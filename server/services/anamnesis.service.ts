@@ -25,6 +25,7 @@ import {
   AnalysisError,
   type ErrorContext
 } from '../utils/error-handler.js';
+import { logger, PerformanceTimer } from '../utils/logger.js';
 import { 
   type AnalysisResult,
   type AnalysisRequest,
@@ -65,10 +66,23 @@ export class AnamnesisService {
     retryable?: boolean;
     suggestedAction?: string;
   }> {
+    const timer = new PerformanceTimer();
+    const operationLogger = logger.child({ 
+      operation: 'createAnalysis',
+      userId,
+      requestId: requestData.metadata?.requestId 
+    });
+
     try {
+      operationLogger.info('Starting analysis creation', { 
+        primaryUrl: requestData.primaryUrl,
+        socialUrlCount: requestData.socialUrls?.length || 0 
+      });
+
       // Validate request data
       const validation = validateAnamnesisRequest(requestData);
       if (!validation.isValid) {
+        operationLogger.warn('Validation failed', { errors: validation.errors });
         throw new ValidationError(
           validation.errors?.join(', ') || 'Invalid request data',
           { errors: validation.errors },
@@ -82,7 +96,17 @@ export class AnamnesisService {
       const allUrls = [validatedData.primaryUrl, ...(validatedData.socialUrls || [])];
       const processedUrls = processUrls(allUrls);
       
+      operationLogger.debug('URL processing completed', {
+        totalUrls: allUrls.length,
+        validUrls: processedUrls.valid.length,
+        invalidUrls: processedUrls.invalid.length,
+        duplicates: processedUrls.duplicates.length
+      });
+      
       if (processedUrls.invalid.length > 0) {
+        operationLogger.warn('Invalid URLs detected', { 
+          invalidUrls: processedUrls.invalid.map(u => ({ url: u.original, error: u.error }))
+        });
         throw new ValidationError(
           `Invalid URLs detected`,
           { 
@@ -114,6 +138,17 @@ export class AnamnesisService {
         // Return existing analysis instead of creating duplicate
         const existingAnalysis = analysisStorage.get(deduplicationResult.originalAnalysisId);
         const sources = this.getAnalysisSources(deduplicationResult.originalAnalysisId) || [];
+        
+        operationLogger.info('Duplicate analysis found', {
+          originalAnalysisId: deduplicationResult.originalAnalysisId,
+          confidence: deduplicationResult.confidence,
+          matchType: deduplicationResult.matchType
+        });
+
+        operationLogger.performance('Analysis creation completed (duplicate)', timer, {
+          result: 'duplicate_found',
+          originalAnalysisId: deduplicationResult.originalAnalysisId
+        });
         
         return {
           success: true,
@@ -190,6 +225,18 @@ export class AnamnesisService {
       // Start background analysis
       this.processAnalysisBackground(analysisId, userId, validatedData, sources);
 
+      operationLogger.info('Analysis created successfully', {
+        analysisId,
+        sourceCount: sources.length,
+        hasSuggestions: !!(deduplicationResult.suggestions && deduplicationResult.suggestions.length > 0)
+      });
+
+      operationLogger.performance('Analysis creation completed', timer, {
+        result: 'created',
+        analysisId,
+        sourceCount: sources.length
+      });
+
       const response: any = {
         success: true,
         data: {
@@ -202,6 +249,11 @@ export class AnamnesisService {
 
       // Add deduplication info if there were suggestions
       if (deduplicationResult.suggestions && deduplicationResult.suggestions.length > 0) {
+        operationLogger.info('Deduplication suggestions found', {
+          suggestionCount: deduplicationResult.suggestions.length,
+          suggestions: deduplicationResult.suggestions
+        });
+        
         response.deduplication = {
           isDuplicate: false,
           confidence: deduplicationResult.confidence,
@@ -221,6 +273,17 @@ export class AnamnesisService {
       };
 
       const structuredError = ErrorHandler.handle(error as Error, context);
+      
+      operationLogger.error('Analysis creation failed', error as Error, {
+        errorCode: structuredError.code,
+        errorCategory: structuredError.category,
+        retryable: structuredError.retryable
+      });
+
+      operationLogger.performance('Analysis creation failed', timer, {
+        result: 'error',
+        errorCode: structuredError.code
+      });
       
       return {
         success: false,

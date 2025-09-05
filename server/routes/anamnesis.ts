@@ -7,6 +7,7 @@ import express from 'express';
 import { z } from 'zod';
 import { AnamnesisService } from '../services/anamnesis.service.js';
 import { validateAnamnesisRequest } from '../utils/url-validation.js';
+import { logger } from '../utils/logger.js';
 
 const router = express.Router();
 const anamnesisService = new AnamnesisService();
@@ -73,17 +74,36 @@ router.post('/',
   requireUser,
   validateRequest(createAnamnesisSchema),
   async (req: express.Request, res: express.Response) => {
+    const requestLogger = (req as any).logger || logger;
+    
     try {
       const userId = (req as any).user.id;
+      
+      requestLogger.info('Creating new analysis', { 
+        userId,
+        primaryUrl: req.body.primaryUrl,
+        socialUrlCount: req.body.socialUrls?.length || 0
+      });
+      
       const result = await anamnesisService.createAnalysis(userId, req.body);
 
       if (!result.success) {
+        requestLogger.warn('Analysis creation failed', {
+          error: result.error,
+          code: result.code,
+          retryable: result.retryable
+        });
         return res.status(400).json(result);
       }
 
+      requestLogger.info('Analysis created successfully', {
+        analysisId: result.data?.id,
+        status: result.data?.status
+      });
+
       res.status(201).json(result);
     } catch (error) {
-      console.error('Error creating analysis:', error);
+      requestLogger.error('Unexpected error in analysis creation', error as Error);
       res.status(500).json({
         success: false,
         error: 'Internal server error'
