@@ -1,0 +1,471 @@
+{
+  "petVeterinary": {
+    "identity": {
+      "score": 78,
+      "findings": [
+        "Presença digital estabelecida com foco em serviços veterinários",
+        "Tom profissional e educativo predominante",
+        "Identidade visual consistente entre plataformas",
+        "Expertise técnica bem demonstrada através de conteúdo educacional"
+      ],
+      "recommendations": [
+        "Fortalecer elementos de confiança e credibilidade",
+        "Incluir mais histórias de sucesso e depoimentos",
+        "Desenvolver linha editorial mais humanizada",
+        "Criar seção específica sobre equipe e qualificações"
+      ],
+      "confidence": "high"
+    },
+    "personas": {
+      "primaryPersona": {
+        "name": "Marina - Tutora Consciente",
+        "age": "25-40 anos",
+        "profile": "Profissional urbana, renda média-alta, primeiro pet ou poucos pets, busca informação e qualidade",
+        "needs": [
+          "Orientação preventiva para saúde do pet",
+          "Transparência em procedimentos e custos",
+          "Atendimento humanizado e acolhedor",
+          "Flexibilidade de horários"
+        ],
+        "painPoints": [
+          "Medo de emergências e não saber como agir",
+          "Dificuldade para encontrar veterinário confiável",
+          "Preocupação com custos de tratamentos",
+          "Falta de informação sobre cuidados básicos"
+        ]
+      },
+      "secondaryPersonas": [
+        {
+          "name": "João - Tutor Experiente",
+          "profile": "Tem múltiplos pets há anos, busca praticidade e eficiência",
+          "percentage": 35
+        },
+        {
+          "name": "Família Silva - Tutores Família",
+          "profile": "Pet familiar, crianças envolvidas, busca educação e segurança",
+          "percentage": 25
+        }
+      ],
+      "insights": [
+        "Público valoriza educação e prevenção acima de preço baixo",
+        "Confiança é o fator decisivo na escolha do veterinário",
+        "Emergências geram alta ansiedade e necessidade de suporte",
+        "Transparência em custos é essencial para conversão"
+      ]
+    },
+    "ux": {
+      "navigation": {
+        "score": 72,
+        "issues": [
+          "Menu principal com muitos itens",
+          "Falta de busca interna",
+          "Hierarquia de informações não clara"
+        ],
+        "strengths": [
+          "Menu mobile responsivo",
+          "Links de contato visíveis",
+          "Seções bem organizadas"
+        ]
+      },
+      "content": {
+        "score": 85,
+        "readability": 78,
+        "engagement": [
+          "Conteúdo educativo de qualidade",
+          "Imagens profissionais dos procedimentos",
+          "Linguagem acessível sem perder tecnicidade"
+        ]
+      },
+      "conversion": {
+        "score": 65,
+        "ctaPresence": true,
+        "trustSignals": [
+          "Certificações profissionais",
+          "Depoimentos de clientes",
+          "Anos de experiência destacados"
+        ]
+      },
+      "mobile": {
+        "score": 80,
+        "responsive": true,
+        "issues": [
+          "Botões pequenos para clique",
+          "Formulários não otimizados"
+        ]
+      }
+    },
+    "ecosystem": {
+      "socialPresence": [
+        {
+          "platform": "Instagram",
+          "handle": "@veterinaria_exemplo",
+          "followers": 3200,
+          "engagement": 4.2,
+          "lastPost": "2 dias atrás",
+          "contentQuality": 82
+        },
+        {
+          "platform": "Facebook",
+          "handle": "Veterinária Exemplo",
+          "followers": 1800,
+          "engagement": 2.8,
+          "lastPost": "1 semana atrás",
+          "contentQuality": 75
+        }
+      ],
+      "competitors": [
+        {
+          "name": "Clínica Vida Animal",
+          "url": "https://clinicavidaanimal.com.br",
+          "strengths": [
+            "Atendimento 24h",
+            "Equipe especializada",
+            "Tecnologia avançada"
+          ],
+          "opportunities": [
+            "Preços mais competitivos",
+            "Maior presença digital",
+            "Programas de fidelidade"
+          ]
+        },
+        {
+          "name": "Pet Care Center",
+          "url": "https://petcarecenter.com.br",
+          "strengths": [
+            "Localização privilegiada",
+            "Parcerias com pet shops",
+            "Programa de vacinação"
+          ],
+          "opportunities": [
+            "Conteúdo educativo",
+            "Presença em redes sociais",
+            "Transparência de preços"
+          ]
+        }
+      ],
+      "marketPosition": {
+        "category": "Clínica veterinária de bairro",
+        "differentiation": [
+          "Atendimento personalizado",
+          "Foco em medicina preventiva",
+          "Relacionamento próximo com tutores"
+        ],
+        "threats": [
+          "Grandes redes veterinárias",
+          "Plataformas de telemedicina",
+          "Novos concorrentes no bairro"
+        ]
+      }
+    },
+    "actionPlan": {
+      "immediate": [
+        {
+          "action": "Otimizar formulário de contato para mobile",
+          "priority": "high",
+          "effort": "small",
+          "impact": "high",
+          "timeline": "1-2 semanas"
+        },
+        {
+          "action": "Criar seção de emergências com WhatsApp direto",
+          "priority": "high",
+          "effort": "small",
+          "impact": "high",
+          "timeline": "1 semana"
+        },
+        {
+          "action": "Adicionar mais depoimentos na homepage",
+          "priority": "medium",
+          "effort": "small",
+          "impact": "medium",
+          "timeline": "1 semana"
+        }
+      ],
+      "shortTerm": [
+        {
+          "action": "Implementar sistema de agendamento online",
+          "priority": "high",
+          "effort": "large",
+          "impact": "high",
+          "timeline": "1-2 meses"
+        },
+        {
+          "action": "Criar blog com conteúdo educativo semanal",
+          "priority": "medium",
+          "effort": "medium",
+          "impact": "high",
+          "timeline": "1 mês"
+        },
+        {
+          "action": "Melhorar SEO local e Google My Business",
+          "priority": "high",
+          "effort": "medium",
+          "impact": "high",
+          "timeline": "2-4 semanas"
+        }
+      ],
+      "longTerm": [
+        {
+          "action": "Desenvolver app próprio para clientes",
+          "priority": "medium",
+          "effort": "large",
+          "impact": "medium",
+          "timeline": "6-12 meses"
+        },
+        {
+          "action": "Implementar programa de fidelidade digital",
+          "priority": "medium",
+          "effort": "medium",
+          "impact": "high",
+          "timeline": "3-6 meses"
+        }
+      ]
+    },
+    "roadmap": {
+      "phases": [
+        {
+          "name": "Fase 1 - Otimização Imediata",
+          "duration": "4 semanas",
+          "objectives": [
+            "Melhorar conversão do site",
+            "Otimizar experiência mobile",
+            "Fortalecer presença local"
+          ],
+          "deliverables": [
+            "Site mobile otimizado",
+            "WhatsApp Business configurado",
+            "Google My Business otimizado"
+          ],
+          "dependencies": [],
+          "risks": [
+            "Recursos técnicos limitados",
+            "Tempo da equipe"
+          ]
+        },
+        {
+          "name": "Fase 2 - Presença Digital",
+          "duration": "8 semanas",
+          "objectives": [
+            "Estabelecer autoridade no setor",
+            "Aumentar engajamento",
+            "Melhorar SEO"
+          ],
+          "deliverables": [
+            "Blog com 8 artigos",
+            "Estratégia de redes sociais",
+            "Sistema de agendamento"
+          ],
+          "dependencies": [
+            "Conclusão da Fase 1"
+          ],
+          "risks": [
+            "Criação de conteúdo consistente",
+            "Concorrência aumentada"
+          ]
+        }
+      ],
+      "milestones": [
+        {
+          "name": "Site Mobile Otimizado",
+          "date": "2 semanas",
+          "criteria": [
+            "Score mobile > 90",
+            "Formulários funcionais",
+            "Tempo carregamento < 3s"
+          ],
+          "responsible": "Desenvolvedor"
+        },
+        {
+          "name": "Presença Local Estabelecida",
+          "date": "4 semanas",
+          "criteria": [
+            "Google My Business 100% completo",
+            "Primeiras 10 avaliações positivas",
+            "WhatsApp Business ativo"
+          ],
+          "responsible": "Marketing"
+        }
+      ],
+      "budget": {
+        "total": 8500,
+        "breakdown": [
+          {
+            "category": "Desenvolvimento Web",
+            "amount": 3500,
+            "justification": "Otimizações mobile e sistema agendamento"
+          },
+          {
+            "category": "Marketing Digital",
+            "amount": 2500,
+            "justification": "SEO, Google Ads, conteúdo"
+          },
+          {
+            "category": "Ferramentas",
+            "amount": 1500,
+            "justification": "Plataformas de agendamento e analytics"
+          },
+          {
+            "category": "Contingência",
+            "amount": 1000,
+            "justification": "Imprevistos e ajustes"
+          }
+        ]
+      }
+    },
+    "homeAnatomy": {
+      "structure": {
+        "header": {
+          "logo": true,
+          "navigation": ["Início", "Serviços", "Equipe", "Blog", "Contato"],
+          "contact": true,
+          "cta": true
+        },
+        "hero": {
+          "headline": "Cuidado Veterinário de Excelência",
+          "subheadline": "Mais de 10 anos cuidando da saúde do seu pet com amor e dedicação",
+          "cta": "Agendar Consulta",
+          "media": "image"
+        },
+        "sections": [
+          {
+            "type": "Serviços",
+            "purpose": "Apresentar especialidades",
+            "effectiveness": 78
+          },
+          {
+            "type": "Sobre",
+            "purpose": "Construir confiança",
+            "effectiveness": 82
+          },
+          {
+            "type": "Depoimentos",
+            "purpose": "Social proof",
+            "effectiveness": 85
+          },
+          {
+            "type": "Contato",
+            "purpose": "Facilitar agendamento",
+            "effectiveness": 70
+          }
+        ],
+        "footer": {
+          "links": ["Política Privacidade", "Termos", "CRMV"],
+          "contact": true,
+          "social": ["Instagram", "Facebook"]
+        }
+      },
+      "performance": {
+        "loadTime": 3.2,
+        "mobileOptimized": true,
+        "seoScore": 75,
+        "accessibilityScore": 68
+      }
+    },
+    "questions": {
+      "brandStrategy": [
+        {
+          "question": "Qual é a proposta de valor única da clínica em relação aos concorrentes?",
+          "importance": "critical",
+          "rationale": "Diferenciação é essencial para posicionamento e precificação"
+        },
+        {
+          "question": "Que tipo de relacionamento vocês querem ter com os tutores?",
+          "importance": "critical",
+          "rationale": "Define tom de comunicação e estratégia de conteúdo"
+        },
+        {
+          "question": "Quais são os valores fundamentais que guiam o atendimento?",
+          "importance": "important",
+          "rationale": "Orienta criação de conteúdo e posicionamento da marca"
+        }
+      ],
+      "contentStrategy": [
+        {
+          "question": "Quais temas vocês têm mais expertise para abordar?",
+          "importance": "critical",
+          "rationale": "Define pilares de conteúdo e autoridade no assunto"
+        },
+        {
+          "question": "Com que frequência é possível produzir conteúdo novo?",
+          "importance": "important",
+          "rationale": "Determina calendário editorial viável"
+        },
+        {
+          "question": "Preferem conteúdo mais técnico ou mais emocional?",
+          "importance": "important",
+          "rationale": "Define tom e estilo do conteúdo"
+        }
+      ],
+      "technical": [
+        {
+          "question": "Existe sistema de gestão integrado para agendamentos?",
+          "importance": "critical",
+          "rationale": "Impacta implementação de agendamento online"
+        },
+        {
+          "question": "Qual o orçamento disponível para melhorias digitais?",
+          "importance": "critical",
+          "rationale": "Define escopo e timeline das implementações"
+        },
+        {
+          "question": "Há recursos internos para manutenção de conteúdo?",
+          "importance": "important",
+          "rationale": "Determina necessidade de terceirização"
+        }
+      ],
+      "business": [
+        {
+          "question": "Quais são os principais objetivos de crescimento?",
+          "importance": "critical",
+          "rationale": "Alinha estratégia digital com metas de negócio"
+        },
+        {
+          "question": "Qual o ticket médio atual e objetivo?",
+          "importance": "important",
+          "rationale": "Orienta estratégia de conversão e precificação"
+        },
+        {
+          "question": "Há planos de expansão ou novos serviços?",
+          "importance": "important",
+          "rationale": "Impacta planejamento de longo prazo"
+        }
+      ]
+    }
+  },
+  "petShop": {
+    "identity": {
+      "score": 85,
+      "findings": [
+        "Forte identidade visual com foco em produtos premium",
+        "Posicionamento claro no segmento pet shop",
+        "Presença digital bem estruturada",
+        "Tom amigável e próximo ao cliente"
+      ],
+      "recommendations": [
+        "Expandir storytelling da marca",
+        "Incluir mais conteúdo educativo",
+        "Fortalecer aspectos de sustentabilidade",
+        "Desenvolver linha editorial mais diversificada"
+      ],
+      "confidence": "high"
+    }
+  },
+  "genericBusiness": {
+    "identity": {
+      "score": 65,
+      "findings": [
+        "Presença digital básica estabelecida",
+        "Identidade visual necessita refinamento",
+        "Proposta de valor não está clara",
+        "Falta consistência entre canais"
+      ],
+      "recommendations": [
+        "Definir proposta de valor única",
+        "Criar guidelines de identidade visual",
+        "Estabelecer tom de voz consistente",
+        "Melhorar presença em redes sociais"
+      ],
+      "confidence": "medium"
+    }
+  }
+}
