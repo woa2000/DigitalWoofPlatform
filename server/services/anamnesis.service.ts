@@ -14,14 +14,16 @@ import {
   type CreateAnamnesisRequest 
 } from '../utils/url-validation.js';
 import { AnamnesisAgentService } from './anamnesis-agent.service.js';
+import { DeduplicationService } from './deduplication.service.js';
 import { 
   type AnalysisResult,
   type AnalysisRequest,
   type AnalysisSource
 } from '../../shared/types/anamnesis.js';
 
-// Initialize analysis agent
+// Initialize analysis agent and deduplication service
 const analysisAgent = new AnamnesisAgentService();
+const deduplicationService = new DeduplicationService();
 
 // In-memory storage for demo purposes (will be replaced with database)
 const analysisStorage = new Map<string, any>();
@@ -40,6 +42,12 @@ export class AnamnesisService {
       status: string;
       estimatedCompletion: string;
       sources: AnalysisSource[];
+    };
+    deduplication?: {
+      isDuplicate: boolean;
+      confidence: string;
+      matchType: string;
+      suggestions?: string[];
     };
     error?: string;
   }> {
@@ -66,13 +74,27 @@ export class AnamnesisService {
         };
       }
 
-      // Check for existing analysis with same primary URL hash
+      // Check for existing analysis using advanced deduplication
       const primaryUrlProcessed = processUrl(validatedData.primaryUrl);
-      const existingAnalysis = this.findAnalysisByUrlHash(userId, primaryUrlProcessed.hash);
+      const existingAnalyses = Array.from(analysisStorage.values())
+        .filter((a: any) => a.userId === userId)
+        .map((a: any) => ({
+          id: a.id,
+          primaryUrl: a.primaryUrl,
+          hash: primaryUrlProcessed.hash
+        }));
+
+      const deduplicationResult = await deduplicationService.checkDuplication(
+        validatedData.primaryUrl,
+        userId,
+        existingAnalyses
+      );
       
-      if (existingAnalysis) {
+      if (deduplicationResult.isDuplicate && deduplicationResult.originalAnalysisId) {
         // Return existing analysis instead of creating duplicate
-        const sources = this.getAnalysisSources(existingAnalysis.id) || [];
+        const existingAnalysis = analysisStorage.get(deduplicationResult.originalAnalysisId);
+        const sources = this.getAnalysisSources(deduplicationResult.originalAnalysisId) || [];
+        
         return {
           success: true,
           data: {
@@ -80,6 +102,11 @@ export class AnamnesisService {
             status: existingAnalysis.status,
             estimatedCompletion: new Date(Date.now() + 120000).toISOString(),
             sources: sources.map((s: any) => this.mapSourceToAnalysisSource(s))
+          },
+          deduplication: {
+            isDuplicate: true,
+            confidence: deduplicationResult.confidence,
+            matchType: deduplicationResult.matchType
           }
         };
       }
@@ -143,7 +170,7 @@ export class AnamnesisService {
       // Start background analysis
       this.processAnalysisBackground(analysisId, userId, validatedData, sources);
 
-      return {
+      const response: any = {
         success: true,
         data: {
           id: analysisId,
@@ -152,6 +179,18 @@ export class AnamnesisService {
           sources
         }
       };
+
+      // Add deduplication info if there were suggestions
+      if (deduplicationResult.suggestions && deduplicationResult.suggestions.length > 0) {
+        response.deduplication = {
+          isDuplicate: false,
+          confidence: deduplicationResult.confidence,
+          matchType: deduplicationResult.matchType,
+          suggestions: deduplicationResult.suggestions
+        };
+      }
+
+      return response;
 
     } catch (error) {
       console.error('Error creating analysis:', error);
@@ -319,6 +358,20 @@ export class AnamnesisService {
         error: 'Internal server error'
       };
     }
+  }
+
+  /**
+   * Gets deduplication metrics and analytics
+   */
+  getDeduplicationMetrics(): any {
+    return deduplicationService.generateReport();
+  }
+
+  /**
+   * Validates hash integrity for an analysis
+   */
+  validateUrlIntegrity(url: string, hash: string): boolean {
+    return deduplicationService.validateHashIntegrity(url, hash);
   }
 
   // Private helper methods

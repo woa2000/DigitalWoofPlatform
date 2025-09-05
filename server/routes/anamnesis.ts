@@ -298,4 +298,28 @@ router.get('/:id/status',
   }
 );
 
+/**
+ * GET /api/anamnesis/metrics/deduplication
+ * Gets deduplication analytics and metrics
+ */
+router.get('/metrics/deduplication', 
+  requireUser,
+  async (req: express.Request, res: express.Response) => {
+    try {
+      const metrics = anamnesisService.getDeduplicationMetrics();
+      
+      res.json({
+        success: true,
+        data: metrics
+      });
+    } catch (error) {
+      console.error('Error getting deduplication metrics:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Internal server error'
+      });
+    }
+  }
+);
+
 export default router;
