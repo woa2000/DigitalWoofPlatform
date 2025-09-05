@@ -96,6 +96,39 @@ export const businessAnamnesis = pgTable("business_anamnesis", {
   completedAt: timestamp("completed_at").default(sql`now()`).notNull(),
 });
 
+// Anamnesis Analysis - Digital presence analysis
+export const anamnesisAnalysis = pgTable("anamnesis_analysis", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id").references(() => users.id).notNull(),
+  primaryUrl: text("primary_url").notNull(),
+  status: text("status").notNull().$type<'queued' | 'running' | 'done' | 'error'>(),
+  scoreCompleteness: decimal("score_completeness", { precision: 5, scale: 2 }),
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").default(sql`now()`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`now()`).notNull(),
+});
+
+// Anamnesis Sources - URLs being analyzed
+export const anamnesisSource = pgTable("anamnesis_source", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  analysisId: uuid("analysis_id").references(() => anamnesisAnalysis.id).notNull(),
+  type: text("type").notNull().$type<'site' | 'social'>(),
+  url: text("url").notNull(),
+  normalizedUrl: text("normalized_url").notNull(),
+  provider: text("provider"), // instagram, facebook, etc.
+  lastFetchedAt: timestamp("last_fetched_at"),
+  hash: text("hash").unique().notNull(),
+});
+
+// Anamnesis Findings - Analysis results by section
+export const anamnesisFinding = pgTable("anamnesis_finding", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  analysisId: uuid("analysis_id").references(() => anamnesisAnalysis.id).notNull(),
+  key: text("key").notNull(),
+  section: text("section").notNull().$type<'identity' | 'personas' | 'ux' | 'ecosystem' | 'actionPlan' | 'roadmap' | 'homeAnatomy' | 'questions'>(),
+  payload: jsonb("payload").notNull(),
+});
+
 // Create insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -135,6 +168,20 @@ export const insertBusinessAnamnesisSchema = createInsertSchema(businessAnamnesi
   completedAt: true,
 });
 
+export const insertAnamnesisAnalysisSchema = createInsertSchema(anamnesisAnalysis).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAnamnesisSourceSchema = createInsertSchema(anamnesisSource).omit({
+  id: true,
+});
+
+export const insertAnamnesisFindingSchema = createInsertSchema(anamnesisFinding).omit({
+  id: true,
+});
+
 // Infer types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -150,3 +197,9 @@ export type BrandAsset = typeof brandAssets.$inferSelect;
 export type InsertBrandAsset = z.infer<typeof insertBrandAssetSchema>;
 export type BusinessAnamnesis = typeof businessAnamnesis.$inferSelect;
 export type InsertBusinessAnamnesis = z.infer<typeof insertBusinessAnamnesisSchema>;
+export type AnamnesisAnalysis = typeof anamnesisAnalysis.$inferSelect;
+export type InsertAnamnesisAnalysis = z.infer<typeof insertAnamnesisAnalysisSchema>;
+export type AnamnesisSource = typeof anamnesisSource.$inferSelect;
+export type InsertAnamnesisSource = z.infer<typeof insertAnamnesisSourceSchema>;
+export type AnamnesisFinding = typeof anamnesisFinding.$inferSelect;
+export type InsertAnamnesisFinding = z.infer<typeof insertAnamnesisFindingSchema>;
