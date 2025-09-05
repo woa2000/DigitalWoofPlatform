@@ -15,7 +15,7 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").default(sql`now()`).notNull(),
 });
 
-// Brand Voice profiles
+// Brand Voice profiles (legacy - deprecated in favor of brandVoiceJsons)
 export const brandVoices = pgTable("brand_voices", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: uuid("user_id").references(() => users.id).notNull(),
@@ -27,6 +27,46 @@ export const brandVoices = pgTable("brand_voices", {
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").default(sql`now()`).notNull(),
   updatedAt: timestamp("updated_at").default(sql`now()`).notNull(),
+});
+
+// Brand Voice JSON Schema v1.0 - Complete brand voice profiles
+export const brandVoiceJsons = pgTable("brand_voice_jsons", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id").references(() => users.id).notNull(),
+  
+  // Core Schema Data (JSONB for full search and indexing)
+  brandVoiceJson: jsonb("brand_voice_json").notNull(), // Complete Brand Voice JSON Schema v1.0
+  
+  // Extracted fields for performance and queries
+  name: text("name").notNull(), // From brandVoiceJson.brand.name
+  version: text("version").notNull().default("1.0"), // Schema version
+  status: text("status").notNull().default("draft"), // draft, active, archived
+  
+  // Generation tracking
+  generatedFrom: text("generated_from"), // onboarding, anamnesis, manual, merged
+  sourceAnalysisId: uuid("source_analysis_id").references(() => anamnesisAnalysis.id), // If from anamnesis
+  sourceOnboardingId: uuid("source_onboarding_id").references(() => brandOnboarding.id), // If from onboarding
+  
+  // Quality metrics (calculated fields for performance)
+  qualityScoreOverall: decimal("quality_score_overall", { precision: 5, scale: 2 }), // 0-100
+  qualityScoreCompleteness: decimal("quality_score_completeness", { precision: 5, scale: 2 }), // 0-100
+  qualityScoreConsistency: decimal("quality_score_consistency", { precision: 5, scale: 2 }), // 0-100
+  qualityScoreSpecificity: decimal("quality_score_specificity", { precision: 5, scale: 2 }), // 0-100
+  qualityScoreUsability: decimal("quality_score_usability", { precision: 5, scale: 2 }), // 0-100
+  
+  // Cache and performance
+  lastValidatedAt: timestamp("last_validated_at"), // Last schema validation
+  cacheKey: text("cache_key").unique(), // For Redis caching
+  
+  // Usage tracking
+  usageCount: integer("usage_count").default(0).notNull(), // How many times used for generation
+  lastUsedAt: timestamp("last_used_at"), // Last time used for content generation
+  
+  // Timestamps
+  createdAt: timestamp("created_at").default(sql`now()`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`now()`).notNull(),
+  activatedAt: timestamp("activated_at"), // When status changed to active
+  archivedAt: timestamp("archived_at"), // When status changed to archived
 });
 
 // Campaigns
@@ -85,6 +125,57 @@ export const brandAssets = pgTable("brand_assets", {
   createdAt: timestamp("created_at").default(sql`now()`).notNull(),
 });
 
+// Brand onboarding - Wizard de configuração da marca
+export const brandOnboarding = pgTable("brand_onboarding", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id").references(() => users.id).notNull().unique(), // Único por usuário
+  
+  // Logo e Visual
+  logoUrl: text("logo_url"),
+  palette: jsonb("palette").$type<string[]>(), // Array de cores em hex
+  logoMetadata: jsonb("logo_metadata").$type<{
+    width: number;
+    height: number;
+    format: string;
+    hasTransparency: boolean;
+    fileSize: number;
+  }>(),
+  
+  // Tom de Voz (4 sliders 0.0-1.0)
+  toneConfig: jsonb("tone_config").$type<{
+    confianca: number;
+    acolhimento: number;
+    humor: number;
+    especializacao: number;
+  }>().notNull(),
+  
+  // Configuração de Linguagem
+  languageConfig: jsonb("language_config").$type<{
+    preferredTerms: string[]; // max 20
+    avoidTerms: string[]; // max 15
+    defaultCTAs: string[]; // max 5
+  }>().notNull(),
+  
+  // Valores e Missão da Marca
+  brandValues: jsonb("brand_values").$type<{
+    mission?: string; // opcional, max 200 chars
+    values: Array<{
+      name: string;
+      description?: string;
+      weight: number; // 0.0-1.0
+    }>; // max 5
+    disclaimer: string; // obrigatório
+  }>(),
+  
+  // Controle do Wizard
+  stepCompleted: text("step_completed").$type<'logo' | 'palette' | 'tone' | 'language' | 'values' | 'completed'>(),
+  
+  // Timestamps
+  createdAt: timestamp("created_at").default(sql`now()`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`now()`).notNull(),
+  completedAt: timestamp("completed_at"),
+});
+
 // Business anamnesis
 export const businessAnamnesis = pgTable("business_anamnesis", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -136,6 +227,18 @@ export const insertUserSchema = createInsertSchema(users).omit({
   updatedAt: true,
 });
 
+export const insertBrandVoiceJsonSchema = createInsertSchema(brandVoiceJsons).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  cacheKey: true,
+  usageCount: true,
+  lastUsedAt: true,
+  lastValidatedAt: true,
+  activatedAt: true,
+  archivedAt: true,
+});
+
 export const insertBrandVoiceSchema = createInsertSchema(brandVoices).omit({
   id: true,
   createdAt: true,
@@ -163,6 +266,12 @@ export const insertBrandAssetSchema = createInsertSchema(brandAssets).omit({
   createdAt: true,
 });
 
+export const insertBrandOnboardingSchema = createInsertSchema(brandOnboarding).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertBusinessAnamnesisSchema = createInsertSchema(businessAnamnesis).omit({
   id: true,
   completedAt: true,
@@ -187,6 +296,8 @@ export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type BrandVoice = typeof brandVoices.$inferSelect;
 export type InsertBrandVoice = z.infer<typeof insertBrandVoiceSchema>;
+export type BrandVoiceJson = typeof brandVoiceJsons.$inferSelect;
+export type InsertBrandVoiceJson = z.infer<typeof insertBrandVoiceJsonSchema>;
 export type Campaign = typeof campaigns.$inferSelect;
 export type InsertCampaign = z.infer<typeof insertCampaignSchema>;
 export type AIContent = typeof aiContent.$inferSelect;
@@ -195,6 +306,8 @@ export type ComplianceCheck = typeof complianceChecks.$inferSelect;
 export type InsertComplianceCheck = z.infer<typeof insertComplianceCheckSchema>;
 export type BrandAsset = typeof brandAssets.$inferSelect;
 export type InsertBrandAsset = z.infer<typeof insertBrandAssetSchema>;
+export type BrandOnboarding = typeof brandOnboarding.$inferSelect;
+export type InsertBrandOnboarding = z.infer<typeof insertBrandOnboardingSchema>;
 export type BusinessAnamnesis = typeof businessAnamnesis.$inferSelect;
 export type InsertBusinessAnamnesis = z.infer<typeof insertBusinessAnamnesisSchema>;
 export type AnamnesisAnalysis = typeof anamnesisAnalysis.$inferSelect;

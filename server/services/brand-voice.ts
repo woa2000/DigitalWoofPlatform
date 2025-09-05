@@ -113,26 +113,28 @@ export function createBrandVoiceJSON(brandVoice: BrandVoice, businessType: strin
   return baseJSON;
 }
 
+type BusinessType = 'veterinaria' | 'petshop' | 'banho_tosa' | 'hotel_pet';
+
 function getKeywordsByBusinessType(businessType: string): string[] {
-  const keywords = {
+  const keywords: Record<BusinessType, string[]> = {
     veterinaria: ["saúde animal", "prevenção", "check-up", "vacinação", "consulta"],
     petshop: ["produtos pet", "alimentação", "brinquedos", "acessórios", "cuidados"],
     banho_tosa: ["higiene", "beleza pet", "tosa", "banho", "cuidados estéticos"],
     hotel_pet: ["hospedagem", "cuidados", "conforto", "segurança", "bem-estar"]
   };
   
-  return keywords[businessType] || keywords.veterinaria;
+  return keywords[businessType as BusinessType] || keywords.veterinaria;
 }
 
 function getHashtagsByBusinessType(businessType: string): string[] {
-  const hashtags = {
+  const hashtags: Record<BusinessType, string[]> = {
     veterinaria: ["#saudeanimal", "#veterinaria", "#checkuppet", "#prevencao"],
     petshop: ["#petshop", "#produtospet", "#alimentacaopet", "#acessoriospet"],
     banho_tosa: ["#banhoetosa", "#higienepet", "#belezapet", "#cuidadosesteticos"],
     hotel_pet: ["#hotelpet", "#hospedagempet", "#cuidadospet", "#bemestar"]
   };
   
-  return hashtags[businessType] || hashtags.veterinaria;
+  return hashtags[businessType as BusinessType] || hashtags.veterinaria;
 }
 
 export function validateBrandVoiceJSON(json: any): boolean {

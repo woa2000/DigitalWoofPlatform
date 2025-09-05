@@ -1,7 +1,7 @@
 {
   "plan": {
-    "title": "Anamnese Digital - Execution Plan",
-    "version": "1.0",
+    "title": "F02 Brand Onboarding - Execution Plan",
+    "version": "1.1",
     "status": "executing",
     "run_mode": "execute",
     "generated_at": "2025-09-05T00:00:00Z"
@@ -33,352 +33,382 @@
       ],
       "artifacts": [
         "shared/schema.ts",
-        "server/migrations/001_anamnesis_tables.sql"
+        "server/migrations/002_brand_onboarding.sql"
       ],
       "last_update": "2025-09-05T00:00:00Z",
-      "notes": "✅ CONCLUÍDO: Schema implementado com sucesso, commit b3492c4"
-    },
-    {
-      "id": "T-002",
-      "title": "Implementar Validação e Normalização de URLs",
-      "owner": "Backend_Developer",
-      "status": "done",
-      "effort": 2,
-      "depends_on": ["T-001"],
-      "acceptance": [
-        "✅ URLs inválidas rejeitadas com mensagem clara",
-        "✅ Normalização remove www, trailing slash, converte para lowercase",
-        "✅ Hash gerado deterministicamente para mesma URL normalizada",
-        "✅ Máximo 10 URLs sociais validado",
-        "✅ Sanitização contra injection funcionando"
-      ],
-      "observability": [
-        "Log de URLs rejeitadas com motivo",
-        "Métricas de validação success/failure rate",
-        "Performance metrics de normalização"
-      ],
-      "security_notes": [
-        "Sanitização contra injection",
-        "Validação de domínios permitidos",
-        "Rate limiting por IP"
-      ],
-      "artifacts": [
-        "server/utils/url-validation.ts",
-        "server/utils/url-normalization.ts"
-      ],
-      "last_update": "2025-09-05T00:00:00Z",
-      "notes": "✅ CONCLUÍDO: Validação e normalização implementadas, commit f0f4b90"
-    },
-    {
-      "id": "T-003",
-      "title": "Implementar Mock Analysis Engine",
-      "owner": "Backend_Developer",
-      "status": "done",
-      "effort": 4,
-      "depends_on": ["T-001", "T-002"],
-      "acceptance": [
-        "✅ Retorna 8 seções estruturadas (identity, personas, ux, etc.)",
-        "✅ Processa em ≤ 2 min (simulado com delay)",
-        "✅ Score de completeness calculado baseado nas fontes",
-        "✅ Dados mock consistentes com schema esperado pela UI",
-        "✅ Output compatível com futura integração OpenAI"
-      ],
-      "observability": [
-        "Logs de processamento com timing",
-        "Métricas de status tracking",
-        "Performance de análise mock"
-      ],
-      "security_notes": [
-        "Não processa dados reais",
-        "Mock determinístico",
-        "Sanitização de outputs"
-      ],
-      "artifacts": [
-        "server/services/anamnesis-agent.service.ts",
-        "server/fixtures/mock-analysis-results.json",
-        "shared/types/anamnesis.ts"
-      ],
-      "last_update": "2025-09-05T00:00:00Z",
-      "notes": "✅ CONCLUÍDO: Mock engine implementado com 8 seções estruturadas, commit 755a19e"
-    },
-    {
-      "id": "T-004",
-      "title": "Implementar CRUD Service para Análises",
-      "owner": "Backend_Developer", 
-      "status": "todo",
-      "effort": 5,
-      "depends_on": ["T-001", "T-002", "T-003"],
-      "acceptance": [
-        "Create: análise criada com fontes associadas, status queued",
-        "Read: busca por ID com findings estruturados",
-        "List: paginação, filtro por user, ordenação por data", 
-        "Deduplicação: URLs normalizadas não geram duplicatas",
-        "Delete: soft delete preservando dados para auditoria"
-      ],
-      "observability": [
-        "Logs de operações CRUD com timing",
-        "Métricas de performance por operation",
-        "Database query performance"
-      ],
-      "security_notes": [
-        "RLS enforcement",
-        "User isolation",
-        "Input sanitization",
-        "Audit trail"
-      ],
-      "artifacts": [
-        "server/services/anamnesis.service.ts",
-        "shared/types/anamnesis.ts"
-      ],
-      "last_update": "2025-09-05T00:00:00Z",
-      "notes": "Core business logic"
+      "notes": "✅ CONCLUÍDO: Brand onboarding schema implementado com sucesso"
     },
     {
       "id": "T-005",
-      "title": "Implementar Deduplicação por URL Normalizada",
-      "owner": "Backend_Developer",
-      "status": "todo", 
-      "effort": 2,
-      "depends_on": ["T-002", "T-004"],
-      "acceptance": [
-        "Hash determinístico gerado para URL normalizada",
-        "Tentativa de criar análise duplicada retorna análise existente",
-        "Database constraint impede duplicatas mesmo em race conditions",
-        "UI feedback claro quando análise já existe"
-      ],
-      "observability": [
-        "Logs de tentativas de duplicação",
-        "Métricas de hit/miss rate",
-        "Performance de lookup por hash"
-      ],
-      "security_notes": [
-        "Hash não reversível",
-        "Protegido contra timing attacks",
-        "Rate limiting aplicado"
-      ],
-      "artifacts": [
-        "Logic integrada no anamnesis.service.ts",
-        "Database constraints para uniqueness"
-      ],
-      "last_update": "2025-09-05T00:00:00Z",
-      "notes": "Evita reprocessamento desnecessário"
-    },
-    {
-      "id": "T-006",
-      "title": "Implementar REST API Endpoints",
-      "owner": "Backend_Developer",
-      "status": "todo",
+      "title": "Implementar Estrutura Base do Wizard",
+      "owner": "Frontend_Developer",
+      "status": "done",
       "effort": 4,
-      "depends_on": ["T-004", "T-005"],
+      "depends_on": ["T-001"],
       "acceptance": [
-        "POST /api/anamnesis cria análise com fontes",
-        "GET /api/anamnesis/:id retorna análise completa", 
-        "GET /api/anamnesis lista análises do usuário",
-        "DELETE /api/anamnesis/:id remove análise",
-        "Todas APIs retornam consistent response format",
-        "Error handling com status codes apropriados"
+        "✅ Hook useOnboarding com navegação entre 5 steps",
+        "✅ Estado persistido com localStorage backup",
+        "✅ Validação estruturada com Zod schemas",
+        "✅ Componente OnboardingWizard com progress tracking",
+        "✅ Navegação bidirecional funcionando"
       ],
       "observability": [
-        "Request/response logs estruturados",
-        "API metrics (latency, errors, throughput)",
-        "Correlation ID tracking"
+        "Estado do wizard logado",
+        "Métricas de abandonos por step",
+        "Performance de navegação"
       ],
       "security_notes": [
-        "JWT validation obrigatório",
-        "Rate limiting por endpoint",
-        "CORS configured",
-        "Input validation via Zod"
+        "Dados sensíveis não persistem no localStorage",
+        "Validação client-side + server-side",
+        "XSS protection aplicada"
       ],
       "artifacts": [
-        "server/routes/anamnesis.ts",
-        "server/middleware/anamnesis.middleware.ts"
+        "client/src/hooks/useOnboarding.ts",
+        "client/src/components/onboarding/OnboardingWizard.tsx",
+        "shared/types/onboarding.ts"
       ],
       "last_update": "2025-09-05T00:00:00Z",
-      "notes": "Interface externa do sistema"
+      "notes": "✅ CONCLUÍDO: Base structure com navegação completa implementada"
     },
     {
       "id": "T-007",
-      "title": "Implementar Error Handling e Status Tracking",
-      "owner": "Backend_Developer",
-      "status": "todo",
+      "title": "Implementar Step de Configuração de Tom",
+      "owner": "Frontend_Developer",
+      "status": "done",
       "effort": 3,
-      "depends_on": ["T-004", "T-006"],
+      "depends_on": ["T-005"],
       "acceptance": [
-        "Status tracking: queued → running → done/error",
-        "Timeout após 2min marca como error",
-        "Error messages estruturadas e actionable",
-        "Retry logic para falhas temporárias",
-        "Graceful degradation quando serviços indisponíveis"
+        "✅ 4 sliders interativos (confiança, acolhimento, humor, especialização)",
+        "✅ Exemplos de texto dinâmicos baseados nos valores",
+        "✅ Validação com alertas para extremos",
+        "✅ Interface responsiva e acessível",
+        "✅ Estado sincronizado com useOnboarding hook"
       ],
       "observability": [
-        "Error metrics por tipo",
-        "Status transition logs",
-        "Timeout tracking",
-        "Retry attempt logs"
+        "Métricas de distribuição de valores",
+        "Tempo gasto no step",
+        "Padrões de ajuste dos sliders"
       ],
       "security_notes": [
-        "Error messages não vazam informações sensíveis",
-        "Stack traces sanitizados",
-        "Audit log de erros"
+        "Valores sanitizados antes de persistir",
+        "Range validation aplicada",
+        "No XSS vectors nos exemplos"
       ],
       "artifacts": [
-        "server/utils/error-handler.ts",
-        "Status transitions logic no service"
+        "client/src/components/onboarding/steps/ToneConfigStep.tsx"
       ],
       "last_update": "2025-09-05T00:00:00Z",
-      "notes": "Robustez e confiabilidade"
+      "notes": "✅ CONCLUÍDO: Configuração de tom com sliders e exemplos dinâmicos"
     },
     {
       "id": "T-008",
-      "title": "Implementar Unit Tests",
-      "owner": "QA_Engineer",
-      "status": "todo",
-      "effort": 4,
-      "depends_on": ["T-002", "T-003", "T-004"],
+      "title": "Implementar Step de Configuração de Linguagem",
+      "owner": "Frontend_Developer",
+      "status": "done",
+      "effort": 3,
+      "depends_on": ["T-005"],
       "acceptance": [
-        "Cobertura conforme definido em docs/TODO.md",
-        "Todos cenários de validação de URL testados",
-        "Mock engine comportamento testado",
-        "Deduplicação logic validada",
-        "Error conditions testadas"
+        "✅ Tags input para termos preferidos (max 20)",
+        "✅ Tags input para termos a evitar (max 15)",
+        "✅ Tags input para CTAs preferidas (max 5)",
+        "✅ Exemplos dinâmicos com termos aplicados",
+        "✅ Validação de limites e feedback visual"
       ],
       "observability": [
-        "Test coverage reports",
-        "Performance de execução dos testes",
-        "Test reliability metrics"
+        "Distribuição de quantidade de termos",
+        "Termos mais comuns utilizados",
+        "Taxa de abandono no step"
       ],
       "security_notes": [
-        "Tests não usam dados sensíveis reais",
-        "Test isolation garantida",
-        "Mock data anonimizada"
+        "Sanitização de input de texto",
+        "Validação de caracteres permitidos",
+        "Limite de tamanho por termo"
       ],
       "artifacts": [
-        "server/tests/unit/anamnesis.service.test.ts",
-        "server/tests/unit/url-validation.test.ts",
-        "server/tests/unit/anamnesis-agent.test.ts"
+        "client/src/components/onboarding/steps/LanguageConfigStep.tsx"
       ],
       "last_update": "2025-09-05T00:00:00Z",
-      "notes": "Validação de comportamento isolado"
+      "notes": "✅ CONCLUÍDO: Configuração de linguagem com tags interativas e preview"
     },
     {
       "id": "T-009",
-      "title": "Implementar Integration Tests",
-      "owner": "QA_Engineer",
-      "status": "todo",
-      "effort": 3,
-      "depends_on": ["T-006", "T-007", "T-008"],
+      "title": "Implementar Step de Valores da Marca",
+      "owner": "Frontend_Developer",
+      "status": "done",
+      "effort": 4,
+      "depends_on": ["T-005"],
       "acceptance": [
-        "Fluxo completo: create → process → retrieve",
-        "API contract validation (request/response schemas)",
-        "Database constraints testadas",
-        "Authentication & authorization testadas",
-        "Performance targets validados (≤ 2min processing)"
+        "✅ Textarea para missão da marca (opcional, 200 chars)",
+        "✅ Adição dinâmica de valores (max 5) com peso",
+        "✅ Slider para importância de cada valor",
+        "✅ Preview do Brand Voice JSON gerado",
+        "✅ Disclaimer de compliance visível"
       ],
       "observability": [
-        "Integration test metrics",
-        "API response times", 
-        "End-to-end tracing"
+        "Distribuição de pesos dos valores",
+        "Tamanho médio de missão",
+        "Quantidade média de valores por marca"
       ],
       "security_notes": [
-        "Test isolation entre execuções",
-        "Cleanup de dados de teste",
-        "Auth flow validation"
+        "Validação de tamanho de texto",
+        "Sanitização de inputs",
+        "Compliance disclaimer obrigatório"
       ],
       "artifacts": [
-        "server/tests/integration/anamnesis.api.test.ts",
-        "Test database setup/teardown scripts"
+        "client/src/components/onboarding/steps/BrandValuesStep.tsx"
       ],
       "last_update": "2025-09-05T00:00:00Z",
-      "notes": "Validação de fluxo completo"
+      "notes": "✅ CONCLUÍDO: Valores da marca com preview JSON e disclaimer compliance"
+    },
+    {
+      "id": "T-002",
+      "title": "Implementar Infraestrutura de Upload de Logo",
+      "owner": "Backend_Developer",
+      "status": "todo",
+      "effort": 3,
+      "depends_on": ["T-001"],
+      "acceptance": [
+        "Endpoint POST /api/onboarding/logo/upload",
+        "Validação de formato (PNG, JPG, SVG)",
+        "Limite de tamanho (5MB)",
+        "Upload para Supabase Storage",
+        "Retorno de URL pública temporária"
+      ],
+      "observability": [
+        "Métricas de upload (size, duration, format)",
+        "Error rates por tipo de arquivo",
+        "Storage usage tracking"
+      ],
+      "security_notes": [
+        "Validação de MIME type real",
+        "Antivirus scan via ClamAV",
+        "URL signed com expiração"
+      ],
+      "artifacts": [
+        "server/routes/brand-onboarding.ts",
+        "server/services/storage.service.ts"
+      ],
+      "last_update": "2025-09-05T00:00:00Z",
+      "notes": "Backend infrastructure para processamento de logo"
+    },
+    {
+      "id": "T-003",
+      "title": "Implementar Processamento de Imagem",
+      "owner": "Backend_Developer",
+      "status": "todo",
+      "effort": 4,
+      "depends_on": ["T-002"],
+      "acceptance": [
+        "Sharp.js para redimensionamento automático",
+        "Extração de paleta de cores com node-vibrant",
+        "Geração de metadata (dimensões, formato, etc)",
+        "Processamento assíncrono com status tracking",
+        "Fallback para cores default se extração falhar"
+      ],
+      "observability": [
+        "Tempo de processamento por imagem",
+        "Taxa de sucesso de extração de paleta",
+        "Performance metrics do Sharp.js"
+      ],
+      "security_notes": [
+        "Validação de dimensões antes do processamento",
+        "Timeout para evitar DoS",
+        "Cleanup de arquivos temporários"
+      ],
+      "artifacts": [
+        "server/services/image-processing.service.ts",
+        "server/utils/color-extraction.ts"
+      ],
+      "last_update": "2025-09-05T00:00:00Z",
+      "notes": "Pipeline de processamento de imagem com extração de paleta"
+    },
+    {
+      "id": "T-004",
+      "title": "Implementar Extração de Paleta de Cores",
+      "owner": "Backend_Developer", 
+      "status": "todo",
+      "effort": 2,
+      "depends_on": ["T-003"],
+      "acceptance": [
+        "node-vibrant configurado para qualidade balanceada",
+        "Extração de 5-8 cores principais",
+        "Formato hexadecimal padronizado",
+        "Fallback para paleta default da marca",
+        "Validação de contraste mínimo"
+      ],
+      "observability": [
+        "Distribuição de quantidade de cores extraídas",
+        "Tempo médio de extração",
+        "Taxa de uso de fallback"
+      ],
+      "security_notes": [
+        "Validação de formato de cores",
+        "Sanitização de outputs",
+        "No information leakage"
+      ],
+      "artifacts": [
+        "server/utils/color-extraction.ts",
+        "Integração com image-processing.service.ts"
+      ],
+      "last_update": "2025-09-05T00:00:00Z",
+      "notes": "Specialized color extraction com node-vibrant"
+    },
+    {
+      "id": "T-006",
+      "title": "Implementar Step de Upload de Logo",
+      "owner": "Frontend_Developer",
+      "status": "todo",
+      "effort": 3,
+      "depends_on": ["T-002", "T-003"],
+      "acceptance": [
+        "Drag & drop interface para upload",
+        "Preview do logo carregado",
+        "Progress bar durante upload/processamento", 
+        "Exibição da paleta de cores extraída",
+        "Feedback de erro para formatos inválidos"
+      ],
+      "observability": [
+        "Taxa de abandono no upload",
+        "Formatos de arquivo mais utilizados",
+        "Tempo médio de upload"
+      ],
+      "security_notes": [
+        "Validação client-side + server-side",
+        "Preview sem execução de código",
+        "Size limits enforced"
+      ],
+      "artifacts": [
+        "client/src/components/onboarding/steps/LogoUploadStep.tsx",
+        "client/src/hooks/useFileUpload.ts"
+      ],
+      "last_update": "2025-09-05T00:00:00Z",
+      "notes": "Interface de upload com processamento visual"
     },
     {
       "id": "T-010",
-      "title": "Implementar Logging Estruturado",
-      "owner": "Backend_Developer",
+      "title": "Implementar Preview e Geração de Brand Voice",
+      "owner": "Frontend_Developer",
       "status": "todo",
-      "effort": 2,
-      "depends_on": ["T-006", "T-007"],
+      "effort": 3,
+      "depends_on": ["T-006", "T-007", "T-008", "T-009"],
       "acceptance": [
-        "Logs incluem contextId, userId, timestamp, operation",
-        "Error logs com stack trace e context",
-        "Performance logs com timing",
-        "Structured format parseable por APM tools",
-        "Log levels configuráveis via environment"
+        "Preview completo de todas configurações",
+        "Geração do Brand Voice JSON estruturado",
+        "Download do arquivo de configuração",
+        "Resumo visual das configurações",
+        "Botão para finalizar onboarding"
       ],
       "observability": [
-        "Log aggregation configurada",
-        "Searchable logs",
-        "Alerting on error patterns"
+        "Taxa de conversão final",
+        "Tempo total de onboarding",
+        "Distribuição de configurações"
       ],
       "security_notes": [
-        "Sanitização de dados sensíveis",
-        "PII masking automático",
-        "Audit trail compliance"
+        "Validação final de todos dados",
+        "JSON sanitizado antes de download",
+        "No sensitive data exposure"
       ],
       "artifacts": [
-        "server/utils/logger.ts",
-        "Log statements em todos services e routes"
+        "client/src/components/onboarding/steps/PreviewStep.tsx",
+        "client/src/utils/brand-voice-generator.ts"
       ],
       "last_update": "2025-09-05T00:00:00Z",
-      "notes": "Observabilidade e debugging"
+      "notes": "Finalização com preview e download do Brand Voice"
     },
     {
       "id": "T-011",
-      "title": "Implementar Performance Monitoring",
-      "owner": "DevOps_Specialist",
+      "title": "Implementar Persistência de Estado",
+      "owner": "Frontend_Developer",
       "status": "todo",
       "effort": 2,
-      "depends_on": ["T-006", "T-010"],
+      "depends_on": ["T-005"],
       "acceptance": [
-        "Endpoint /api/health com métricas básicas funcionando",
-        "Logs estruturados com performance data",
-        "Error rate tracking via logs",
-        "Database health check integrado",
-        "Response time logging implementado"
+        "Auto-save a cada mudança significativa",
+        "Recovery de sessão após reload",
+        "Limpeza de dados temporários após conclusão",
+        "Backup em localStorage para offline",
+        "Sync com backend quando online"
       ],
       "observability": [
-        "Health endpoint métricas",
-        "Structured performance logs",
-        "Error rate tracking"
+        "Taxa de recovery de sessão",
+        "Frequência de auto-save",
+        "Casos de perda de dados"
       ],
       "security_notes": [
-        "Metrics não incluem dados sensíveis",
-        "Health endpoint sem auth (público)", 
-        "Rate limiting aplicado"
+        "Dados sensíveis não ficam em localStorage",
+        "Encryption de dados temporários",
+        "TTL para limpeza automática"
       ],
       "artifacts": [
-        "server/routes/health.ts",
-        "server/utils/performance-logger.ts",
-        "Metrics collection sem APM externo"
+        "Melhorias no useOnboarding.ts",
+        "client/src/utils/session-manager.ts"
       ],
       "last_update": "2025-09-05T00:00:00Z",
-      "notes": "✅ DESBLOQUEADO: Usando observabilidade simplificada sem APM"
+      "notes": "Sistema robusto de persistência e recovery"
+    },
+    {
+      "id": "T-012",
+      "title": "Implementar Testes Unitários Frontend",
+      "owner": "QA_Engineer",
+      "status": "todo",
+      "effort": 4,
+      "depends_on": ["T-007", "T-008", "T-009"],
+      "acceptance": [
+        "RTL + Jest para componentes do wizard",
+        "Testes de navegação entre steps",
+        "Validação de formulários testada",
+        "Mocking de hooks e API calls",
+        "Cobertura mínima de 80%"
+      ],
+      "observability": [
+        "Coverage reports",
+        "Test execution performance",
+        "Flaky test detection"
+      ],
+      "security_notes": [
+        "Mock data não contém dados reais",
+        "Test isolation garantida",
+        "No API calls reais em testes"
+      ],
+      "artifacts": [
+        "client/src/components/onboarding/__tests__/",
+        "client/src/hooks/__tests__/useOnboarding.test.ts"
+      ],
+      "last_update": "2025-09-05T00:00:00Z",
+      "notes": "Cobertura de testes para componentes críticos"
+    },
+    {
+      "id": "T-013",
+      "title": "Implementar Testes E2E",
+      "owner": "QA_Engineer",
+      "status": "todo",
+      "effort": 3,
+      "depends_on": ["T-010", "T-011"],
+      "acceptance": [
+        "Playwright para fluxo completo de onboarding",
+        "Teste de upload de logo com diferentes formatos",
+        "Validação de geração do Brand Voice JSON",
+        "Teste de recuperação de sessão",
+        "Cenários de erro e edge cases"
+      ],
+      "observability": [
+        "E2E test metrics",
+        "Performance do fluxo completo",
+        "Screenshot diffs para regression"
+      ],
+      "security_notes": [
+        "Test data cleanup após execução",
+        "No dados sensíveis em test fixtures",
+        "Isolated test environment"
+      ],
+      "artifacts": [
+        "e2e/onboarding.spec.ts",
+        "e2e/fixtures/test-logos/",
+        "e2e/utils/onboarding-helpers.ts"
+      ],
+      "last_update": "2025-09-05T00:00:00Z",
+      "notes": "Validação completa do fluxo de usuário"
     }
   ],
-  "blocks": [
-    {
-      "tag": "DOCS_PENDENTE",
-      "description": "Ferramenta de observabilidade/APM não definida",
-      "owner": "DevOps_Specialist",
-      "unblock_next_step": "Definir entre DataDog, New Relic, Grafana, ou alternativa open-source"
-    },
-    {
-      "tag": "DOCS_PENDENTE", 
-      "description": "Estratégia de testes automatizados específica",
-      "owner": "QA_Engineer",
-      "unblock_next_step": "Consultar docs/TODO.md e definir percentual de cobertura"
-    },
-    {
-      "tag": "DOCS_PENDENTE",
-      "description": "Processo de rollback para falhas no pipeline de análise",
-      "owner": "Database_Admin", 
-      "unblock_next_step": "Documentar procedimento de rollback seguro para migrations"
-    },
-    {
-      "tag": "PERGUNTA_ABERTA",
-      "description": "Timeline para integração com OpenAI real",
-      "owner": "Tech_Lead",
-      "unblock_next_step": "Roadmap definition meeting para substituição do mock"
-    }
-  ]
+  "blocks": []
 }

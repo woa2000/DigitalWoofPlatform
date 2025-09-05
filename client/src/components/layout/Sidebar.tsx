@@ -12,7 +12,8 @@ import {
   Images, 
   Menu,
   Settings,
-  User
+  User,
+  Palette
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
@@ -22,6 +23,7 @@ interface SidebarProps {
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: ChartLine },
+  { name: "Onboarding de Marca", href: "/onboarding", icon: Palette },
   { name: "Campanhas", href: "/campaigns", icon: Megaphone },
   { name: "IA Content", href: "/ai-content", icon: Bot },
   { name: "Manual da Marca", href: "/brand-manual", icon: Book },
@@ -99,8 +101,8 @@ export function Sidebar({ className }: SidebarProps) {
           </div>
           {!collapsed && (
             <div className="flex-1">
-              <p className="text-sm font-medium">{user?.name}</p>
-              <p className="text-xs text-muted-foreground">{user?.businessName}</p>
+              <p className="text-sm font-medium">{user?.email || 'Usuário'}</p>
+              <p className="text-xs text-muted-foreground">Digital Woof</p>
             </div>
           )}
           <Button

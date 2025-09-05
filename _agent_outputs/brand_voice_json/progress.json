@@ -1,0 +1,421 @@
+{
+  "plan": {
+    "title": "Brand Voice JSON - Execution Plan",
+    "version": "1.0",
+    "status": "ready_for_execution",
+    "run_mode": "dry-run",
+    "generated_at": "2025-09-05T15:30:00Z",
+    "agent_responsible": "Backend_Developer",
+    "total_tasks": 12,
+    "total_effort": 45,
+    "estimated_duration_days": 4
+  },
+  "tasks": [
+    {
+      "id": "T-001",
+      "title": "Implementar JSON Schema v1.0 Completo",
+      "owner": "Backend_Developer",
+      "status": "completed",
+      "effort": 5,
+      "depends_on": [],
+      "acceptance": [
+        "Schema valida todos campos obrigatórios e opcionais",
+        "Type safety completa entre runtime e compile-time",
+        "Validation errors específicas e actionable",
+        "JSON Schema published em URL pública",
+        "Backward compatibility plan documentado"
+      ],
+      "observability": [
+        "Schema validation metrics",
+        "Error categorization logs"
+      ],
+      "security_notes": [
+        "Input sanitization",
+        "Content length limits"
+      ],
+      "artifacts": [
+        "shared/schemas/brand-voice.ts",
+        "shared/types/brand-voice.ts"
+      ],
+      "last_update": "2025-09-05T16:04:00Z",
+      "completed_at": "2025-09-05T16:04:00Z",
+      "notes": "Foundation task - required for all subsequent work. COMPLETED with Zod validation."
+    },
+    {
+      "id": "T-002",
+      "title": "Implementar Database Schema e Migration",
+      "owner": "Database_Admin",
+      "status": "completed",
+      "effort": 3,
+      "depends_on": ["T-001"],
+      "acceptance": [
+        "JSONB field para schema completo",
+        "Indexed fields para queries comuns (userId, brandName, segment)",
+        "Unique constraint para one active per user",
+        "Quality score indexes para filtering",
+        "Migration executa sem erros"
+      ],
+      "observability": [
+        "Query performance metrics",
+        "Index usage stats"
+      ],
+      "security_notes": [
+        "RLS policies",
+        "User isolation"
+      ],
+      "artifacts": [
+        "migrations/0001_brand_voice_json_schema.sql",
+        "shared/schema.ts updated"
+      ],
+      "last_update": "2025-09-05T16:09:00Z",
+      "completed_at": "2025-09-05T16:09:00Z",
+      "notes": "Database foundation with optimized structure. COMPLETED with RLS and performance indexes."
+    },
+    {
+      "id": "T-003",
+      "title": "Implementar Brand Voice Generator Core",
+      "owner": "Backend_Developer",
+      "status": "todo",
+      "effort": 6,
+      "depends_on": ["T-001", "T-002"],
+      "acceptance": [
+        "Merge prioriza user input > anamnesis > defaults",
+        "Weighted average para valores numéricos conflitantes",
+        "Default values apropriados por segment",
+        "Validation de consistency durante merge",
+        "Generation time < 2s"
+      ],
+      "observability": [
+        "Generation metrics",
+        "Merge decision logs"
+      ],
+      "security_notes": [
+        "Input validation",
+        "Sanitization de merged data"
+      ],
+      "artifacts": [
+        "services/brand-voice-generator.service.ts",
+        "utils/brand-voice-merger.ts"
+      ],
+      "last_update": "2025-09-05T15:30:00Z",
+      "notes": "Core business logic for Brand Voice generation"
+    },
+    {
+      "id": "T-004",
+      "title": "Implementar Quality Metrics Calculator",
+      "owner": "Backend_Developer",
+      "status": "todo",
+      "effort": 4,
+      "depends_on": ["T-003"],
+      "acceptance": [
+        "Completeness: % campos preenchidos vs opcionais",
+        "Consistency: contradições internas (tone vs lexicon)",
+        "Specificity: genericidade vs specific to business",
+        "Usability: adequação para content generation",
+        "Calculation time < 500ms"
+      ],
+      "observability": [
+        "Quality score distributions",
+        "Improvement tracking"
+      ],
+      "security_notes": [
+        "Metrics não expõem dados sensíveis"
+      ],
+      "artifacts": [
+        "services/brand-voice-quality.service.ts"
+      ],
+      "last_update": "2025-09-05T15:30:00Z",
+      "notes": "Quality assessment system for Brand Voice validation"
+    },
+    {
+      "id": "T-005",
+      "title": "Implementar CRUD Service para Brand Voice",
+      "owner": "Backend_Developer",
+      "status": "todo",
+      "effort": 5,
+      "depends_on": ["T-002", "T-004"],
+      "acceptance": [
+        "Create: nova Brand Voice com quality validation",
+        "Read: cache-first retrieval < 100ms",
+        "Update: versioning automático, preserva histórico",
+        "Activate: only one active per user, deactivates previous",
+        "List: version history com metadata"
+      ],
+      "observability": [
+        "Cache hit rates",
+        "Operation latencies"
+      ],
+      "security_notes": [
+        "User isolation",
+        "Version access control"
+      ],
+      "artifacts": [
+        "services/brand-voice.service.ts",
+        "utils/brand-voice-cache.ts"
+      ],
+      "last_update": "2025-09-05T15:30:00Z",
+      "notes": "Core CRUD operations with caching strategy"
+    },
+    {
+      "id": "T-006",
+      "title": "Implementar Default Values System",
+      "owner": "Backend_Developer",
+      "status": "todo",
+      "effort": 3,
+      "depends_on": ["T-003"],
+      "acceptance": [
+        "Defaults específicos por segment (veterinaria, petshop, etc.)",
+        "Compliance defaults apropriados",
+        "Lexicon defaults do setor pet",
+        "Override graceful por user input",
+        "Quality defaults que garantem usability"
+      ],
+      "observability": [
+        "Default usage statistics",
+        "Override patterns"
+      ],
+      "security_notes": [
+        "Defaults não introduzem vulnerabilities"
+      ],
+      "artifacts": [
+        "config/brand-voice-defaults.json"
+      ],
+      "last_update": "2025-09-05T15:30:00Z",
+      "notes": "Intelligent defaults per business segment"
+    },
+    {
+      "id": "T-007",
+      "title": "Implementar REST API Endpoints",
+      "owner": "Backend_Developer",
+      "status": "todo",
+      "effort": 4,
+      "depends_on": ["T-005"],
+      "acceptance": [
+        "POST /api/brand-voice/generate - gera nova Brand Voice",
+        "GET /api/brand-voice/active - retrieval otimizada",
+        "PUT /api/brand-voice/:id/activate - version activation",
+        "GET /api/brand-voice/history - version listing",
+        "Validation errors específicas e actionable"
+      ],
+      "observability": [
+        "API metrics",
+        "Endpoint performance"
+      ],
+      "security_notes": [
+        "JWT validation",
+        "Rate limiting",
+        "Input sanitization"
+      ],
+      "artifacts": [
+        "routes/brand-voice.ts"
+      ],
+      "last_update": "2025-09-05T15:30:00Z",
+      "notes": "RESTful API layer with validation"
+    },
+    {
+      "id": "T-008",
+      "title": "Implementar Cache Strategy",
+      "owner": "Backend_Developer",
+      "status": "todo",
+      "effort": 3,
+      "depends_on": ["T-005"],
+      "acceptance": [
+        "Cache TTL de 5 minutos para Brand Voice ativo",
+        "Invalidation automática em updates",
+        "Cache hit rate > 90%",
+        "Memory usage monitoring",
+        "Graceful fallback se cache fails"
+      ],
+      "observability": [
+        "Cache metrics",
+        "Hit/miss rates",
+        "Memory usage"
+      ],
+      "security_notes": [
+        "Cache isolation entre users"
+      ],
+      "artifacts": [
+        "utils/brand-voice-cache.ts"
+      ],
+      "last_update": "2025-09-05T15:30:00Z",
+      "notes": "Performance optimization through intelligent caching"
+    },
+    {
+      "id": "T-009",
+      "title": "Implementar Version Management System",
+      "owner": "Backend_Developer",
+      "status": "todo",
+      "effort": 4,
+      "depends_on": ["T-005"],
+      "acceptance": [
+        "Automatic version detection e migration",
+        "Backward compatibility preservation",
+        "Migration rollback capability",
+        "Version history tracking",
+        "Migration performance < 1s per Brand Voice"
+      ],
+      "observability": [
+        "Migration success rates",
+        "Version distribution"
+      ],
+      "security_notes": [
+        "Migration integrity",
+        "Rollback safety"
+      ],
+      "artifacts": [
+        "utils/brand-voice-versioning.ts"
+      ],
+      "last_update": "2025-09-05T15:30:00Z",
+      "notes": "Schema evolution and version control"
+    },
+    {
+      "id": "T-010",
+      "title": "Implementar Integration com Content Generation",
+      "owner": "Backend_Developer",
+      "status": "todo",
+      "effort": 4,
+      "depends_on": ["T-005"],
+      "acceptance": [
+        "Prompt templates para different content types",
+        "Dynamic tone description generation",
+        "Compliance checking integration",
+        "Context-aware prompt building",
+        "Template performance < 50ms"
+      ],
+      "observability": [
+        "Template usage metrics",
+        "Prompt effectiveness"
+      ],
+      "security_notes": [
+        "Template injection prevention"
+      ],
+      "artifacts": [
+        "templates/prompt-templates.ts",
+        "utils/brand-voice-prompt-builder.ts"
+      ],
+      "last_update": "2025-09-05T15:30:00Z",
+      "notes": "Integration layer for AI content generation"
+    },
+    {
+      "id": "T-011",
+      "title": "Implementar Unit Tests",
+      "owner": "QA_Engineer",
+      "status": "todo",
+      "effort": 5,
+      "depends_on": ["T-003", "T-004", "T-009"],
+      "acceptance": [
+        "Generator merge scenarios testados",
+        "Quality metrics calculation validated",
+        "Schema validation edge cases",
+        "Version migration tested",
+        "Error conditions covered"
+      ],
+      "observability": [
+        "Test coverage metrics",
+        "Test execution time"
+      ],
+      "security_notes": [
+        "Test data não contém dados sensíveis"
+      ],
+      "artifacts": [
+        "tests/unit/brand-voice-generator.test.ts",
+        "tests/unit/brand-voice-quality.test.ts",
+        "tests/fixtures/brand-voice-test-data.json"
+      ],
+      "last_update": "2025-09-05T15:30:00Z",
+      "notes": "Comprehensive unit testing coverage"
+    },
+    {
+      "id": "T-012",
+      "title": "Implementar Integration Tests",
+      "owner": "QA_Engineer",
+      "status": "todo",
+      "effort": 4,
+      "depends_on": ["T-007", "T-008"],
+      "acceptance": [
+        "Generation flow: anamnesis + onboarding → Brand Voice",
+        "API contract validation",
+        "Database persistence tested",
+        "Cache behavior validated",
+        "Performance targets met"
+      ],
+      "observability": [
+        "Integration test metrics",
+        "API performance"
+      ],
+      "security_notes": [
+        "Test isolation",
+        "Data cleanup"
+      ],
+      "artifacts": [
+        "tests/integration/brand-voice.api.test.ts"
+      ],
+      "last_update": "2025-09-05T15:30:00Z",
+      "notes": "End-to-end integration validation"
+    }
+  ],
+  "blocks": [
+    {
+      "tag": "DOCS_PENDENTE",
+      "description": "Estratégia de backup e disaster recovery para Brand Voice data",
+      "owner": "DevOps_Specialist",
+      "unblock_next_step": "RESOLVIDO: DB snapshots diários + storage versionamento + job de purge implementado",
+      "status": "resolved",
+      "resolved_at": "2025-09-05T15:45:00Z"
+    },
+    {
+      "tag": "DOCS_PENDENTE", 
+      "description": "Processo de validação manual quando quality score baixo",
+      "owner": "Product_Owner",
+      "unblock_next_step": "RESOLVIDO: Workflow Draft→AutoGenerated→NeedsReview→Approved/Rejected→Published implementado",
+      "status": "resolved",
+      "resolved_at": "2025-09-05T15:45:00Z"
+    },
+    {
+      "tag": "DOCS_PENDENTE",
+      "description": "Integração com future AI models além do OpenAI",
+      "owner": "Tech_Lead", 
+      "unblock_next_step": "RESOLVIDO: Interface AiProvider + adapter OpenAI + strategy para Fase 2 definida",
+      "status": "resolved",
+      "resolved_at": "2025-09-05T15:45:00Z"
+    },
+    {
+      "tag": "PERGUNTA_ABERTA",
+      "description": "Quantas versions antigas manter ativas?",
+      "owner": "Product_Owner",
+      "unblock_next_step": "RESOLVIDO: 10 versões + ativa + is_pinned + soft-delete 30 dias",
+      "status": "resolved",
+      "resolved_at": "2025-09-05T15:45:00Z"
+    },
+    {
+      "tag": "PERGUNTA_ABERTA",
+      "description": "Como otimizar para large number of users?", 
+      "owner": "Tech_Lead",
+      "unblock_next_step": "RESOLVIDO: RLS + índices compostos + rate limits + caching Edge/Redis",
+      "status": "resolved",
+      "resolved_at": "2025-09-05T15:45:00Z"
+    },
+    {
+      "tag": "PERGUNTA_ABERTA",
+      "description": "Quality threshold 0.7 é adequado ou deve ser ajustável por user?",
+      "owner": "Product_Owner", 
+      "unblock_next_step": "RESOLVIDO: 0.7 fixo MVP, configurável por tenant Fase 2",
+      "status": "resolved",
+      "resolved_at": "2025-09-05T15:45:00Z"
+    }
+  ],
+  "summary": {
+    "ready_tasks": 10,
+    "blocked_tasks": 0,
+    "completed_tasks": 2,
+    "in_progress_tasks": 0,
+    "total_blocks": 0,
+    "resolved_blocks": 6,
+    "critical_path_length": 8,
+    "parallel_opportunities": 4,
+    "execution_status": "fully_unblocked",
+    "completion_percentage": 17.8,
+    "story_points_completed": 8,
+    "story_points_total": 45
+  }
+}
