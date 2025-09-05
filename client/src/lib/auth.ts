@@ -1,13 +1,6 @@
 import { useState, useEffect } from "react";
-import { authApi } from "./api";
-
-interface User {
-  id: string;
-  email: string;
-  name: string;
-  businessType: string;
-  businessName: string;
-}
+import { supabase } from "./supabase";
+import type { User } from "@supabase/supabase-js";
 
 interface AuthState {
   user: User | null;
@@ -23,19 +16,62 @@ export function useAuth() {
   });
 
   useEffect(() => {
+    // Check initial session
     checkAuthStatus();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id);
+        
+        if (session?.user) {
+          setAuthState({
+            user: session.user,
+            isLoading: false,
+            isAuthenticated: true,
+          });
+        } else {
+          setAuthState({
+            user: null,
+            isLoading: false,
+            isAuthenticated: false,
+          });
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const checkAuthStatus = async () => {
     try {
-      const response = await authApi.getCurrentUser();
-      const user = await response.json();
-      setAuthState({
-        user,
-        isLoading: false,
-        isAuthenticated: true,
-      });
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error('Error checking auth status:', error);
+        setAuthState({
+          user: null,
+          isLoading: false,
+          isAuthenticated: false,
+        });
+        return;
+      }
+
+      if (session?.user) {
+        setAuthState({
+          user: session.user,
+          isLoading: false,
+          isAuthenticated: true,
+        });
+      } else {
+        setAuthState({
+          user: null,
+          isLoading: false,
+          isAuthenticated: false,
+        });
+      }
     } catch (error) {
+      console.error('Error checking auth status:', error);
       setAuthState({
         user: null,
         isLoading: false,
@@ -46,27 +82,33 @@ export function useAuth() {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await authApi.login({ email, password });
-      const user = await response.json();
-      setAuthState({
-        user,
-        isLoading: false,
-        isAuthenticated: true,
+      setAuthState(prev => ({ ...prev, isLoading: true }));
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
-      return { success: true };
+
+      if (error) {
+        setAuthState(prev => ({ ...prev, isLoading: false }));
+        return { success: false, error: error.message };
+      }
+
+      // State will be updated by onAuthStateChange
+      return { success: true, data };
     } catch (error) {
+      setAuthState(prev => ({ ...prev, isLoading: false }));
       return { success: false, error: (error as Error).message };
     }
   };
 
   const logout = async () => {
     try {
-      await authApi.logout();
-      setAuthState({
-        user: null,
-        isLoading: false,
-        isAuthenticated: false,
-      });
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Logout error:", error);
+      }
+      // State will be updated by onAuthStateChange
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -80,15 +122,29 @@ export function useAuth() {
     businessName: string;
   }) => {
     try {
-      const response = await authApi.register(userData);
-      const user = await response.json();
-      setAuthState({
-        user,
-        isLoading: false,
-        isAuthenticated: true,
+      setAuthState(prev => ({ ...prev, isLoading: true }));
+      
+      const { data, error } = await supabase.auth.signUp({
+        email: userData.email,
+        password: userData.password,
+        options: {
+          data: {
+            name: userData.name,
+            business_type: userData.businessType,
+            business_name: userData.businessName,
+          }
+        }
       });
-      return { success: true };
+
+      if (error) {
+        setAuthState(prev => ({ ...prev, isLoading: false }));
+        return { success: false, error: error.message };
+      }
+
+      // State will be updated by onAuthStateChange
+      return { success: true, data };
     } catch (error) {
+      setAuthState(prev => ({ ...prev, isLoading: false }));
       return { success: false, error: (error as Error).message };
     }
   };

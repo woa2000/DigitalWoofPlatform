@@ -29,7 +29,10 @@ export default function Login() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Attempting login with:', { email: loginData.email });
+    
     const result = await login(loginData.email, loginData.password);
+    console.log('Login result:', result);
     
     if (result.success) {
       setLocation("/");
@@ -38,6 +41,7 @@ export default function Login() {
         description: "Bem-vindo à Woof Marketing Platform",
       });
     } else {
+      console.error('Login error:', result.error);
       toast({
         title: "Erro no login",
         description: result.error || "Credenciais inválidas",
@@ -48,7 +52,15 @@ export default function Login() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Attempting register with:', { 
+      email: registerData.email,
+      name: registerData.name,
+      businessType: registerData.businessType,
+      businessName: registerData.businessName
+    });
+    
     const result = await register(registerData);
+    console.log('Register result:', result);
     
     if (result.success) {
       setLocation("/");
@@ -57,6 +69,7 @@ export default function Login() {
         description: "Bem-vindo à Woof Marketing Platform",
       });
     } else {
+      console.error('Register error:', result.error);
       toast({
         title: "Erro no cadastro",
         description: result.error || "Erro ao criar conta",

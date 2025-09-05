@@ -1,0 +1,68 @@
+{
+  "timestamp": "2025-09-05T00:00:00Z",
+  "event": "plan_execution_started",
+  "level": "INFO",
+  "plan_id": "anamnese_digital",
+  "run_mode": "dry-run",
+  "message": "Iniciando execução do plano Anamnese Digital em modo dry-run"
+}
+{
+  "timestamp": "2025-09-05T00:00:01Z", 
+  "event": "plan_parsed",
+  "level": "INFO",
+  "plan_id": "anamnese_digital",
+  "task_count": 11,
+  "total_effort": 34,
+  "message": "Plano parseado com sucesso - 11 tarefas identificadas"
+}
+{
+  "timestamp": "2025-09-05T00:00:02Z",
+  "event": "dependencies_analyzed", 
+  "level": "INFO",
+  "plan_id": "anamnese_digital",
+  "critical_path": ["T-001", "T-002", "T-003", "T-004", "T-006", "T-007", "T-009"],
+  "message": "Análise de dependências concluída - critical path identificado"
+}
+{
+  "timestamp": "2025-09-05T00:00:03Z",
+  "event": "blocks_identified",
+  "level": "WARN", 
+  "plan_id": "anamnese_digital",
+  "block_count": 4,
+  "critical_blocks": 3,
+  "message": "Bloqueios identificados - 3 críticos, 1 não-crítico"
+}
+{
+  "timestamp": "2025-09-05T00:00:04Z",
+  "event": "pre_exec_summary_generated",
+  "level": "INFO",
+  "plan_id": "anamnese_digital", 
+  "artifact": "PRE_EXEC_SUMMARY.md",
+  "message": "Resumo pré-execução gerado com escopo e critérios de aceitação"
+}
+{
+  "timestamp": "2025-09-05T00:00:05Z",
+  "event": "todos_generated",
+  "level": "INFO",
+  "plan_id": "anamnese_digital",
+  "artifacts": ["TODOS.md", "progress.json"],
+  "message": "TODO rastreável gerado com 11 tarefas sincronizadas"
+}
+{
+  "timestamp": "2025-09-05T00:00:06Z",
+  "event": "blockers_documented",
+  "level": "WARN",
+  "plan_id": "anamnese_digital", 
+  "artifact": "BLOCKERS.md",
+  "critical_blocks": ["apm_tool", "test_strategy", "rollback_procedures"],
+  "message": "Bloqueios documentados com plano de desbloqueio"
+}
+{
+  "timestamp": "2025-09-05T00:00:07Z",
+  "event": "dry_run_completed",
+  "level": "INFO",
+  "plan_id": "anamnese_digital",
+  "run_mode": "dry-run", 
+  "output_dir": "_agent_outputs/anamnese_digital/",
+  "message": "Execução dry-run concluída com sucesso - pronto para modo execute"
+}

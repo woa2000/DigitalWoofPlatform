@@ -1,20 +1,13 @@
 import { Router } from "express";
 import { storage } from "../storage";
+import { authenticateToken, AuthenticatedRequest } from "../middleware/auth";
 
 const router = Router();
 
-// Middleware to check authentication
-const requireAuth = (req: any, res: any, next: any) => {
-  if (!req.session.userId) {
-    return res.status(401).json({ message: "Authentication required" });
-  }
-  next();
-};
-
 // Get dashboard stats
-router.get("/stats", requireAuth, async (req: any, res) => {
+router.get("/stats", authenticateToken, async (req: AuthenticatedRequest, res) => {
   try {
-    const userId = req.session.userId;
+    const userId = req.user!.id;
     const stats = await storage.getDashboardStats(userId);
     res.json(stats);
   } catch (error) {
@@ -24,9 +17,9 @@ router.get("/stats", requireAuth, async (req: any, res) => {
 });
 
 // Get performance data
-router.get("/performance", requireAuth, async (req: any, res) => {
+router.get("/performance", authenticateToken, async (req: AuthenticatedRequest, res) => {
   try {
-    const userId = req.session.userId;
+    const userId = req.user!.id;
     const performance = await storage.getPerformanceData(userId);
     res.json(performance);
   } catch (error) {

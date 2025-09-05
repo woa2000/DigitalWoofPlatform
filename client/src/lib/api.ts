@@ -10,16 +10,6 @@ export const dashboardApi = {
   getPerformanceData: () => apiRequest("GET", "/api/dashboard/performance"),
 };
 
-// Authentication API
-export const authApi = {
-  login: (credentials: { email: string; password: string }) =>
-    apiRequest("POST", "/api/auth/login", credentials),
-  register: (userData: { email: string; password: string; name: string; businessType: string; businessName: string }) =>
-    apiRequest("POST", "/api/auth/register", userData),
-  logout: () => apiRequest("POST", "/api/auth/logout"),
-  getCurrentUser: () => apiRequest("GET", "/api/auth/me"),
-};
-
 // Campaigns API
 export const campaignsApi = {
   create: (campaign: any) => apiRequest("POST", "/api/campaigns", campaign),

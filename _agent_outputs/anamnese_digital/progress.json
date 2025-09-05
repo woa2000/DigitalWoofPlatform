@@ -1,0 +1,384 @@
+{
+  "plan": {
+    "title": "Anamnese Digital - Execution Plan",
+    "version": "1.0",
+    "status": "executing",
+    "run_mode": "execute",
+    "generated_at": "2025-09-05T00:00:00Z"
+  },
+  "tasks": [
+    {
+      "id": "T-001",
+      "title": "Implementar Schema de Banco de Dados",
+      "owner": "Database_Admin",
+      "status": "done",
+      "effort": 3,
+      "depends_on": [],
+      "acceptance": [
+        "✅ Schema valida com drizzle-kit generate",
+        "✅ Migration executa sem erros no ambiente de test",
+        "✅ Índices de performance criados (user_id, normalized_url, status)",
+        "✅ Constraints de uniqueness funcionando (hash, normalized_url)",
+        "✅ RLS policies aplicadas e testadas"
+      ],
+      "observability": [
+        "Migration logs estruturados",
+        "Métricas de query performance",
+        "Database connection monitoring"
+      ],
+      "security_notes": [
+        "RLS policies aplicadas",
+        "Acesso restrito por accountId",
+        "Constraints para data integrity"
+      ],
+      "artifacts": [
+        "shared/schema.ts",
+        "server/migrations/001_anamnesis_tables.sql"
+      ],
+      "last_update": "2025-09-05T00:00:00Z",
+      "notes": "✅ CONCLUÍDO: Schema implementado com sucesso, commit b3492c4"
+    },
+    {
+      "id": "T-002",
+      "title": "Implementar Validação e Normalização de URLs",
+      "owner": "Backend_Developer",
+      "status": "done",
+      "effort": 2,
+      "depends_on": ["T-001"],
+      "acceptance": [
+        "✅ URLs inválidas rejeitadas com mensagem clara",
+        "✅ Normalização remove www, trailing slash, converte para lowercase",
+        "✅ Hash gerado deterministicamente para mesma URL normalizada",
+        "✅ Máximo 10 URLs sociais validado",
+        "✅ Sanitização contra injection funcionando"
+      ],
+      "observability": [
+        "Log de URLs rejeitadas com motivo",
+        "Métricas de validação success/failure rate",
+        "Performance metrics de normalização"
+      ],
+      "security_notes": [
+        "Sanitização contra injection",
+        "Validação de domínios permitidos",
+        "Rate limiting por IP"
+      ],
+      "artifacts": [
+        "server/utils/url-validation.ts",
+        "server/utils/url-normalization.ts"
+      ],
+      "last_update": "2025-09-05T00:00:00Z",
+      "notes": "✅ CONCLUÍDO: Validação e normalização implementadas, commit f0f4b90"
+    },
+    {
+      "id": "T-003",
+      "title": "Implementar Mock Analysis Engine",
+      "owner": "Backend_Developer",
+      "status": "done",
+      "effort": 4,
+      "depends_on": ["T-001", "T-002"],
+      "acceptance": [
+        "✅ Retorna 8 seções estruturadas (identity, personas, ux, etc.)",
+        "✅ Processa em ≤ 2 min (simulado com delay)",
+        "✅ Score de completeness calculado baseado nas fontes",
+        "✅ Dados mock consistentes com schema esperado pela UI",
+        "✅ Output compatível com futura integração OpenAI"
+      ],
+      "observability": [
+        "Logs de processamento com timing",
+        "Métricas de status tracking",
+        "Performance de análise mock"
+      ],
+      "security_notes": [
+        "Não processa dados reais",
+        "Mock determinístico",
+        "Sanitização de outputs"
+      ],
+      "artifacts": [
+        "server/services/anamnesis-agent.service.ts",
+        "server/fixtures/mock-analysis-results.json",
+        "shared/types/anamnesis.ts"
+      ],
+      "last_update": "2025-09-05T00:00:00Z",
+      "notes": "✅ CONCLUÍDO: Mock engine implementado com 8 seções estruturadas, commit 755a19e"
+    },
+    {
+      "id": "T-004",
+      "title": "Implementar CRUD Service para Análises",
+      "owner": "Backend_Developer", 
+      "status": "todo",
+      "effort": 5,
+      "depends_on": ["T-001", "T-002", "T-003"],
+      "acceptance": [
+        "Create: análise criada com fontes associadas, status queued",
+        "Read: busca por ID com findings estruturados",
+        "List: paginação, filtro por user, ordenação por data", 
+        "Deduplicação: URLs normalizadas não geram duplicatas",
+        "Delete: soft delete preservando dados para auditoria"
+      ],
+      "observability": [
+        "Logs de operações CRUD com timing",
+        "Métricas de performance por operation",
+        "Database query performance"
+      ],
+      "security_notes": [
+        "RLS enforcement",
+        "User isolation",
+        "Input sanitization",
+        "Audit trail"
+      ],
+      "artifacts": [
+        "server/services/anamnesis.service.ts",
+        "shared/types/anamnesis.ts"
+      ],
+      "last_update": "2025-09-05T00:00:00Z",
+      "notes": "Core business logic"
+    },
+    {
+      "id": "T-005",
+      "title": "Implementar Deduplicação por URL Normalizada",
+      "owner": "Backend_Developer",
+      "status": "todo", 
+      "effort": 2,
+      "depends_on": ["T-002", "T-004"],
+      "acceptance": [
+        "Hash determinístico gerado para URL normalizada",
+        "Tentativa de criar análise duplicada retorna análise existente",
+        "Database constraint impede duplicatas mesmo em race conditions",
+        "UI feedback claro quando análise já existe"
+      ],
+      "observability": [
+        "Logs de tentativas de duplicação",
+        "Métricas de hit/miss rate",
+        "Performance de lookup por hash"
+      ],
+      "security_notes": [
+        "Hash não reversível",
+        "Protegido contra timing attacks",
+        "Rate limiting aplicado"
+      ],
+      "artifacts": [
+        "Logic integrada no anamnesis.service.ts",
+        "Database constraints para uniqueness"
+      ],
+      "last_update": "2025-09-05T00:00:00Z",
+      "notes": "Evita reprocessamento desnecessário"
+    },
+    {
+      "id": "T-006",
+      "title": "Implementar REST API Endpoints",
+      "owner": "Backend_Developer",
+      "status": "todo",
+      "effort": 4,
+      "depends_on": ["T-004", "T-005"],
+      "acceptance": [
+        "POST /api/anamnesis cria análise com fontes",
+        "GET /api/anamnesis/:id retorna análise completa", 
+        "GET /api/anamnesis lista análises do usuário",
+        "DELETE /api/anamnesis/:id remove análise",
+        "Todas APIs retornam consistent response format",
+        "Error handling com status codes apropriados"
+      ],
+      "observability": [
+        "Request/response logs estruturados",
+        "API metrics (latency, errors, throughput)",
+        "Correlation ID tracking"
+      ],
+      "security_notes": [
+        "JWT validation obrigatório",
+        "Rate limiting por endpoint",
+        "CORS configured",
+        "Input validation via Zod"
+      ],
+      "artifacts": [
+        "server/routes/anamnesis.ts",
+        "server/middleware/anamnesis.middleware.ts"
+      ],
+      "last_update": "2025-09-05T00:00:00Z",
+      "notes": "Interface externa do sistema"
+    },
+    {
+      "id": "T-007",
+      "title": "Implementar Error Handling e Status Tracking",
+      "owner": "Backend_Developer",
+      "status": "todo",
+      "effort": 3,
+      "depends_on": ["T-004", "T-006"],
+      "acceptance": [
+        "Status tracking: queued → running → done/error",
+        "Timeout após 2min marca como error",
+        "Error messages estruturadas e actionable",
+        "Retry logic para falhas temporárias",
+        "Graceful degradation quando serviços indisponíveis"
+      ],
+      "observability": [
+        "Error metrics por tipo",
+        "Status transition logs",
+        "Timeout tracking",
+        "Retry attempt logs"
+      ],
+      "security_notes": [
+        "Error messages não vazam informações sensíveis",
+        "Stack traces sanitizados",
+        "Audit log de erros"
+      ],
+      "artifacts": [
+        "server/utils/error-handler.ts",
+        "Status transitions logic no service"
+      ],
+      "last_update": "2025-09-05T00:00:00Z",
+      "notes": "Robustez e confiabilidade"
+    },
+    {
+      "id": "T-008",
+      "title": "Implementar Unit Tests",
+      "owner": "QA_Engineer",
+      "status": "todo",
+      "effort": 4,
+      "depends_on": ["T-002", "T-003", "T-004"],
+      "acceptance": [
+        "Cobertura conforme definido em docs/TODO.md",
+        "Todos cenários de validação de URL testados",
+        "Mock engine comportamento testado",
+        "Deduplicação logic validada",
+        "Error conditions testadas"
+      ],
+      "observability": [
+        "Test coverage reports",
+        "Performance de execução dos testes",
+        "Test reliability metrics"
+      ],
+      "security_notes": [
+        "Tests não usam dados sensíveis reais",
+        "Test isolation garantida",
+        "Mock data anonimizada"
+      ],
+      "artifacts": [
+        "server/tests/unit/anamnesis.service.test.ts",
+        "server/tests/unit/url-validation.test.ts",
+        "server/tests/unit/anamnesis-agent.test.ts"
+      ],
+      "last_update": "2025-09-05T00:00:00Z",
+      "notes": "Validação de comportamento isolado"
+    },
+    {
+      "id": "T-009",
+      "title": "Implementar Integration Tests",
+      "owner": "QA_Engineer",
+      "status": "todo",
+      "effort": 3,
+      "depends_on": ["T-006", "T-007", "T-008"],
+      "acceptance": [
+        "Fluxo completo: create → process → retrieve",
+        "API contract validation (request/response schemas)",
+        "Database constraints testadas",
+        "Authentication & authorization testadas",
+        "Performance targets validados (≤ 2min processing)"
+      ],
+      "observability": [
+        "Integration test metrics",
+        "API response times", 
+        "End-to-end tracing"
+      ],
+      "security_notes": [
+        "Test isolation entre execuções",
+        "Cleanup de dados de teste",
+        "Auth flow validation"
+      ],
+      "artifacts": [
+        "server/tests/integration/anamnesis.api.test.ts",
+        "Test database setup/teardown scripts"
+      ],
+      "last_update": "2025-09-05T00:00:00Z",
+      "notes": "Validação de fluxo completo"
+    },
+    {
+      "id": "T-010",
+      "title": "Implementar Logging Estruturado",
+      "owner": "Backend_Developer",
+      "status": "todo",
+      "effort": 2,
+      "depends_on": ["T-006", "T-007"],
+      "acceptance": [
+        "Logs incluem contextId, userId, timestamp, operation",
+        "Error logs com stack trace e context",
+        "Performance logs com timing",
+        "Structured format parseable por APM tools",
+        "Log levels configuráveis via environment"
+      ],
+      "observability": [
+        "Log aggregation configurada",
+        "Searchable logs",
+        "Alerting on error patterns"
+      ],
+      "security_notes": [
+        "Sanitização de dados sensíveis",
+        "PII masking automático",
+        "Audit trail compliance"
+      ],
+      "artifacts": [
+        "server/utils/logger.ts",
+        "Log statements em todos services e routes"
+      ],
+      "last_update": "2025-09-05T00:00:00Z",
+      "notes": "Observabilidade e debugging"
+    },
+    {
+      "id": "T-011",
+      "title": "Implementar Performance Monitoring",
+      "owner": "DevOps_Specialist",
+      "status": "todo",
+      "effort": 2,
+      "depends_on": ["T-006", "T-010"],
+      "acceptance": [
+        "Endpoint /api/health com métricas básicas funcionando",
+        "Logs estruturados com performance data",
+        "Error rate tracking via logs",
+        "Database health check integrado",
+        "Response time logging implementado"
+      ],
+      "observability": [
+        "Health endpoint métricas",
+        "Structured performance logs",
+        "Error rate tracking"
+      ],
+      "security_notes": [
+        "Metrics não incluem dados sensíveis",
+        "Health endpoint sem auth (público)", 
+        "Rate limiting aplicado"
+      ],
+      "artifacts": [
+        "server/routes/health.ts",
+        "server/utils/performance-logger.ts",
+        "Metrics collection sem APM externo"
+      ],
+      "last_update": "2025-09-05T00:00:00Z",
+      "notes": "✅ DESBLOQUEADO: Usando observabilidade simplificada sem APM"
+    }
+  ],
+  "blocks": [
+    {
+      "tag": "DOCS_PENDENTE",
+      "description": "Ferramenta de observabilidade/APM não definida",
+      "owner": "DevOps_Specialist",
+      "unblock_next_step": "Definir entre DataDog, New Relic, Grafana, ou alternativa open-source"
+    },
+    {
+      "tag": "DOCS_PENDENTE", 
+      "description": "Estratégia de testes automatizados específica",
+      "owner": "QA_Engineer",
+      "unblock_next_step": "Consultar docs/TODO.md e definir percentual de cobertura"
+    },
+    {
+      "tag": "DOCS_PENDENTE",
+      "description": "Processo de rollback para falhas no pipeline de análise",
+      "owner": "Database_Admin", 
+      "unblock_next_step": "Documentar procedimento de rollback seguro para migrations"
+    },
+    {
+      "tag": "PERGUNTA_ABERTA",
+      "description": "Timeline para integração com OpenAI real",
+      "owner": "Tech_Lead",
+      "unblock_next_step": "Roadmap definition meeting para substituição do mock"
+    }
+  ]
+}
