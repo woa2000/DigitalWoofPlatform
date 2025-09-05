@@ -16,6 +16,16 @@ import {
 import { AnamnesisAgentService } from './anamnesis-agent.service.js';
 import { DeduplicationService } from './deduplication.service.js';
 import { 
+  ErrorHandler,
+  StatusTracker,
+  ErrorRecovery,
+  AnalysisStatus,
+  ValidationError,
+  TimeoutError,
+  AnalysisError,
+  type ErrorContext
+} from '../utils/error-handler.js';
+import { 
   type AnalysisResult,
   type AnalysisRequest,
   type AnalysisSource
@@ -50,15 +60,20 @@ export class AnamnesisService {
       suggestions?: string[];
     };
     error?: string;
+    code?: string;
+    category?: string;
+    retryable?: boolean;
+    suggestedAction?: string;
   }> {
     try {
       // Validate request data
       const validation = validateAnamnesisRequest(requestData);
       if (!validation.isValid) {
-        return {
-          success: false,
-          error: validation.errors?.join(', ') || 'Invalid request data'
-        };
+        throw new ValidationError(
+          validation.errors?.join(', ') || 'Invalid request data',
+          { errors: validation.errors },
+          requestData.metadata?.requestId
+        );
       }
 
       const validatedData = validation.data!;
@@ -68,10 +83,15 @@ export class AnamnesisService {
       const processedUrls = processUrls(allUrls);
       
       if (processedUrls.invalid.length > 0) {
-        return {
-          success: false,
-          error: `Invalid URLs: ${processedUrls.invalid.map(u => u.error).join(', ')}`
-        };
+        throw new ValidationError(
+          `Invalid URLs detected`,
+          { 
+            invalidUrls: processedUrls.invalid.map(u => ({ url: u.original, error: u.error })),
+            validCount: processedUrls.valid.length,
+            invalidCount: processedUrls.invalid.length
+          },
+          requestData.metadata?.requestId
+        );
       }
 
       // Check for existing analysis using advanced deduplication
@@ -119,7 +139,7 @@ export class AnamnesisService {
         id: analysisId,
         userId,
         primaryUrl: validatedData.primaryUrl,
-        status: 'queued',
+        status: AnalysisStatus.QUEUED,
         scoreCompleteness: 0,
         errorMessage: null,
         createdAt: new Date(),
@@ -174,7 +194,7 @@ export class AnamnesisService {
         success: true,
         data: {
           id: analysisId,
-          status: 'queued',
+          status: AnalysisStatus.QUEUED,
           estimatedCompletion: estimatedCompletion.toISOString(),
           sources
         }
@@ -193,10 +213,22 @@ export class AnamnesisService {
       return response;
 
     } catch (error) {
-      console.error('Error creating analysis:', error);
+      const context: ErrorContext = {
+        userId,
+        operation: 'createAnalysis',
+        requestId: requestData.metadata?.requestId,
+        metadata: { primaryUrl: requestData.primaryUrl }
+      };
+
+      const structuredError = ErrorHandler.handle(error as Error, context);
+      
       return {
         success: false,
-        error: 'Internal server error'
+        error: structuredError.message,
+        code: structuredError.code,
+        category: structuredError.category,
+        retryable: structuredError.retryable,
+        suggestedAction: structuredError.suggestedAction
       };
     }
   }
@@ -374,6 +406,59 @@ export class AnamnesisService {
     return deduplicationService.validateHashIntegrity(url, hash);
   }
 
+  /**
+   * Gets error statistics and metrics
+   */
+  getErrorStatistics(): {
+    errorCounts: Record<string, number>;
+    statusDistribution: Record<string, number>;
+    timeoutRate: number;
+    averageProcessingTime: number;
+  } {
+    const errorCounts = ErrorHandler.getErrorStats();
+    const statusDistribution: Record<string, number> = {};
+    let timeouts = 0;
+    let totalProcessingTime = 0;
+    let completedAnalyses = 0;
+
+    // Calculate statistics from stored analyses
+    const analyses = Array.from(analysisStorage.values());
+    for (const analysis of analyses) {
+      const status = analysis.status;
+      statusDistribution[status] = (statusDistribution[status] || 0) + 1;
+
+      if (status === AnalysisStatus.TIMEOUT) {
+        timeouts++;
+      }
+
+      if (status === AnalysisStatus.DONE) {
+        completedAnalyses++;
+        totalProcessingTime += analysis.updatedAt.getTime() - analysis.createdAt.getTime();
+      }
+    }
+
+    const totalAnalyses = analyses.length;
+    const timeoutRate = totalAnalyses > 0 ? timeouts / totalAnalyses : 0;
+    const averageProcessingTime = completedAnalyses > 0 ? totalProcessingTime / completedAnalyses : 0;
+
+    return {
+      errorCounts,
+      statusDistribution,
+      timeoutRate,
+      averageProcessingTime
+    };
+  }
+
+  /**
+   * Checks if an analysis can be retried based on its current status
+   */
+  canRetryAnalysis(analysisId: string): boolean {
+    const analysis = analysisStorage.get(analysisId);
+    if (!analysis) return false;
+
+    return StatusTracker.isRetryableStatus(analysis.status);
+  }
+
   // Private helper methods
 
   private findAnalysisByUrlHash(userId: string, hash: string): any | null {
@@ -419,14 +504,49 @@ export class AnamnesisService {
   ): Promise<void> {
     // Run analysis in background
     setImmediate(async () => {
+      const context: ErrorContext = {
+        userId,
+        operation: 'backgroundAnalysis',
+        analysisId,
+        requestId: requestData.metadata?.requestId
+      };
+
       try {
-        // Update status to running
+        // Update status to running with validation
         const analysisRecord = analysisStorage.get(analysisId);
-        if (analysisRecord) {
-          analysisRecord.status = 'running';
-          analysisRecord.updatedAt = new Date();
-          analysisStorage.set(analysisId, analysisRecord);
+        if (!analysisRecord) {
+          throw new AnalysisError('Analysis record not found', { analysisId }, context.requestId);
         }
+
+        // Validate status transition
+        if (!StatusTracker.isValidTransition(analysisRecord.status, AnalysisStatus.RUNNING)) {
+          throw new AnalysisError(
+            `Invalid status transition from ${analysisRecord.status} to ${AnalysisStatus.RUNNING}`,
+            { currentStatus: analysisRecord.status, requestedStatus: AnalysisStatus.RUNNING },
+            context.requestId
+          );
+        }
+
+        analysisRecord.status = AnalysisStatus.RUNNING;
+        analysisRecord.updatedAt = new Date();
+        analysisStorage.set(analysisId, analysisRecord);
+
+        // Set timeout handler
+        const timeoutHandler = setTimeout(() => {
+          const record = analysisStorage.get(analysisId);
+          if (record && record.status === AnalysisStatus.RUNNING) {
+            record.status = AnalysisStatus.TIMEOUT;
+            record.errorMessage = 'Analysis timed out after 2 minutes';
+            record.updatedAt = new Date();
+            analysisStorage.set(analysisId, record);
+            
+            console.warn('Analysis timed out:', {
+              analysisId,
+              userId,
+              duration: Date.now() - record.createdAt.getTime()
+            });
+          }
+        }, 2 * 60 * 1000); // 2 minutes
 
         // Prepare analysis request
         const analysisRequest: AnalysisRequest = {
@@ -437,39 +557,84 @@ export class AnamnesisService {
           requestId: analysisId
         };
 
-        // Run analysis
-        const result = await analysisAgent.analyzeDigitalPresence(analysisRequest);
+        // Run analysis with retry logic
+        const result = await ErrorRecovery.withRetry(
+          async () => await analysisAgent.analyzeDigitalPresence(analysisRequest),
+          3,
+          context
+        );
+
+        // Clear timeout since analysis completed
+        clearTimeout(timeoutHandler);
+
+        // Validate the analysis result
+        if (!result || typeof result !== 'object') {
+          throw new AnalysisError('Invalid analysis result format', { result }, context.requestId);
+        }
 
         // Save results
         await this.saveAnalysisResults(analysisId, result);
 
       } catch (error) {
-        console.error('Background analysis failed:', error);
+        const structuredError = ErrorHandler.handle(error as Error, context);
+        
+        console.error('Background analysis failed:', {
+          ...structuredError,
+          analysisId,
+          userId
+        });
         
         const analysisRecord = analysisStorage.get(analysisId);
         if (analysisRecord) {
-          analysisRecord.status = 'error';
-          analysisRecord.errorMessage = error instanceof Error ? error.message : 'Analysis failed';
-          analysisRecord.updatedAt = new Date();
-          analysisStorage.set(analysisId, analysisRecord);
+          // Determine appropriate error status based on error type
+          let errorStatus = AnalysisStatus.ERROR;
+          
+          if (error instanceof TimeoutError) {
+            errorStatus = AnalysisStatus.TIMEOUT;
+          }
+
+          // Validate status transition
+          if (StatusTracker.isValidTransition(analysisRecord.status, errorStatus)) {
+            analysisRecord.status = errorStatus;
+            analysisRecord.errorMessage = structuredError.message;
+            analysisRecord.updatedAt = new Date();
+            analysisStorage.set(analysisId, analysisRecord);
+          }
         }
       }
     });
   }
 
   private async saveAnalysisResults(analysisId: string, result: AnalysisResult): Promise<void> {
-    // Update analysis record
     const analysisRecord = analysisStorage.get(analysisId);
-    if (analysisRecord) {
-      analysisRecord.status = result.status;
-      analysisRecord.scoreCompleteness = result.scoreCompleteness;
-      analysisRecord.errorMessage = result.errorMessage;
-      analysisRecord.updatedAt = new Date();
-      analysisStorage.set(analysisId, analysisRecord);
+    if (!analysisRecord) {
+      throw new AnalysisError('Analysis record not found during save', { analysisId });
     }
+
+    // Validate status transition to done
+    if (!StatusTracker.isValidTransition(analysisRecord.status, AnalysisStatus.DONE)) {
+      throw new AnalysisError(
+        `Cannot mark analysis as done from status ${analysisRecord.status}`,
+        { currentStatus: analysisRecord.status, analysisId }
+      );
+    }
+
+    // Update analysis record
+    analysisRecord.status = AnalysisStatus.DONE;
+    analysisRecord.scoreCompleteness = result.scoreCompleteness;
+    analysisRecord.errorMessage = result.errorMessage;
+    analysisRecord.updatedAt = new Date();
+    analysisStorage.set(analysisId, analysisRecord);
 
     // Save findings
     findingStorage.set(analysisId, result.findings);
+
+    console.info('Analysis completed successfully:', {
+      analysisId,
+      status: AnalysisStatus.DONE,
+      scoreCompleteness: result.scoreCompleteness,
+      duration: Date.now() - analysisRecord.createdAt.getTime()
+    });
   }
 
   private getEmptyFindings() {

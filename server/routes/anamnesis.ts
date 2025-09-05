@@ -299,6 +299,30 @@ router.get('/:id/status',
 );
 
 /**
+ * GET /api/anamnesis/metrics/errors
+ * Gets error statistics and system health metrics
+ */
+router.get('/metrics/errors', 
+  requireUser,
+  async (req: express.Request, res: express.Response) => {
+    try {
+      const errorStats = anamnesisService.getErrorStatistics();
+      
+      res.json({
+        success: true,
+        data: errorStats
+      });
+    } catch (error) {
+      console.error('Error getting error statistics:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Internal server error'
+      });
+    }
+  }
+);
+
+/**
  * GET /api/anamnesis/metrics/deduplication
  * Gets deduplication analytics and metrics
  */
