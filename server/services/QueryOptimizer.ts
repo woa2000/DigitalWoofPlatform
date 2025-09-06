@@ -4,7 +4,7 @@
  * Otimiza queries do banco de dados baseadas em análise de performance
  */
 
-import { getTestDatabase } from '../../tests/helpers/database'; // Usando para simulação
+import { db } from '../db';
 
 interface QueryAnalysis {
   query: string;
@@ -23,8 +23,8 @@ export class QueryOptimizer {
   private db: any;
 
   constructor() {
-    // Em um ambiente real, conectaríamos ao banco de dados principal
-    this.db = getTestDatabase();
+    // Conexão com o banco de dados principal
+    this.db = db;
   }
 
   /**
@@ -36,19 +36,30 @@ export class QueryOptimizer {
     const startTime = performance.now();
     
     // Simula a execução da query com EXPLAIN
-    const plan = this.db.prepare(`EXPLAIN QUERY PLAN ${query}`).all();
-    
-    const endTime = performance.now();
-    const executionTime = endTime - startTime;
-    
-    const recommendations = this.generateRecommendations(plan);
-    
-    return {
-      query,
-      executionTime,
-      plan,
-      recommendations
-    };
+    // Para PostgreSQL, usamos EXPLAIN (ANALYZE, BUFFERS) em vez de EXPLAIN QUERY PLAN
+    try {
+      const plan = await this.db.execute(`EXPLAIN (ANALYZE, BUFFERS) ${query}`);
+      
+      const endTime = performance.now();
+      const executionTime = endTime - startTime;
+      
+      const recommendations = this.generateRecommendations(plan.rows);
+      
+      return {
+        query,
+        executionTime,
+        plan: plan.rows,
+        recommendations
+      };
+    } catch (error) {
+      console.error('Error analyzing query:', error);
+      return {
+        query,
+        executionTime: 0,
+        plan: [],
+        recommendations: ['Query analysis failed. Please check syntax.']
+      };
+    }
   }
 
   /**
@@ -91,23 +102,36 @@ export class QueryOptimizer {
   private generateRecommendations(plan: any[]): string[] {
     const recommendations: string[] = [];
     
+    if (!plan || plan.length === 0) {
+      return ['No plan information available'];
+    }
+    
     plan.forEach(step => {
-      if (step.detail.includes('SCAN TABLE')) {
-        const tableName = step.detail.split(' ')[2];
-        recommendations.push(`Consider adding an index to table '${tableName}' to avoid a full table scan.`);
+      const planText = step['QUERY PLAN'] || step.toString();
+      
+      if (planText.includes('Seq Scan')) {
+        recommendations.push('Query is using sequential scan. Consider adding an index to improve performance.');
       }
       
-      if (step.detail.includes('USING TEMP B-TREE')) {
-        recommendations.push('Query is using a temporary B-TREE for sorting or grouping. Consider adding an index to the relevant columns.');
+      if (planText.includes('Sort')) {
+        recommendations.push('Query requires sorting. Consider adding an index on the ORDER BY columns.');
       }
       
-      if (step.detail.includes('SEARCH TABLE') && step.detail.includes('USING COVERING INDEX')) {
-        // This is good, but we can check for other things
+      if (planText.includes('Hash Join')) {
+        recommendations.push('Query uses hash join. Consider if the join conditions can be optimized.');
+      }
+      
+      if (planText.includes('Nested Loop')) {
+        recommendations.push('Query uses nested loop join. Consider adding indexes to join columns.');
       }
     });
     
-    if (plan.length > 3) {
-      recommendations.push('Query has multiple steps. Consider simplifying JOINs or subqueries.');
+    if (plan.length > 5) {
+      recommendations.push('Query has many execution steps. Consider simplifying JOINs or subqueries.');
+    }
+    
+    if (recommendations.length === 0) {
+      recommendations.push('Query appears to be well optimized.');
     }
     
     return recommendations;
@@ -148,7 +172,17 @@ export class QueryOptimizer {
    * @returns Lista de índices
    */
   async listIndexes(tableName: string): Promise<any[]> {
-    return this.db.prepare(`PRAGMA index_list(${tableName})`).all();
+    try {
+      const result = await this.db.execute(`
+        SELECT indexname, indexdef 
+        FROM pg_indexes 
+        WHERE tablename = $1
+      `, [tableName]);
+      return result.rows;
+    } catch (error) {
+      console.error('Error listing indexes:', error);
+      return [];
+    }
   }
 
   /**
@@ -161,7 +195,7 @@ export class QueryOptimizer {
     const query = `CREATE INDEX IF NOT EXISTS ${indexName} ON ${tableName}(${columnName})`;
     
     try {
-      this.db.exec(query);
+      await this.db.execute(query);
       console.log(`Index '${indexName}' created successfully on '${tableName}'.`);
     } catch (error) {
       console.error(`Failed to create index '${indexName}':`, error);
