@@ -7,6 +7,7 @@ import { useAuth } from "./lib/auth";
 import Dashboard from "@/pages/Dashboard";
 import Login from "@/pages/Login";
 import Onboarding from "@/pages/Onboarding";
+import ManualMarca from "@/pages/ManualMarca";
 import NotFound from "@/pages/not-found";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -34,6 +35,16 @@ function Router() {
       <Route path="/onboarding">
         <ProtectedRoute>
           <Onboarding />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/manual-marca/:brandId/:section?/:subsection?">
+        <ProtectedRoute>
+          <ManualMarca />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/manual-marca/:brandId?">
+        <ProtectedRoute>
+          <ManualMarca />
         </ProtectedRoute>
       </Route>
       <Route path="/">
