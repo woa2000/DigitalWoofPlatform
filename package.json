@@ -12,7 +12,11 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "db:push": "drizzle-kit push",
-    "db:test": "tsx test-db-connection.js"
+    "db:test": "tsx test-db-connection.js",
+    "sync-seasonal": "tsx server/scripts/sync-seasonal-kb.ts",
+    "sync-seasonal:test": "tsx server/scripts/sync-seasonal-kb.ts test",
+    "sync-seasonal:validate": "tsx server/scripts/sync-seasonal-kb.ts validate",
+    "sync-seasonal:all": "tsx server/scripts/sync-seasonal-kb.ts all"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
