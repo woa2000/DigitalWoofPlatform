@@ -1,6 +1,4 @@
 import { 
-  User, 
-  InsertUser,
   BrandVoice,
   InsertBrandVoice,
   Campaign,
@@ -16,9 +14,21 @@ import {
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
+// TODO: User operations will be handled by Supabase Auth
+// These interfaces are temporarily disabled during migration
+interface LegacyUser {
+  id: string;
+  email: string;
+  name: string;
+  businessType: string;
+  businessName: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // Mock data structures for development
 interface MockDatabase {
-  users: Map<string, User>;
+  users: Map<string, LegacyUser>;
   brandVoices: Map<string, BrandVoice>;
   campaigns: Map<string, Campaign>;
   aiContent: Map<string, AIContent>;
@@ -28,10 +38,10 @@ interface MockDatabase {
 }
 
 export interface IStorage {
-  // User operations
-  getUser(id: string): Promise<User | undefined>;
-  getUserByEmail(email: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  // User operations - TODO: Migrate to Supabase Auth
+  getUser(id: string): Promise<LegacyUser | undefined>;
+  getUserByEmail(email: string): Promise<LegacyUser | undefined>;
+  createUser(user: Partial<LegacyUser>): Promise<LegacyUser>;
 
   // Brand Voice operations
   getActiveBrandVoice(userId: string): Promise<BrandVoice | undefined>;
@@ -91,10 +101,9 @@ export class MemStorage implements IStorage {
   private initializeSampleData() {
     // Create a sample user
     const sampleUserId = randomUUID();
-    const sampleUser: User = {
+    const sampleUser: LegacyUser = {
       id: sampleUserId,
       email: "demo@woofmarketing.com",
-      password: "$2b$10$hash", // hashed password
       name: "Dr. Maria Silva",
       businessType: "veterinaria",
       businessName: "Clínica Veterinária Pet Care",
@@ -162,19 +171,22 @@ export class MemStorage implements IStorage {
   }
 
   // User operations
-  async getUser(id: string): Promise<User | undefined> {
+  async getUser(id: string): Promise<LegacyUser | undefined> {
     return this.db.users.get(id);
   }
 
-  async getUserByEmail(email: string): Promise<User | undefined> {
+  async getUserByEmail(email: string): Promise<LegacyUser | undefined> {
     return Array.from(this.db.users.values()).find(user => user.email === email);
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
+  async createUser(insertUser: Partial<LegacyUser>): Promise<LegacyUser> {
     const id = randomUUID();
-    const user: User = {
-      ...insertUser,
+    const user: LegacyUser = {
       id,
+      email: insertUser.email || '',
+      name: insertUser.name || '',
+      businessType: insertUser.businessType || '',
+      businessName: insertUser.businessName || '',
       createdAt: new Date(),
       updatedAt: new Date(),
     };

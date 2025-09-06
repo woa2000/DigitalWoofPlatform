@@ -1,24 +1,25 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, jsonb, integer, decimal, boolean, uuid } from "drizzle-orm/pg-core";
+import { pgTable, pgSchema, text, varchar, timestamp, jsonb, integer, decimal, boolean, uuid } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Users table
-export const users = pgTable("users", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  email: text("email").notNull().unique(),
-  password: text("password").notNull(),
-  name: text("name").notNull(),
-  businessType: text("business_type").notNull(), // veterinaria, petshop, banho_tosa, hotel_pet
-  businessName: text("business_name").notNull(),
-  createdAt: timestamp("created_at").default(sql`now()`).notNull(),
-  updatedAt: timestamp("updated_at").default(sql`now()`).notNull(),
+// Reference to Supabase auth schema
+export const authSchema = pgSchema("auth");
+
+// Reference to Supabase auth.users table
+// This table is managed by Supabase Auth and contains user authentication data
+export const authUsers = authSchema.table("users", {
+  id: uuid("id").primaryKey(),
+  email: text("email"),
+  rawUserMetaData: jsonb("raw_user_meta_data"),
+  createdAt: timestamp("created_at"),
+  updatedAt: timestamp("updated_at"),
 });
 
 // Brand Voice profiles (legacy - deprecated in favor of brandVoiceJsons)
 export const brandVoices = pgTable("brand_voices", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id").references(() => users.id).notNull(),
+  userId: uuid("user_id").references(() => authUsers.id).notNull(),
   name: text("name").notNull(),
   tone: text("tone").notNull(), // profissional-amigavel, empatico, tecnico
   persona: jsonb("persona").notNull(), // Target audience characteristics
@@ -32,7 +33,7 @@ export const brandVoices = pgTable("brand_voices", {
 // Brand Voice JSON Schema v1.0 - Complete brand voice profiles
 export const brandVoiceJsons = pgTable("brand_voice_jsons", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id").references(() => users.id).notNull(),
+  userId: uuid("user_id").references(() => authUsers.id).notNull(),
   
   // Core Schema Data (JSONB for full search and indexing)
   brandVoiceJson: jsonb("brand_voice_json").notNull(), // Complete Brand Voice JSON Schema v1.0
@@ -72,7 +73,7 @@ export const brandVoiceJsons = pgTable("brand_voice_jsons", {
 // Campaigns
 export const campaigns = pgTable("campaigns", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id").references(() => users.id).notNull(),
+  userId: uuid("user_id").references(() => authUsers.id).notNull(),
   name: text("name").notNull(),
   type: text("type").notNull(), // checkup_preventivo, programa_vip, etc
   status: text("status").notNull(), // ativa, em_teste, pausada, finalizada
@@ -86,7 +87,7 @@ export const campaigns = pgTable("campaigns", {
 // AI Generated Content
 export const aiContent = pgTable("ai_content", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id").references(() => users.id).notNull(),
+  userId: uuid("user_id").references(() => authUsers.id).notNull(),
   campaignId: uuid("campaign_id").references(() => campaigns.id),
   type: text("type").notNull(), // post_instagram, email, whatsapp_template
   content: text("content").notNull(),
@@ -116,7 +117,7 @@ export const complianceChecks = pgTable("compliance_checks", {
 // Brand assets
 export const brandAssets = pgTable("brand_assets", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id").references(() => users.id).notNull(),
+  userId: uuid("user_id").references(() => authUsers.id).notNull(),
   type: text("type").notNull(), // logo, color_palette, typography
   name: text("name").notNull(),
   fileName: text("file_name").notNull(),
@@ -128,7 +129,7 @@ export const brandAssets = pgTable("brand_assets", {
 // Brand onboarding - Wizard de configuração da marca
 export const brandOnboarding = pgTable("brand_onboarding", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id").references(() => users.id).notNull().unique(), // Único por usuário
+  userId: uuid("user_id").references(() => authUsers.id).notNull().unique(), // Único por usuário
   
   // Logo e Visual
   logoUrl: text("logo_url"),
@@ -179,7 +180,7 @@ export const brandOnboarding = pgTable("brand_onboarding", {
 // Business anamnesis
 export const businessAnamnesis = pgTable("business_anamnesis", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id").references(() => users.id).notNull(),
+  userId: uuid("user_id").references(() => authUsers.id).notNull(),
   responses: jsonb("responses").notNull(), // Anamnesis questions and answers
   analysis: jsonb("analysis"), // AI analysis results
   recommendations: jsonb("recommendations"), // Marketing recommendations
@@ -190,7 +191,7 @@ export const businessAnamnesis = pgTable("business_anamnesis", {
 // Anamnesis Analysis - Digital presence analysis
 export const anamnesisAnalysis = pgTable("anamnesis_analysis", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id").references(() => users.id).notNull(),
+  userId: uuid("user_id").references(() => authUsers.id).notNull(),
   primaryUrl: text("primary_url").notNull(),
   status: text("status").notNull().$type<'queued' | 'running' | 'done' | 'error'>(),
   scoreCompleteness: decimal("score_completeness", { precision: 5, scale: 2 }),
@@ -221,12 +222,6 @@ export const anamnesisFinding = pgTable("anamnesis_finding", {
 });
 
 // Create insert schemas
-export const insertUserSchema = createInsertSchema(users).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
 export const insertBrandVoiceJsonSchema = createInsertSchema(brandVoiceJsons).omit({
   id: true,
   createdAt: true,
@@ -291,9 +286,15 @@ export const insertAnamnesisFindingSchema = createInsertSchema(anamnesisFinding)
   id: true,
 });
 
+// User metadata type for raw_user_meta_data in auth.users
+export type UserMetadata = {
+  name?: string;
+  business_type?: 'veterinaria' | 'petshop' | 'banho_tosa' | 'hotel_pet';
+  business_name?: string;
+};
+
 // Infer types
-export type User = typeof users.$inferSelect;
-export type InsertUser = z.infer<typeof insertUserSchema>;
+export type AuthUser = typeof authUsers.$inferSelect;
 export type BrandVoice = typeof brandVoices.$inferSelect;
 export type InsertBrandVoice = z.infer<typeof insertBrandVoiceSchema>;
 export type BrandVoiceJson = typeof brandVoiceJsons.$inferSelect;
