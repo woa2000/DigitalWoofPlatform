@@ -1,0 +1,410 @@
+{
+  "complete_veterinaria": {
+    "version": "1.0",
+    "brand": {
+      "name": "Clínica Veterinária Pet Care",
+      "segment": "veterinaria",
+      "businessType": "clinica",
+      "mission": "Cuidar da saúde e bem-estar dos pets com excelência e carinho",
+      "values": [
+        { "name": "Cuidado", "weight": 0.9, "description": "Dedicação total ao bem-estar animal" },
+        { "name": "Confiança", "weight": 0.8, "description": "Transparência e honestidade sempre" },
+        { "name": "Excelência", "weight": 0.7, "description": "Qualidade superior em todos os serviços" }
+      ],
+      "targetAudience": {
+        "primary": "Proprietários de pets urbanos, classe média",
+        "secondary": "Famílias com animais idosos",
+        "demographics": ["25-45 anos", "renda média-alta", "residentes urbanos"]
+      }
+    },
+    "voice": {
+      "tone": {
+        "confiança": 0.9,
+        "acolhimento": 0.8,
+        "humor": 0.3,
+        "especialização": 0.9,
+        "urgência": 0.4,
+        "formalidade": 0.6
+      },
+      "style": {
+        "sentence_length": "medium",
+        "paragraph_style": "scannable",
+        "use_questions": true,
+        "use_exclamations": false,
+        "use_emojis": "minimal",
+        "cta_style": {
+          "preferred": ["agende", "consulte", "cuide"],
+          "urgency_level": "medium",
+          "personalization": "personalized"
+        },
+        "formatting": {
+          "use_lists": true,
+          "use_bold": "moderate",
+          "use_italics": false,
+          "use_quotes": false
+        }
+      },
+      "persona": {
+        "description": "Veterinário experiente e acolhedor",
+        "characteristics": ["confiável", "especializado", "cuidadoso"],
+        "communication_style": "professional"
+      },
+      "lexicon": {
+        "preferred_terms": ["pet", "companheiro", "cuidado", "saúde"],
+        "avoid_terms": ["animal", "bicho"],
+        "technical_level": "balanced",
+        "jargon_usage": "minimal"
+      }
+    },
+    "visual": {
+      "colors": {
+        "primary": "#2E8B57",
+        "secondary": "#F0F8F0",
+        "accent": "#FFD700"
+      },
+      "fonts": {
+        "primary": "Open Sans",
+        "secondary": "Roboto"
+      },
+      "imagery_style": "warm_professional",
+      "logo_usage": "consistent"
+    },
+    "compliance": {
+      "regulatory": {
+        "medical_claims": "moderate",
+        "veterinary_advice": "required_disclaimer",
+        "medication_mentions": "with_disclaimer"
+      },
+      "content_policies": {
+        "claims_policy": "Evidence-based claims only",
+        "disclaimer_required": true,
+        "default_disclaimer": "Consulte sempre um veterinário",
+        "review_triggers": ["medicamento", "tratamento", "diagnóstico"]
+      },
+      "legal": {
+        "lgpd_compliance": true,
+        "copyright_policy": "original_content_only",
+        "user_generated_content": "moderated"
+      }
+    },
+    "channels": {
+      "website": {
+        "tone_adaptation": 0.1,
+        "content_length": "detailed",
+        "cta_frequency": "moderate"
+      },
+      "social_media": {
+        "tone_adaptation": 0.3,
+        "content_length": "short",
+        "cta_frequency": "high"
+      },
+      "email": {
+        "tone_adaptation": 0.2,
+        "content_length": "medium",
+        "cta_frequency": "moderate"
+      }
+    },
+    "metadata": {
+      "created_at": "2025-09-05T10:00:00Z",
+      "updated_at": "2025-09-05T10:00:00Z",
+      "version_history": [],
+      "source": {
+        "anamnesis_analysis_id": "anm_123",
+        "onboarding_session_id": "onb_456",
+        "manual_override": false
+      },
+      "quality_metrics": {
+        "completeness_score": 0.95,
+        "consistency_score": 0.90,
+        "specificity_score": 0.85,
+        "usability_score": 0.92,
+        "last_validated": "2025-09-05T10:00:00Z"
+      }
+    }
+  },
+  "incomplete_petshop": {
+    "version": "1.0",
+    "brand": {
+      "name": "Pet Shop Amigo",
+      "segment": "petshop",
+      "businessType": "comercio",
+      "values": [
+        { "name": "Qualidade", "weight": 0.8 }
+      ],
+      "targetAudience": {
+        "primary": "Donos de pets"
+      }
+    },
+    "voice": {
+      "tone": {
+        "confiança": 0.7,
+        "acolhimento": 0.6,
+        "humor": 0.5
+      },
+      "style": {
+        "sentence_length": "short",
+        "paragraph_style": "short",
+        "use_questions": false,
+        "use_exclamations": true,
+        "use_emojis": "frequent",
+        "cta_style": {
+          "preferred": ["compre", "visite"],
+          "urgency_level": "high",
+          "personalization": "generic"
+        },
+        "formatting": {
+          "use_lists": false,
+          "use_bold": "frequent",
+          "use_italics": true,
+          "use_quotes": true
+        }
+      },
+      "persona": {
+        "description": "Vendedor animado",
+        "characteristics": ["entusiasta"],
+        "communication_style": "friendly"
+      },
+      "lexicon": {
+        "preferred_terms": ["pet", "amigo"],
+        "avoid_terms": [],
+        "technical_level": "simple",
+        "jargon_usage": "none"
+      }
+    },
+    "visual": {
+      "colors": {
+        "primary": "#FF6B6B"
+      },
+      "fonts": {
+        "primary": "Arial"
+      },
+      "imagery_style": "playful",
+      "logo_usage": "flexible"
+    },
+    "compliance": {
+      "regulatory": {
+        "medical_claims": "flexible",
+        "veterinary_advice": "none",
+        "medication_mentions": "allowed"
+      },
+      "content_policies": {
+        "claims_policy": "Standard commercial claims",
+        "disclaimer_required": false,
+        "default_disclaimer": "",
+        "review_triggers": []
+      },
+      "legal": {
+        "lgpd_compliance": true,
+        "copyright_policy": "standard",
+        "user_generated_content": "allowed"
+      }
+    },
+    "channels": {
+      "social_media": {
+        "tone_adaptation": 0.4,
+        "content_length": "short",
+        "cta_frequency": "high"
+      }
+    },
+    "metadata": {
+      "created_at": "2025-09-05T11:00:00Z",
+      "updated_at": "2025-09-05T11:00:00Z",
+      "version_history": [],
+      "source": {
+        "manual_override": true
+      },
+      "quality_metrics": {
+        "completeness_score": 0.60,
+        "consistency_score": 0.70,
+        "specificity_score": 0.55,
+        "usability_score": 0.65,
+        "last_validated": "2025-09-05T11:00:00Z"
+      }
+    }
+  },
+  "invalid_brand_voice": {
+    "version": "1.0",
+    "brand": {
+      "name": "",
+      "segment": "invalid_segment",
+      "businessType": "invalid_type"
+    },
+    "voice": {
+      "tone": {},
+      "style": {
+        "sentence_length": "invalid_length",
+        "paragraph_style": "invalid_style",
+        "use_questions": "not_boolean",
+        "use_exclamations": "not_boolean",
+        "use_emojis": "invalid_frequency",
+        "cta_style": {
+          "preferred": "not_array",
+          "urgency_level": "invalid_level",
+          "personalization": "invalid_personalization"
+        },
+        "formatting": {
+          "use_lists": "not_boolean",
+          "use_bold": "invalid_frequency",
+          "use_italics": "not_boolean",
+          "use_quotes": "not_boolean"
+        }
+      },
+      "persona": {
+        "description": "",
+        "characteristics": "not_array",
+        "communication_style": "invalid_style"
+      },
+      "lexicon": {
+        "preferred_terms": "not_array",
+        "avoid_terms": "not_array",
+        "technical_level": "invalid_level",
+        "jargon_usage": "invalid_usage"
+      }
+    }
+  },
+  "migration_test_v1_0": {
+    "version": "1.0",
+    "brand": {
+      "name": "Test Brand v1.0",
+      "segment": "veterinaria",
+      "businessType": "clinica",
+      "values": [
+        { "name": "Test Value", "weight": 0.8 }
+      ],
+      "targetAudience": {
+        "primary": "Test audience"
+      }
+    },
+    "voice": {
+      "tone": {
+        "confiança": 0.8
+      },
+      "style": {
+        "sentence_length": "medium",
+        "paragraph_style": "short",
+        "use_questions": true,
+        "use_exclamations": false,
+        "use_emojis": "none",
+        "cta_style": {
+          "preferred": ["test"],
+          "urgency_level": "low",
+          "personalization": "generic"
+        },
+        "formatting": {
+          "use_lists": true,
+          "use_bold": "minimal",
+          "use_italics": false,
+          "use_quotes": false
+        }
+      },
+      "persona": {
+        "description": "Test persona",
+        "characteristics": ["test"],
+        "communication_style": "professional"
+      },
+      "lexicon": {
+        "preferred_terms": ["test"],
+        "avoid_terms": [],
+        "technical_level": "simple",
+        "jargon_usage": "none"
+      }
+    },
+    "visual": {
+      "colors": {
+        "primary": "#000000"
+      },
+      "fonts": {
+        "primary": "Arial"
+      },
+      "imagery_style": "professional",
+      "logo_usage": "consistent"
+    },
+    "compliance": {
+      "regulatory": {
+        "medical_claims": "moderate",
+        "veterinary_advice": "none",
+        "medication_mentions": "allowed"
+      },
+      "content_policies": {
+        "claims_policy": "Test policy",
+        "disclaimer_required": false,
+        "default_disclaimer": "",
+        "review_triggers": []
+      },
+      "legal": {
+        "lgpd_compliance": true,
+        "copyright_policy": "standard",
+        "user_generated_content": "allowed"
+      }
+    },
+    "channels": {
+      "website": {
+        "tone_adaptation": 0.1,
+        "content_length": "medium",
+        "cta_frequency": "low"
+      }
+    },
+    "metadata": {
+      "created_at": "2025-09-05T09:00:00Z",
+      "updated_at": "2025-09-05T09:00:00Z",
+      "version_history": [],
+      "source": {
+        "manual_override": false
+      },
+      "quality_metrics": {
+        "completeness_score": 0.75,
+        "consistency_score": 0.80,
+        "specificity_score": 0.70,
+        "usability_score": 0.75,
+        "last_validated": "2025-09-05T09:00:00Z"
+      }
+    }
+  },
+  "prompt_contexts": {
+    "social_media_basic": {
+      "contentType": "social-media-post",
+      "platform": "Instagram",
+      "targetAudience": "pet owners",
+      "contentGoal": "promote services",
+      "contentLength": "short"
+    },
+    "email_campaign_advanced": {
+      "contentType": "email-campaign",
+      "targetAudience": "existing clients",
+      "contentGoal": "vaccination reminder",
+      "contentLength": "medium",
+      "callToAction": "schedule appointment",
+      "keywords": ["vaccination", "health", "prevention"],
+      "constraints": ["friendly tone", "not pushy"]
+    },
+    "blog_article_complex": {
+      "contentType": "blog-article",
+      "targetAudience": "pet enthusiasts",
+      "contentGoal": "educate about nutrition",
+      "contentLength": "long",
+      "keywords": ["nutrition", "diet", "health", "feeding"],
+      "callToAction": "schedule consultation",
+      "constraints": ["evidence-based", "accessible language"]
+    }
+  },
+  "quality_test_cases": {
+    "high_quality": {
+      "completeness_score": 0.95,
+      "consistency_score": 0.90,
+      "specificity_score": 0.85,
+      "usability_score": 0.92
+    },
+    "medium_quality": {
+      "completeness_score": 0.75,
+      "consistency_score": 0.70,
+      "specificity_score": 0.65,
+      "usability_score": 0.72
+    },
+    "low_quality": {
+      "completeness_score": 0.45,
+      "consistency_score": 0.40,
+      "specificity_score": 0.35,
+      "usability_score": 0.42
+    }
+  }
+}
