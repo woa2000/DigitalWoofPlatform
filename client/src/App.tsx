@@ -9,6 +9,7 @@ import Login from "@/pages/Login";
 import Onboarding from "@/pages/Onboarding";
 import ManualMarca from "@/pages/ManualMarca";
 import { ContentGenerationPage } from "@/pages/ContentGeneration";
+import { PerformanceDashboard } from "@/components/performance/PerformanceDashboard";
 import NotFound from "@/pages/not-found";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 
@@ -66,6 +67,16 @@ function Router() {
             subtitle="Crie conteúdo personalizado com inteligência artificial"
           >
             <ContentGenerationPage />
+          </DashboardLayout>
+        </ProtectedRoute>
+      </Route>
+      <Route path="/performance">
+        <ProtectedRoute>
+          <DashboardLayout 
+            title="Performance Dashboard" 
+            subtitle="Monitore métricas e performance do sistema"
+          >
+            <PerformanceDashboard />
           </DashboardLayout>
         </ProtectedRoute>
       </Route>

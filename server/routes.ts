@@ -10,6 +10,7 @@ import anamnesisRoutes from "./routes/anamnesis";
 import onboardingRoutes from "./routes/onboarding";
 import storageRoutes from "./routes/storage";
 import contentRoutes from "./routes/content";
+import performanceRoutes from "./routes/performance";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Add logging middleware first
@@ -24,6 +25,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/onboarding", onboardingRoutes);
   app.use("/api/storage", storageRoutes);
   app.use("/api/content", contentRoutes);
+  app.use("/api/performance", performanceRoutes);
 
   const httpServer = createServer(app);
   return httpServer;

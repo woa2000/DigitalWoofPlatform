@@ -3,6 +3,7 @@ import { BrandVoice } from '../../shared/schemas/brand-voice';
 import { PetContentPrompts, PromptContext } from './petContentPrompts';
 import { ComplianceChecker } from './complianceChecker';
 import { withOpenAILimit } from './openai';
+import { performanceMonitor } from './performance-monitor.service';
 import Bottleneck from 'bottleneck';
 
 export interface ContentBrief {
@@ -84,15 +85,22 @@ export class ContentGenerationService {
     brandVoice: BrandVoice,
     options: ContentGenerationOptions = {}
   ): Promise<GeneratedContent[]> {
-    const {
-      generateVariations = 3,
-      includeEngagementPrediction = true,
-      skipComplianceCheck = false,
-      temperature = 0.7,
-      maxTokens = 1000
-    } = options;
+    const timer = performanceMonitor.startTimer('content_generation', {
+      channel: brief.channel,
+      objective: brief.objective,
+      variations: options.generateVariations || 3,
+      userId: brief.userId
+    });
 
     try {
+      const {
+        generateVariations = 3,
+        includeEngagementPrediction = true,
+        skipComplianceCheck = false,
+        temperature = 0.7,
+        maxTokens = 1000
+      } = options;
+
       // Build prompt context
       const promptContext: PromptContext = {
         theme: brief.theme,
@@ -204,13 +212,16 @@ export class ContentGenerationService {
       }
 
       if (generatedContents.length === 0) {
+        timer.end(false, 'No valid content variations were generated');
         throw new Error('No valid content variations were generated');
       }
 
+      timer.end(true);
       return generatedContents;
 
     } catch (error) {
       console.error('Content generation failed:', error);
+      timer.end(false, error instanceof Error ? error.message : 'Unknown error');
       throw new Error(`Content generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }

@@ -4,10 +4,14 @@ dotenv.config();
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { performanceMiddleware } from "./services/performance-monitor.service";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Add performance monitoring middleware
+app.use(performanceMiddleware);
 
 app.use((req, res, next) => {
   const start = Date.now();
