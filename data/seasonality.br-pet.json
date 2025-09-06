@@ -1,0 +1,389 @@
+{
+  "version": "v0.1",
+  "region": "BR",
+  "description": "Base de conhecimento sazonal para o setor pet brasileiro",
+  "last_updated": "2025-09-06",
+  "items": [
+    {
+      "id": "br-newyear",
+      "name": "Ano Novo",
+      "month": 1,
+      "date": 1,
+      "movable": false,
+      "regions": ["BR"],
+      "event_type": "holiday",
+      "business_types": ["veterinaria", "petshop", "estetica", "hotel", "adestramento"],
+      "tags": ["awareness", "familia", "verao", "feriado"],
+      "copy_guidelines": [
+        "Rotina de férias com pets: hidratação, sombra, enriquecimento ambiental.",
+        "Cuidados especiais no calor: água fresca sempre disponível.",
+        "Fogos de artifício: como acalmar pets sensíveis a ruídos."
+      ],
+      "compliance_flags": ["no-medical-claims"],
+      "content_themes": ["hidratacao", "protecao_solar", "enriquecimento_ambiental"],
+      "recommended_frequency": 2,
+      "priority_score": 8
+    },
+    {
+      "id": "br-summer-heat",
+      "name": "Pico do Verão",
+      "month": 1,
+      "date": 15,
+      "movable": false,
+      "regions": ["SE", "CO", "NE"],
+      "event_type": "weather",
+      "business_types": ["veterinaria", "petshop", "estetica"],
+      "tags": ["saude", "prevencao", "verao"],
+      "copy_guidelines": [
+        "Sinais de superaquecimento em pets: ofegação excessiva, letargia.",
+        "Horários ideais para passeios: antes das 9h e após as 17h.",
+        "Tosquia adequada: consulte sempre um profissional."
+      ],
+      "compliance_flags": ["no-medical-claims", "professional-advice"],
+      "content_themes": ["tosquia", "hidratacao", "exercicios_moderados"],
+      "recommended_frequency": 3,
+      "priority_score": 9
+    },
+    {
+      "id": "br-carnival",
+      "name": "Carnaval",
+      "month": 2,
+      "date": null,
+      "movable": true,
+      "calculation": "easter - 47 days",
+      "regions": ["BR"],
+      "event_type": "holiday",
+      "business_types": ["hotel", "petshop", "adestramento"],
+      "tags": ["viagem", "hospedagem", "rotina"],
+      "copy_guidelines": [
+        "Planejamento antecipado para hospedagem durante o Carnaval.",
+        "Rotina reduzida: como manter pets tranquilos durante feriados.",
+        "Ruídos e multidões: preparação comportamental."
+      ],
+      "compliance_flags": ["no-medical-claims"],
+      "content_themes": ["hospedagem", "adestramento", "rotina_alterada"],
+      "recommended_frequency": 2,
+      "priority_score": 7
+    },
+    {
+      "id": "br-easter",
+      "name": "Páscoa",
+      "month": 4,
+      "date": null,
+      "movable": true,
+      "calculation": "easter",
+      "regions": ["BR"],
+      "event_type": "holiday",
+      "business_types": ["veterinaria", "petshop"],
+      "tags": ["seguranca", "alimentacao", "awareness"],
+      "copy_guidelines": [
+        "Chocolate é tóxico para pets: alternativas seguras de petiscos.",
+        "Decorações da Páscoa: cuidado com objetos pequenos que podem ser engolidos.",
+        "Ovos de Páscoa pet-friendly: receitas caseiras aprovadas."
+      ],
+      "compliance_flags": ["safety-first", "no-medical-claims"],
+      "content_themes": ["toxicidade_chocolate", "petiscos_seguros", "prevencao_acidentes"],
+      "recommended_frequency": 2,
+      "priority_score": 9
+    },
+    {
+      "id": "br-mothers-day",
+      "name": "Dia das Mães",
+      "month": 5,
+      "date": null,
+      "movable": true,
+      "calculation": "second sunday of may",
+      "regions": ["BR"],
+      "event_type": "holiday",
+      "business_types": ["petshop", "estetica", "veterinaria"],
+      "tags": ["familia", "amor", "presente"],
+      "copy_guidelines": [
+        "Família multiespécie: a importância dos pets na vida das mães.",
+        "Presentes especiais: sessão de spa para pets.",
+        "Registro de momentos: fotografia profissional com pets."
+      ],
+      "compliance_flags": ["no-medical-claims"],
+      "content_themes": ["familia_pets", "spa_pets", "presentes"],
+      "recommended_frequency": 3,
+      "priority_score": 7
+    },
+    {
+      "id": "br-festa-junina",
+      "name": "Festa Junina",
+      "month": 6,
+      "date": 24,
+      "movable": false,
+      "regions": ["BR"],
+      "event_type": "holiday",
+      "business_types": ["petshop", "estetica", "veterinaria"],
+      "tags": ["cultura", "fantasia", "inverno"],
+      "copy_guidelines": [
+        "Fantasias seguras para pets: materiais atóxicos e confortáveis.",
+        "Fogueiras e fogos: mantenha pets em ambiente seguro.",
+        "Comidas típicas: quais são seguras para compartilhar com pets."
+      ],
+      "compliance_flags": ["safety-first", "no-medical-claims"],
+      "content_themes": ["fantasias_pets", "seguranca_fogos", "alimentacao_festa"],
+      "recommended_frequency": 2,
+      "priority_score": 6
+    },
+    {
+      "id": "br-winter-southeast",
+      "name": "Inverno Sudeste/Sul",
+      "month": 6,
+      "date": 21,
+      "movable": false,
+      "regions": ["SE", "S"],
+      "event_type": "weather",
+      "business_types": ["petshop", "estetica", "veterinaria"],
+      "tags": ["frio", "cuidados", "inverno"],
+      "copy_guidelines": [
+        "Roupinhas adequadas: quando e como usar em pets.",
+        "Camas elevadas: proteção contra o frio do chão.",
+        "Hidratação no inverno: pets bebem menos água, mas precisam de estímulo."
+      ],
+      "compliance_flags": ["no-medical-claims"],
+      "content_themes": ["roupas_pets", "aquecimento", "hidratacao_inverno"],
+      "recommended_frequency": 2,
+      "priority_score": 7
+    },
+    {
+      "id": "br-school-vacation",
+      "name": "Férias Escolares Julho",
+      "month": 7,
+      "date": 1,
+      "movable": false,
+      "regions": ["BR"],
+      "event_type": "business_cycle",
+      "business_types": ["hotel", "petshop", "adestramento"],
+      "tags": ["viagem", "familia", "ferias"],
+      "copy_guidelines": [
+        "Roteiros pet-friendly para as férias escolares.",
+        "Hospedagem pet: checklist de escolha responsável.",
+        "Atividades em família: envolvendo pets nas férias."
+      ],
+      "compliance_flags": ["no-medical-claims"],
+      "content_themes": ["viagem_pets", "hospedagem", "atividades_familia"],
+      "recommended_frequency": 3,
+      "priority_score": 8
+    },
+    {
+      "id": "br-fathers-day",
+      "name": "Dia dos Pais",
+      "month": 8,
+      "date": null,
+      "movable": true,
+      "calculation": "second sunday of august",
+      "regions": ["BR"],
+      "event_type": "holiday",
+      "business_types": ["petshop", "estetica", "adestramento"],
+      "tags": ["familia", "pai", "presente"],
+      "copy_guidelines": [
+        "Papais de pet: celebrando a paternidade multiespécie.",
+        "Presentes especiais: acessórios e brinquedos para pets.",
+        "Atividades pai e pet: fortalecendo vínculos."
+      ],
+      "compliance_flags": ["no-medical-claims"],
+      "content_themes": ["paternidade_pets", "presentes", "vinculo"],
+      "recommended_frequency": 2,
+      "priority_score": 7
+    },
+    {
+      "id": "br-back-to-routine",
+      "name": "Volta à Rotina",
+      "month": 8,
+      "date": 15,
+      "movable": false,
+      "regions": ["BR"],
+      "event_type": "business_cycle",
+      "business_types": ["adestramento", "veterinaria", "petshop"],
+      "tags": ["rotina", "adaptacao", "volta_aulas"],
+      "copy_guidelines": [
+        "Readaptação de pets à rotina escolar das crianças.",
+        "Ansiedade de separação: como identificar e ajudar.",
+        "Novo cronograma: ajustando horários de alimentação e passeios."
+      ],
+      "compliance_flags": ["behavioral-guidance", "no-medical-claims"],
+      "content_themes": ["ansiedade_separacao", "rotina_adaptacao", "horarios"],
+      "recommended_frequency": 2,
+      "priority_score": 8
+    },
+    {
+      "id": "br-veterinarian-day",
+      "name": "Dia do Veterinário",
+      "month": 9,
+      "date": 9,
+      "movable": false,
+      "regions": ["BR"],
+      "event_type": "industry_event",
+      "business_types": ["veterinaria"],
+      "tags": ["profissional", "medicina_veterinaria", "awareness"],
+      "copy_guidelines": [
+        "Valorização do profissional veterinário na saúde animal.",
+        "Importância das consultas regulares de prevenção.",
+        "Escolha responsável: como encontrar um bom veterinário."
+      ],
+      "compliance_flags": ["professional-appreciation", "no-medical-claims"],
+      "content_themes": ["profissao_veterinaria", "prevencao", "escolha_profissional"],
+      "recommended_frequency": 2,
+      "priority_score": 9
+    },
+    {
+      "id": "br-spring",
+      "name": "Início da Primavera",
+      "month": 9,
+      "date": 23,
+      "movable": false,
+      "regions": ["BR"],
+      "event_type": "weather",
+      "business_types": ["veterinaria", "petshop", "estetica"],
+      "tags": ["primavera", "alergia", "plantas"],
+      "copy_guidelines": [
+        "Primavera e alergias: sintomas a observar em pets.",
+        "Jardinagem segura: plantas tóxicas a evitar.",
+        "Renovação do pelo: escovação regular na troca de estação."
+      ],
+      "compliance_flags": ["observation-tips", "no-medical-claims"],
+      "content_themes": ["alergia_sazonal", "plantas_toxicas", "cuidados_pelo"],
+      "recommended_frequency": 2,
+      "priority_score": 7
+    },
+    {
+      "id": "br-world-animal-day",
+      "name": "Dia Mundial dos Animais",
+      "month": 10,
+      "date": 4,
+      "movable": false,
+      "regions": ["BR"],
+      "event_type": "industry_event",
+      "business_types": ["veterinaria", "petshop", "estetica", "hotel", "adestramento"],
+      "tags": ["direitos_animais", "awareness", "bem_estar"],
+      "copy_guidelines": [
+        "Bem-estar animal: princípios fundamentais.",
+        "Adoção responsável: compromisso para toda vida.",
+        "Cinco liberdades dos animais: conceitos básicos."
+      ],
+      "compliance_flags": ["education-focus", "no-medical-claims"],
+      "content_themes": ["bem_estar_animal", "adocao_responsavel", "direitos"],
+      "recommended_frequency": 3,
+      "priority_score": 9
+    },
+    {
+      "id": "br-outubro-rosa-pet",
+      "name": "Outubro Rosa Pet",
+      "month": 10,
+      "date": 15,
+      "movable": false,
+      "regions": ["BR"],
+      "event_type": "pet_health",
+      "business_types": ["veterinaria"],
+      "tags": ["prevencao", "saude", "conscientizacao"],
+      "copy_guidelines": [
+        "Prevenção em saúde animal: importância de check-ups regulares.",
+        "Sinais de alerta: quando procurar orientação veterinária.",
+        "Cuidado preventivo: melhor que tratamento curativo."
+      ],
+      "compliance_flags": ["prevention-focus", "professional-guidance", "no-medical-claims"],
+      "content_themes": ["check_ups", "prevencao", "sinais_alerta"],
+      "recommended_frequency": 2,
+      "priority_score": 8
+    },
+    {
+      "id": "br-novembro-azul-pet",
+      "name": "Novembro Azul Pet",
+      "month": 11,
+      "date": 15,
+      "movable": false,
+      "regions": ["BR"],
+      "event_type": "pet_health",
+      "business_types": ["veterinaria"],
+      "tags": ["prevencao", "saude_masculina", "conscientizacao"],
+      "copy_guidelines": [
+        "Cuidados específicos com pets machos: prevenção responsável.",
+        "Castração: benefícios para a saúde com orientação veterinária.",
+        "Envelhecimento saudável: cuidados especiais para pets idosos."
+      ],
+      "compliance_flags": ["prevention-focus", "professional-guidance", "no-medical-claims"],
+      "content_themes": ["castracao", "pets_idosos", "prevencao_machos"],
+      "recommended_frequency": 2,
+      "priority_score": 8
+    },
+    {
+      "id": "br-black-friday",
+      "name": "Black Friday",
+      "month": 11,
+      "date": null,
+      "movable": true,
+      "calculation": "fourth friday of november",
+      "regions": ["BR"],
+      "event_type": "business_cycle",
+      "business_types": ["petshop", "estetica", "veterinaria"],
+      "tags": ["promocao", "ofertas", "produtos"],
+      "copy_guidelines": [
+        "Ofertas especiais em produtos e serviços para pets.",
+        "Kits de cuidados: pacotes promocionais com desconto.",
+        "Preparação para o verão: produtos de proteção solar."
+      ],
+      "compliance_flags": ["promotional-content", "no-medical-claims"],
+      "content_themes": ["promocoes", "kits_cuidados", "preparacao_verao"],
+      "recommended_frequency": 3,
+      "priority_score": 6
+    },
+    {
+      "id": "br-christmas",
+      "name": "Natal",
+      "month": 12,
+      "date": 25,
+      "movable": false,
+      "regions": ["BR"],
+      "event_type": "holiday",
+      "business_types": ["petshop", "estetica", "veterinaria", "hotel"],
+      "tags": ["natal", "familia", "seguranca"],
+      "copy_guidelines": [
+        "Natal seguro para pets: decorações e plantas natalinas tóxicas.",
+        "Adaptação a visitas: como preparar pets para as festividades.",
+        "Presentes seguros: brinquedos e acessórios apropriados."
+      ],
+      "compliance_flags": ["safety-first", "no-medical-claims"],
+      "content_themes": ["seguranca_natal", "adaptacao_visitas", "presentes_pets"],
+      "recommended_frequency": 3,
+      "priority_score": 8
+    },
+    {
+      "id": "br-new-year-eve",
+      "name": "Réveillon",
+      "month": 12,
+      "date": 31,
+      "movable": false,
+      "regions": ["BR"],
+      "event_type": "holiday",
+      "business_types": ["veterinaria", "petshop", "hotel"],
+      "tags": ["fogos", "estresse", "seguranca"],
+      "copy_guidelines": [
+        "Fogos de artifício: como proteger pets sensíveis a ruídos.",
+        "Ambiente seguro: criando refúgio durante festividades.",
+        "Técnicas de acalmamento: música e aromatherapia pet-friendly."
+      ],
+      "compliance_flags": ["behavioral-guidance", "no-medical-claims"],
+      "content_themes": ["fogos_artificio", "acalmamento", "refugio_seguro"],
+      "recommended_frequency": 2,
+      "priority_score": 9
+    }
+  ],
+  "compliance_guidelines": {
+    "no-medical-claims": "Evitar promessas de cura ou tratamento médico",
+    "professional-guidance": "Sempre orientar busca por profissional qualificado",
+    "safety-first": "Priorizar segurança animal em todas as recomendações",
+    "prevention-focus": "Focar em prevenção, não diagnóstico ou tratamento",
+    "behavioral-guidance": "Oferecer orientações comportamentais básicas e seguras",
+    "education-focus": "Conteúdo educativo sem prescrições médicas",
+    "promotional-content": "Conteúdo promocional ético e responsável"
+  },
+  "regional_notes": {
+    "N": "Norte - Clima tropical, pouca variação sazonal",
+    "NE": "Nordeste - Calor constante, período seco e chuvoso",
+    "CO": "Centro-Oeste - Pantanal, estações secas e chuvosas bem definidas",
+    "SE": "Sudeste - Quatro estações bem definidas, inverno moderado",
+    "S": "Sul - Inverno mais rigoroso, variações sazonais acentuadas"
+  }
+}
