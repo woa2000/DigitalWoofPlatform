@@ -7,6 +7,8 @@ import campaignsRoutes from "./routes/campaigns";
 import brandVoiceRoutes from "./routes/brand-voice";
 import complianceRoutes from "./routes/compliance";
 import anamnesisRoutes from "./routes/anamnesis";
+import onboardingRoutes from "./routes/onboarding";
+import storageRoutes from "./routes/storage";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Add logging middleware first
@@ -18,6 +20,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/brand-voice", brandVoiceRoutes);
   app.use("/api/compliance", complianceRoutes);
   app.use("/api/anamnesis", anamnesisRoutes);
+  app.use("/api/onboarding", onboardingRoutes);
+  app.use("/api/storage", storageRoutes);
 
   const httpServer = createServer(app);
   return httpServer;
