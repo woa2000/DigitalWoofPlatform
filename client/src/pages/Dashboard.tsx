@@ -5,7 +5,7 @@ import { QuickActions } from "@/components/dashboard/QuickActions";
 import { ActiveCampaigns } from "@/components/dashboard/ActiveCampaigns";
 import { AIContentPipeline } from "@/components/dashboard/AIContentPipeline";
 import { ComplianceMonitor } from "@/components/dashboard/ComplianceMonitor";
-import { PerformanceChart } from "@/components/dashboard/PerformanceChart";
+import { PerformanceChart } from "@/components/PerformanceChart";
 import { BrandManualSection } from "@/components/dashboard/BrandManualSection";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
