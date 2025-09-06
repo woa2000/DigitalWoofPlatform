@@ -172,6 +172,27 @@ Consulte `docs/SUPABASE_SETUP.md` para instruções detalhadas.
 
 ---
 
+## 🎉 **MERGE CONCLUÍDO - Calendário Editorial Inteligente**
+**Status:** ✅ **MERGE COMPLETED**  
+**Data do Merge:** 6 de setembro de 2025  
+**Branch Mergeado:** `feature/F07-calendario-editorial` → `main`
+
+**O que foi integrado:**
+- ✅ Todas as 17 tarefas do Calendário Editorial (T-001 até T-017)
+- ✅ Schema completo do banco de dados
+- ✅ Seasonal Intelligence Engine
+- ✅ Campaign Template System
+- ✅ Real-time WebSocket integration
+- ✅ Frontend React com drag-and-drop
+- ✅ 19 testes de integração
+- ✅ Documentação completa
+
+**Arquivos afetados:** 25+ arquivos criados/modificados
+**Conflitos resolvidos:** package-lock.json (aceitou versão HEAD)
+**Branches limpos:** feature/F07-calendario-editorial removido
+
+---
+
 ## 🎉 **CONQUISTAS RECENTES**
 
 ### ✅ **Calendário Editorial Inteligente - CONCLUÍDO**

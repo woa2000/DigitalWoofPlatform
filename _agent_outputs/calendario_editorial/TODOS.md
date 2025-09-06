@@ -79,3 +79,19 @@
 
 ## Concluídas
 - [x] T-001 — Gerar Resumo Pré-Execução
+- [x] T-002 — Implementar Schema de Banco de Dados
+- [x] T-003 — Desenvolver Seasonal Intelligence Engine
+- [x] T-004 — Criar Campaign Template System
+- [x] T-005 — Implementar Optimal Timing Calculator
+- [x] T-006 — Criar Calendar Suggestions API
+- [x] T-007 — Implementar Real-time Calendar Updates
+- [x] T-008 — Desenvolver Calendar UI Core Component
+- [x] T-009 — Implementar Content Type Color Coding
+- [x] T-010 — Desenvolver Drag-and-Drop System
+- [x] T-011 — Criar Campaign Template Application UI
+- [x] T-012 — Implementar Suggestions Panel
+- [x] T-013 — Desenvolver Calendar Views
+- [x] T-014 — Otimizar Performance
+- [x] T-015 — Implementar Responsive Design
+- [x] T-016 — Executar Integration Testing
+- [x] T-017 — Deploy e Documentação
