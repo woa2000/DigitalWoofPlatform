@@ -8,7 +8,7 @@ Execute #file:executar_plan.prompt.md com os seguintes parâmetros:
 {
   "PLAN_PATH": "plans/Manual_Marca_Digital_Plan.md",
   "REPO_ROOT": ".",
-  "RUN_MODE": "dry-run",
+  "RUN_MODE": "execute",
   "OUTPUT_DIR": "./_agent_outputs/manual_marca_digital/",
   "AGENT_ROLE": "Frontend_Developer",
   "BRANCH_NAME": "feature/F04-manual-marca-digital",
