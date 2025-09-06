@@ -56,6 +56,7 @@ const STEPS = [
 
 export function RobustOnboardingWizard({ userId }: { userId?: string }) {
   const [isCompleting, setIsCompleting] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   
   const {
     currentStep,
@@ -69,6 +70,7 @@ export function RobustOnboardingWizard({ userId }: { userId?: string }) {
     getStepStatus,
     completWizard,
     validateCurrentStep,
+    validateAndNextStep,
     updateLogoData,
     updateToneConfig,
     updateLanguageConfig,
@@ -84,18 +86,22 @@ export function RobustOnboardingWizard({ userId }: { userId?: string }) {
       setIsCompleting(true);
       try {
         await completWizard();
+        setShowSuccessMessage(true);
       } catch (error) {
         setIsCompleting(false);
       }
     } else {
-      await nextStep();
+      // Use the new validation function
+      const success = await validateAndNextStep();
+      if (!success) {
+        // Validation failed, error is already set in state
+        console.log('Validation failed for step:', currentStep);
+      }
     }
   };
 
   const handleValidateAndNext = () => {
-    if (validateCurrentStep()) {
-      handleNext();
-    }
+    handleNext();
   };
 
   return (
@@ -205,7 +211,7 @@ export function RobustOnboardingWizard({ userId }: { userId?: string }) {
                 onNext={() => {}} // Empty function - steps shouldn't navigate directly
                 onPrevious={() => {}} // Empty function - navigation handled by wizard
                 errors={errors}
-                isLoading={isLoading}
+                isLoading={false} // Don't pass global loading state to individual steps
                 updateLogoData={updateLogoData}
                 updateToneConfig={updateToneConfig}
                 updateLanguageConfig={updateLanguageConfig}
@@ -245,7 +251,7 @@ export function RobustOnboardingWizard({ userId }: { userId?: string }) {
 
               <Button
                 onClick={handleValidateAndNext}
-                disabled={isLoading || isCompleting}
+                disabled={isCompleting}
                 className="flex items-center space-x-2"
               >
                 {isCompleting ? (
@@ -270,6 +276,27 @@ export function RobustOnboardingWizard({ userId }: { userId?: string }) {
           </div>
         </Card>
 
+        {/* Success Message */}
+        {showSuccessMessage && (
+          <Card className="mb-6 border-green-200 bg-green-50">
+            <CardContent className="pt-6">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                  <Check className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-green-800 font-medium">
+                    🎉 Configuração concluída com sucesso!
+                  </p>
+                  <p className="text-green-700 text-sm">
+                    Redirecionando para o dashboard...
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Help Text */}
         <div className="mt-6 text-center">
           {currentStep === STEPS.length - 1 ? (
@@ -278,12 +305,12 @@ export function RobustOnboardingWizard({ userId }: { userId?: string }) {
                 🎉 Configuração quase concluída!
               </p>
               <p className="text-sm text-gray-500">
-                Ao finalizar, você será redirecionado para o dashboard onde poderá começar a usar a plataforma.
+                Ao finalizar, seus dados serão salvos e você será redirecionado para o dashboard.
               </p>
             </div>
           ) : (
             <p className="text-sm text-gray-500">
-              Seu progresso é salvo automaticamente. Você pode sair e retornar a qualquer momento.
+              Complete cada etapa para prosseguir. Seus dados serão salvos apenas ao finalizar.
             </p>
           )}
         </div>

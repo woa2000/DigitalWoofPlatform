@@ -511,34 +511,86 @@ export const campaignPerformance = pgTable("campaign_performance", {
   measuredAt: timestamp("measured_at").default(sql`now()`).notNull(),
 });
 
-// Assets visuais
-export const visualAssets = pgTable("visual_assets", {
+// Assets visuais - Sistema completo de assets
+export const assets = pgTable("assets", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   name: varchar("name", { length: 200 }).notNull(),
-  type: text("type").notNull(), // References asset_type enum
-  category: varchar("category", { length: 100 }).notNull(),
-  
-  // Arquivo
+  description: text("description"),
+  type: text("type").notNull(), // image, video, icon, template, background, illustration
+  category: varchar("category", { length: 100 }).notNull(), // pets, medical, seasonal, promotional, educational
+  format: varchar("format", { length: 10 }).notNull(), // jpg, png, svg, mp4, gif
+
+  // Arquivos
   url: text("url").notNull(),
-  fileSize: integer("file_size"),
-  dimensions: jsonb("dimensions"), // {width: 1080, height: 1080}
-  
-  // Variants para diferentes formatos
-  variants: jsonb("variants"), // {instagram_post: 'url', instagram_story: 'url'}
-  
-  // Customização
-  customizableElements: jsonb("customizable_elements"),
-  
-  // Metadata para busca
+  thumbnailUrl: text("thumbnail_url").notNull(),
+  previewUrl: text("preview_url"),
+  fileSize: integer("file_size").notNull(), // in bytes
+  dimensions: jsonb("dimensions").notNull(), // {width: 1080, height: 1080}
+
+  // Metadata para busca e filtros
   tags: jsonb("tags").$type<string[]>(), // Array de tags
+  colors: jsonb("colors").$type<string[]>(), // Dominant colors for filtering
   petTypes: jsonb("pet_types").$type<string[]>(), // Array de tipos de pet
   emotions: jsonb("emotions").$type<string[]>(), // Array de emoções
-  usageRights: text("usage_rights").default("free").notNull(), // References usage_rights_type enum
-  
-  // Performance
+
+  // Controle de acesso
+  isPremium: boolean("is_premium").default(false).notNull(),
+  isPublic: boolean("is_public").default(true).notNull(),
+  usageRights: text("usage_rights").default("free").notNull(), // free, premium, restricted
+
+  // Performance e métricas
   usageCount: integer("usage_count").default(0).notNull(),
-  avgEngagement: decimal("avg_engagement", { precision: 5, scale: 4 }),
-  
+  downloadCount: integer("download_count").default(0).notNull(),
+  rating: decimal("rating", { precision: 3, scale: 2 }).default("0.0"), // 0.0-5.0
+
+  // Variants para diferentes formatos
+  variants: jsonb("variants"), // {instagram_post: 'url', instagram_story: 'url'}
+
+  // Metadata adicional
+  metadata: jsonb("metadata"), // alt, caption, attribution, license
+
+  // Controle de versão e timestamps
+  createdBy: uuid("created_by").references(() => authUsers.id),
+  createdAt: timestamp("created_at").default(sql`now()`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`now()`).notNull(),
+});
+
+// Asset Collections
+export const assetCollections = pgTable("asset_collections", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name", { length: 200 }).notNull(),
+  description: text("description"),
+  isPublic: boolean("is_public").default(false).notNull(),
+  createdBy: uuid("created_by").references(() => authUsers.id).notNull(),
+  createdAt: timestamp("created_at").default(sql`now()`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`now()`).notNull(),
+});
+
+// Asset Collection Items
+export const assetCollectionItems = pgTable("asset_collection_items", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  collectionId: uuid("collection_id").references(() => assetCollections.id).notNull(),
+  assetId: uuid("asset_id").references(() => assets.id).notNull(),
+  addedAt: timestamp("added_at").default(sql`now()`).notNull(),
+});
+
+// Asset Favorites
+export const assetFavorites = pgTable("asset_favorites", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id").references(() => authUsers.id).notNull(),
+  assetId: uuid("asset_id").references(() => assets.id).notNull(),
+  addedAt: timestamp("added_at").default(sql`now()`).notNull(),
+}, (table) => ({
+  uniqueUserAsset: sql`UNIQUE(${table.userId}, ${table.assetId})`
+}));
+
+// Asset Analytics
+export const assetAnalytics = pgTable("asset_analytics", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  assetId: uuid("asset_id").references(() => assets.id).notNull(),
+  userId: uuid("user_id").references(() => authUsers.id),
+  action: text("action").notNull(), // view, download, favorite, unfavorite
+  metadata: jsonb("metadata"), // additional context
   createdAt: timestamp("created_at").default(sql`now()`).notNull(),
 });
 
@@ -560,7 +612,29 @@ export const insertCampaignPerformanceSchema = createInsertSchema(campaignPerfor
   measuredAt: true,
 });
 
-export const insertVisualAssetSchema = createInsertSchema(visualAssets).omit({
+export const insertAssetSchema = createInsertSchema(assets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAssetCollectionSchema = createInsertSchema(assetCollections).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAssetCollectionItemSchema = createInsertSchema(assetCollectionItems).omit({
+  id: true,
+  addedAt: true,
+});
+
+export const insertAssetFavoriteSchema = createInsertSchema(assetFavorites).omit({
+  id: true,
+  addedAt: true,
+});
+
+export const insertAssetAnalyticsSchema = createInsertSchema(assetAnalytics).omit({
   id: true,
   createdAt: true,
 });
@@ -607,5 +681,15 @@ export type UserCampaign = typeof userCampaigns.$inferSelect;
 export type InsertUserCampaign = z.infer<typeof insertUserCampaignSchema>;
 export type CampaignPerformance = typeof campaignPerformance.$inferSelect;
 export type InsertCampaignPerformance = z.infer<typeof insertCampaignPerformanceSchema>;
-export type VisualAsset = typeof visualAssets.$inferSelect;
-export type InsertVisualAsset = z.infer<typeof insertVisualAssetSchema>;
+
+// Asset System Types
+export type Asset = typeof assets.$inferSelect;
+export type InsertAsset = z.infer<typeof insertAssetSchema>;
+export type AssetCollection = typeof assetCollections.$inferSelect;
+export type InsertAssetCollection = z.infer<typeof insertAssetCollectionSchema>;
+export type AssetCollectionItem = typeof assetCollectionItems.$inferSelect;
+export type InsertAssetCollectionItem = z.infer<typeof insertAssetCollectionItemSchema>;
+export type AssetFavorite = typeof assetFavorites.$inferSelect;
+export type InsertAssetFavorite = z.infer<typeof insertAssetFavoriteSchema>;
+export type AssetAnalytics = typeof assetAnalytics.$inferSelect;
+export type InsertAssetAnalytics = z.infer<typeof insertAssetAnalyticsSchema>;

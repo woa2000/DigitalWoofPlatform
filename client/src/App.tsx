@@ -10,6 +10,11 @@ import Onboarding from "@/pages/Onboarding";
 import ManualMarca from "@/pages/ManualMarca";
 import { ContentGenerationPage } from "@/pages/ContentGeneration";
 import { PerformanceDashboard } from "@/components/performance/PerformanceDashboard";
+import EditorialCalendar from "@/pages/EditorialCalendar";
+import AnamneseDigital from "@/pages/AnamneseDigital";
+import Templates from "@/pages/Templates";
+import VisualAssetsLibrary from "@/pages/VisualAssetsLibrary";
+import SidebarTest from "@/pages/SidebarTest";
 import NotFound from "@/pages/not-found";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 
@@ -70,15 +75,48 @@ function Router() {
           </DashboardLayout>
         </ProtectedRoute>
       </Route>
+      <Route path="/calendar">
+        <ProtectedRoute>
+          <EditorialCalendar />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/anamnesis">
+        <ProtectedRoute>
+          <DashboardLayout
+            title="Anamnese Digital"
+            subtitle="Análise automatizada da presença digital da sua marca"
+          >
+            <AnamneseDigital />
+          </DashboardLayout>
+        </ProtectedRoute>
+      </Route>
+      <Route path="/campaigns">
+        <ProtectedRoute>
+          <Templates />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/assets">
+        <ProtectedRoute>
+          <DashboardLayout
+            title="Biblioteca de Assets"
+            subtitle="Gerencie e organize seus assets visuais"
+          >
+            <VisualAssetsLibrary />
+          </DashboardLayout>
+        </ProtectedRoute>
+      </Route>
       <Route path="/performance">
         <ProtectedRoute>
-          <DashboardLayout 
-            title="Performance Dashboard" 
+          <DashboardLayout
+            title="Performance Dashboard"
             subtitle="Monitore métricas e performance do sistema"
           >
             <PerformanceDashboard />
           </DashboardLayout>
         </ProtectedRoute>
+      </Route>
+      <Route path="/sidebar-test">
+        <SidebarTest />
       </Route>
       <Route path="/">
         <ProtectedRoute>

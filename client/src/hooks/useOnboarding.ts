@@ -111,14 +111,15 @@ interface UseOnboardingReturn {
   updateToneConfig: (config: ToneConfiguration) => void;
   updateLanguageConfig: (config: LanguageConfiguration) => void;
   updateBrandValues: (values: BrandValues) => void;
-  
-  // Actions
-  saveProgress: () => Promise<void>;
-  completWizard: () => Promise<void>;
-  resetWizard: () => void;
+    
+    // Actions
+    saveProgressLocally: () => Promise<void>;
+    completWizard: () => Promise<void>;
+    resetWizard: () => void;
   
   // Validation
   validateCurrentStep: () => boolean;
+  validateAndNextStep: () => Promise<boolean>;
   getStepStatus: (stepIndex: number) => 'completed' | 'current' | 'pending';
 }
 
@@ -132,32 +133,19 @@ export function useOnboarding(userId?: string): UseOnboardingReturn {
   // API client
   const apiClient = userId ? createOnboardingApiClient(userId) : null;
 
-  // Load from backend or localStorage on mount
+    // Load state from localStorage on mount (no BD loading)
   useEffect(() => {
-    const loadOnboardingData = async () => {
-      if (apiClient) {
-        // Try to load from backend first
-        const result = await apiClient.getOnboardingData();
-        if (result.success && result.data) {
-          dispatch({ type: 'LOAD_FROM_STORAGE', payload: result.data });
-          return;
-        }
-      }
-
-      // Fallback to localStorage
+    try {
       const savedState = localStorage.getItem(ONBOARDING_STORAGE_KEY);
       if (savedState) {
-        try {
-          const parsed = JSON.parse(savedState);
-          dispatch({ type: 'LOAD_FROM_STORAGE', payload: parsed });
-        } catch (error) {
-          console.warn('Failed to parse saved onboarding state:', error);
-        }
+        const parsed = JSON.parse(savedState);
+        dispatch({ type: 'LOAD_FROM_STORAGE', payload: parsed });
       }
-    };
-
-    loadOnboardingData();
-  }, [apiClient]);
+    } catch (error) {
+      console.warn('Failed to load onboarding state from localStorage:', error);
+      // Continue with fresh default state
+    }
+  }, []);
 
   // Validation function without useCallback to avoid dependency issues
   const validateStep = (stepToValidate: number, currentState = state): { isValid: boolean; errors: Record<string, string> } => {
@@ -219,24 +207,28 @@ export function useOnboarding(userId?: string): UseOnboardingReturn {
     return isValid;
   };
 
+  // New function to validate and move to next step
+  const validateAndNextStep = async (): Promise<boolean> => {
+    const isValid = validateCurrentStep();
+    if (isValid) {
+      await nextStep();
+      return true;
+    }
+    return false;
+  };
+
   // Navigation actions
   const nextStep = async () => {
     if (state.currentStep < STEPS.length - 1) {
       dispatch({ type: 'SET_CURRENT_STEP', payload: state.currentStep + 1 });
-      // Auto-save progress when moving to next step
-      if (apiClient) {
-        await saveProgress();
-      }
+      // Remove auto-save - only save on completion
     }
   };
 
   const prevStep = async () => {
     if (state.currentStep > 0) {
       dispatch({ type: 'SET_CURRENT_STEP', payload: state.currentStep - 1 });
-      // Auto-save progress when moving to previous step
-      if (apiClient) {
-        await saveProgress();
-      }
+      // Remove auto-save - only save on completion
     }
   };
 
@@ -263,55 +255,75 @@ export function useOnboarding(userId?: string): UseOnboardingReturn {
     dispatch({ type: 'UPDATE_BRAND_VALUES', payload: values });
   };
 
-  // Async actions
-  const saveProgress = async () => {
-    dispatch({ type: 'SET_LOADING', payload: true });
+  // Save progress to localStorage only (no backend save until completion)
+  const saveProgressLocally = async () => {
     try {
-      if (apiClient) {
-        // Save to backend
-        const result = await apiClient.saveOnboardingData(state);
-        if (!result.success) {
-          dispatch({ type: 'SET_ERRORS', payload: { general: result.error || 'Failed to save progress' } });
-          return;
-        }
-      }
-
-      // Also save to localStorage as backup
       localStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify(state));
+      console.log('💾 Progress saved locally');
     } catch (error) {
-      console.error('Failed to save progress:', error);
-      dispatch({ type: 'SET_ERRORS', payload: { general: 'Failed to save progress' } });
-    } finally {
-      dispatch({ type: 'SET_LOADING', payload: false });
+      console.error('Failed to save progress locally:', error);
     }
   };
 
+  // Auto-save to localStorage when state changes
+  useEffect(() => {
+    if (state.currentStep > 0 || state.logoData || Object.keys(state.errors).length === 0) {
+      saveProgressLocally();
+    }
+  }, [state]);
+
   const completWizard = async () => {
+    // Validate current step before proceeding
+    if (!validateCurrentStep()) {
+      return;
+    }
+
     dispatch({ type: 'SET_LOADING', payload: true });
+    
     try {
+      // Prepare final brand voice data for single save
+      const finalBrandVoiceData = {
+        logoData: state.logoData,
+        toneConfig: state.toneConfig,
+        languageConfig: state.languageConfig,
+        brandValues: state.brandValues,
+        metadata: {
+          completedAt: new Date().toISOString(),
+          version: '1.0',
+          userId: userId || 'current-user'
+        }
+      };
+
+      // Single save to database (no incremental saves)
       if (apiClient) {
-        // Complete onboarding on backend
-        const result = await apiClient.completeOnboarding();
-        if (!result.success) {
-          dispatch({ type: 'SET_ERRORS', payload: { general: result.error || 'Failed to complete onboarding' } });
-          return;
+        const saveResult = await apiClient.saveOnboardingData(finalBrandVoiceData);
+        if (!saveResult.success) {
+          throw new Error(saveResult.error || 'Falha ao salvar dados no servidor');
         }
 
-        // Get the generated Brand Voice JSON
+        // Generate Brand Voice JSON
         const brandVoiceResult = await apiClient.getBrandVoiceJson();
         if (brandVoiceResult.success) {
           dispatch({ type: 'UPDATE_BRAND_VOICE_JSON', payload: brandVoiceResult.data });
         }
+      } else {
+        // Fallback: save to localStorage as backup
+        localStorage.setItem('brand_voice_backup', JSON.stringify(finalBrandVoiceData));
+        console.warn('No API client available, saved to localStorage backup');
       }
 
-      // Clear localStorage on successful completion
+      // Clear temporary localStorage
       localStorage.removeItem(ONBOARDING_STORAGE_KEY);
       
-      // Navigate to dashboard after completion
+      // Navigate immediately to dashboard
       setLocation('/');
+      
     } catch (error) {
-      console.error('Failed to complete wizard:', error);
-      dispatch({ type: 'SET_ERRORS', payload: { general: 'Failed to complete onboarding' } });
+      console.error('Failed to save onboarding data:', error);
+      dispatch({ 
+        type: 'SET_ERRORS', 
+        payload: { general: 'Erro ao salvar dados. Verifique sua conexão e tente novamente.' } 
+      });
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
@@ -350,11 +362,12 @@ export function useOnboarding(userId?: string): UseOnboardingReturn {
     updateLanguageConfig,
     updateBrandValues,
     
-    saveProgress,
+    saveProgressLocally,
     completWizard,
     resetWizard,
     
     validateCurrentStep,
+    validateAndNextStep,
     getStepStatus
   };
 }
