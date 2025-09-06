@@ -414,6 +414,157 @@ export type UserMetadata = {
   business_name?: string;
 };
 
+// Enums necessários
+export const campaignCategoryEnum = pgTable("campaign_category", {
+  value: text("value").primaryKey(),
+});
+
+export const serviceTypeEnum = pgTable("service_type", {
+  value: text("value").primaryKey(),
+});
+
+export const campaignStatusEnum = pgTable("campaign_status", {
+  value: text("value").primaryKey(),
+});
+
+export const assetTypeEnum = pgTable("asset_type", {
+  value: text("value").primaryKey(),
+});
+
+export const usageRightsTypeEnum = pgTable("usage_rights_type", {
+  value: text("value").primaryKey(),
+});
+
+// Templates de campanhas
+export const campaignTemplates = pgTable("campaign_templates", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name", { length: 200 }).notNull(),
+  description: text("description"),
+  category: text("category").notNull(), // References campaign_category enum
+  serviceType: text("service_type").notNull(), // References service_type enum
+  
+  // Conteúdo estruturado
+  contentPieces: jsonb("content_pieces").notNull(),
+  visualAssets: jsonb("visual_assets"),
+  customizationOptions: jsonb("customization_options"),
+  
+  // Performance data
+  usageCount: integer("usage_count").default(0).notNull(),
+  avgEngagementRate: decimal("avg_engagement_rate", { precision: 5, scale: 4 }),
+  avgConversionRate: decimal("avg_conversion_rate", { precision: 5, scale: 4 }),
+  successCases: integer("success_cases").default(0).notNull(),
+  
+  // Sazonalidade
+  seasonality: jsonb("seasonality"), // {months: [1,2,3], peak_performance: 'high'}
+  
+  // Metadata
+  createdBy: uuid("created_by").references(() => authUsers.id),
+  isPublic: boolean("is_public").default(true).notNull(),
+  isPremium: boolean("is_premium").default(false).notNull(),
+  
+  createdAt: timestamp("created_at").default(sql`now()`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`now()`).notNull(),
+});
+
+// Campanhas personalizadas dos usuários
+export const userCampaigns = pgTable("user_campaigns", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id").notNull().references(() => authUsers.id),
+  templateId: uuid("template_id").references(() => campaignTemplates.id),
+  brandVoiceId: uuid("brand_voice_id").references(() => brandVoices.id),
+  
+  // Configuração da campanha
+  campaignConfig: jsonb("campaign_config").notNull(),
+  personalizedContent: jsonb("personalized_content").notNull(),
+  
+  // Status e execução
+  status: text("status").default("draft").notNull(), // References campaign_status enum
+  scheduledAt: timestamp("scheduled_at"),
+  publishedAt: timestamp("published_at"),
+  
+  // Tracking de performance
+  performanceMetrics: jsonb("performance_metrics"),
+  
+  createdAt: timestamp("created_at").default(sql`now()`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`now()`).notNull(),
+});
+
+// Performance tracking
+export const campaignPerformance = pgTable("campaign_performance", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  campaignId: uuid("campaign_id").notNull().references(() => userCampaigns.id),
+  templateId: uuid("template_id").notNull().references(() => campaignTemplates.id),
+  channel: varchar("channel", { length: 50 }).notNull(),
+  
+  // Metrics básicas
+  impressions: integer("impressions").default(0).notNull(),
+  reaches: integer("reaches").default(0).notNull(),
+  clicks: integer("clicks").default(0).notNull(),
+  conversions: integer("conversions").default(0).notNull(),
+  
+  // Rates calculadas
+  engagementRate: decimal("engagement_rate", { precision: 5, scale: 4 }),
+  clickThroughRate: decimal("click_through_rate", { precision: 5, scale: 4 }),
+  conversionRate: decimal("conversion_rate", { precision: 5, scale: 4 }),
+  
+  // Metadata
+  measuredAt: timestamp("measured_at").default(sql`now()`).notNull(),
+});
+
+// Assets visuais
+export const visualAssets = pgTable("visual_assets", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name", { length: 200 }).notNull(),
+  type: text("type").notNull(), // References asset_type enum
+  category: varchar("category", { length: 100 }).notNull(),
+  
+  // Arquivo
+  url: text("url").notNull(),
+  fileSize: integer("file_size"),
+  dimensions: jsonb("dimensions"), // {width: 1080, height: 1080}
+  
+  // Variants para diferentes formatos
+  variants: jsonb("variants"), // {instagram_post: 'url', instagram_story: 'url'}
+  
+  // Customização
+  customizableElements: jsonb("customizable_elements"),
+  
+  // Metadata para busca
+  tags: jsonb("tags").$type<string[]>(), // Array de tags
+  petTypes: jsonb("pet_types").$type<string[]>(), // Array de tipos de pet
+  emotions: jsonb("emotions").$type<string[]>(), // Array de emoções
+  usageRights: text("usage_rights").default("free").notNull(), // References usage_rights_type enum
+  
+  // Performance
+  usageCount: integer("usage_count").default(0).notNull(),
+  avgEngagement: decimal("avg_engagement", { precision: 5, scale: 4 }),
+  
+  createdAt: timestamp("created_at").default(sql`now()`).notNull(),
+});
+
+// Create insert schemas for Campaign Library
+export const insertCampaignTemplateSchema = createInsertSchema(campaignTemplates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUserCampaignSchema = createInsertSchema(userCampaigns).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCampaignPerformanceSchema = createInsertSchema(campaignPerformance).omit({
+  id: true,
+  measuredAt: true,
+});
+
+export const insertVisualAssetSchema = createInsertSchema(visualAssets).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Infer types
 export type AuthUser = typeof authUsers.$inferSelect;
 export type BrandVoice = typeof brandVoices.$inferSelect;
@@ -448,3 +599,13 @@ export type ContentFeedback = typeof contentFeedback.$inferSelect;
 export type InsertContentFeedback = z.infer<typeof insertContentFeedbackSchema>;
 export type AIPrompt = typeof aiPrompts.$inferSelect;
 export type InsertAIPrompt = z.infer<typeof insertAIPromptSchema>;
+
+// Campaign Library types
+export type CampaignTemplate = typeof campaignTemplates.$inferSelect;
+export type InsertCampaignTemplate = z.infer<typeof insertCampaignTemplateSchema>;
+export type UserCampaign = typeof userCampaigns.$inferSelect;
+export type InsertUserCampaign = z.infer<typeof insertUserCampaignSchema>;
+export type CampaignPerformance = typeof campaignPerformance.$inferSelect;
+export type InsertCampaignPerformance = z.infer<typeof insertCampaignPerformanceSchema>;
+export type VisualAsset = typeof visualAssets.$inferSelect;
+export type InsertVisualAsset = z.infer<typeof insertVisualAssetSchema>;

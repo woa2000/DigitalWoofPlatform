@@ -1,0 +1,554 @@
+{
+  "plan": {
+    "title": "Biblioteca de Campanhas Pet",
+    "version": "1.0",
+    "status": "executing",
+    "run_mode": "execute",
+    "generated_at": "2025-01-16T00:00:00Z",
+    "blockers_resolved_at": "2025-01-16T12:00:00Z",
+    "execution_started_at": "2025-01-16T13:00:00Z"
+  },
+  "tasks": [
+    {
+      "id": "T-001",
+      "title": "Setup Database Schema",
+      "owner": "Backend_Developer",
+      "status": "completed",
+      "effort": 8,
+      "depends_on": [],
+      "acceptance": [
+        "Todas as tabelas criadas sem erros",
+        "Foreign keys funcionando corretamente", 
+        "20 templates de exemplo inseridos",
+        "Queries de busca < 100ms"
+      ],
+      "observability": [
+        "Database connection logs",
+        "Migration execution metrics",
+        "Query performance logs"
+      ],
+      "security_notes": [
+        "Validar constraints de integridade",
+        "Configurar permissions de tabela"
+      ],
+      "artifacts": [
+        "migrations/",
+        "server/fixtures/templates.json",
+        "server/db/schema.ts"
+      ],
+      "last_update": "2025-01-16T14:00:00Z",
+      "completed_at": "2025-01-16T14:00:00Z",
+      "notes": "Base fundamental - deve executar primeiro"
+    },
+    {
+      "id": "T-002", 
+      "title": "Campaign Template Model",
+      "owner": "Backend_Developer",
+      "status": "completed",
+      "effort": 16,
+      "depends_on": ["T-001"],
+      "acceptance": [
+        "Modelos Drizzle type-safe implementados",
+        "Repository classes com CRUD completo",
+        "Validações Zod para todos os inputs", 
+        "Testes unitários para repositories"
+      ],
+      "observability": [
+        "Model validation errors",
+        "Repository operation metrics",
+        "Type safety compilation checks"
+      ],
+      "security_notes": [
+        "Validação Zod obrigatória",
+        "Sanitização de inputs"
+      ],
+      "artifacts": [
+        "server/models/campaign.ts",
+        "server/repositories/",
+        "server/schemas/validation.ts"
+      ],
+      "last_update": "2025-01-16T16:30:00Z",
+      "completed_at": "2025-01-16T16:30:00Z", 
+      "notes": "Foundation para todas as operações de template"
+    },
+    {
+      "id": "T-003",
+      "title": "Template Listing API", 
+      "owner": "Backend_Developer",
+      "status": "completed",
+      "effort": 16,
+      "depends_on": ["T-002"],
+      "acceptance": [
+        "Filtros funcionando corretamente",
+        "Paginação implementada (limit/offset)",
+        "Busca textual operacional", 
+        "Response time < 200ms para 100 templates"
+      ],
+      "observability": [
+        "API response time metrics",
+        "Filter usage analytics", 
+        "Search query performance"
+      ],
+      "security_notes": [
+        "Rate limiting por usuário",
+        "Validação de parâmetros de busca"
+      ],
+      "artifacts": [
+        "server/routes/templates.ts",
+        "docs/api/templates.yaml",
+        "server/middleware/pagination.ts"
+      ],
+      "last_update": "2025-01-16T16:30:00Z",
+      "completed_at": "2025-01-16T16:30:00Z",
+      "notes": "API core para discovery de templates"
+    },
+    {
+      "id": "T-004",
+      "title": "Personalization Engine",
+      "owner": "Backend_Developer", 
+      "status": "completed",
+      "effort": 24,
+      "depends_on": ["T-001", "T-002"],
+      "acceptance": [
+        "Personalização aplica todos os elementos do Brand Voice",
+        "Score de personalização calculado corretamente",
+        "Compliance checking automático funcionando",
+        "Tempo de processamento < 5s por template"
+      ],
+      "observability": [
+        "Personalization processing time",
+        "Brand Voice application success rate",
+        "Compliance check results"
+      ],
+      "security_notes": [
+        "Validação de Brand Voice JSON",
+        "Sanitização de conteúdo gerado"
+      ],
+      "artifacts": [
+        "server/services/personalization/",
+        "server/services/compliance.ts",
+        "server/utils/brand-voice.ts"
+      ],
+      "last_update": "2025-01-16T16:30:00Z",
+      "completed_at": "2025-01-16T16:30:00Z",
+      "notes": "Depende de Brand Voice JSON APIs funcionais"
+    },
+    {
+      "id": "T-005",
+      "title": "Template Performance Tracking",
+      "owner": "Backend_Developer",
+      "status": "completed", 
+      "effort": 16,
+      "depends_on": ["T-001"],
+      "acceptance": [
+        "Coleta automática de métricas de uso",
+        "Agregação de dados por período",
+        "Cálculo de rates (CTR, engagement, conversion)",
+        "API para dashboard de performance"
+      ],
+      "observability": [
+        "Metrics collection success rate",
+        "Data aggregation performance",
+        "Analytics API response times"
+      ],
+      "security_notes": [
+        "Anonimização de dados de usuário",
+        "Controle de acesso a métricas"
+      ],
+      "artifacts": [
+        "server/services/analytics/",
+        "server/routes/performance.ts",
+        "server/models/metrics.ts"
+      ],
+      "last_update": "2025-01-16T16:30:00Z",
+      "completed_at": "2025-01-16T16:30:00Z",
+      "notes": "Base para otimização de templates"
+    },
+    {
+      "id": "T-006",
+      "title": "Template Search & Filtering",
+      "owner": "Backend_Developer",
+      "status": "completed",
+      "effort": 16, 
+      "depends_on": ["T-004"],
+      "acceptance": [
+        "Sistema de busca textual avançada implementado",
+        "Filtros facetados funcionando",
+        "Recomendações personalizadas operacionais",
+        "Templates similares e trending disponíveis"
+      ],
+      "observability": [
+        "Search performance metrics", 
+        "Filter usage analytics",
+        "Recommendation effectiveness tracking"
+      ],
+      "security_notes": [
+        "Input sanitization na busca",
+        "Rate limiting para queries complexas"
+      ],
+      "artifacts": [
+        "server/services/TemplateSearchService.ts",
+        "server/routes/template-search.ts",
+        "server/repositories/CampaignTemplateRepository.ts (extended)"
+      ],
+      "last_update": "2025-01-16T16:45:00Z",
+      "completed_at": "2025-01-16T16:45:00Z",
+      "notes": "Sistema avançado de descoberta de templates implementado"
+    },
+    {
+      "id": "T-007",
+      "title": "Template Discovery UI",
+      "owner": "Frontend_Developer",
+      "status": "completed",
+      "effort": 24,
+      "depends_on": ["T-003"],
+      "acceptance": [
+        "Grid responsivo funcionando",
+        "Filtros aplicando em tempo real", 
+        "Busca com debounce e autocomplete",
+        "Preview cards informativos"
+      ],
+      "observability": [
+        "UI interaction metrics",
+        "Search usage analytics",
+        "Filter application success"
+      ],
+      "security_notes": [
+        "XSS prevention em preview",
+        "Input sanitization"
+      ],
+      "artifacts": [
+        "client/src/pages/Templates.tsx",
+        "client/src/components/discovery/SearchBar.tsx",
+        "client/src/components/discovery/FilterPanel.tsx",
+        "client/src/components/discovery/TemplateGrid.tsx",
+        "client/src/hooks/useTemplates.ts",
+        "client/src/hooks/useDebounce.ts",
+        "client/src/hooks/useAutocomplete.ts"
+      ],
+      "last_update": "2025-01-16T17:00:00Z",
+      "completed_at": "2025-01-16T17:00:00Z",
+      "notes": "Interface completa de descoberta implementada com busca avançada, filtros facetados, autocomplete e grid responsivo"
+    },
+    {
+      "id": "T-008", 
+      "title": "Template Comparison Interface",
+      "owner": "Frontend_Developer",
+      "status": "completed",
+      "effort": 16,
+      "depends_on": ["T-003"],
+      "acceptance": [
+        "Seleção múltipla de templates funcionando",
+        "Layout de comparação legível",
+        "Métricas comparativas exibidas", 
+        "Sistema de recomendação ativo"
+      ],
+      "observability": [
+        "Comparison usage metrics",
+        "Template selection patterns",
+        "Recommendation effectiveness"
+      ],
+      "security_notes": [
+        "Validação de templates selecionados",
+        "Rate limiting para comparações"
+      ],
+      "artifacts": [
+        "client/src/components/comparison/ComparisonTable.tsx",
+        "client/src/components/comparison/SelectionPanel.tsx",
+        "client/src/pages/TemplateComparison.tsx",
+        "client/src/hooks/useComparison.ts",
+        "server/routes/template-comparison.ts"
+      ],
+      "last_update": "2025-01-16T17:30:00Z",
+      "completed_at": "2025-01-16T17:30:00Z",
+      "notes": "Interface completa de comparação implementada com seleção múltipla, tabela comparativa detalhada, métricas de performance e APIs backend"
+    },
+    {
+      "id": "T-009",
+      "title": "Personalization Preview", 
+      "owner": "Frontend_Developer",
+      "status": "completed",
+      "effort": 24,
+      "depends_on": ["T-004"],
+      "acceptance": [
+        "Preview atualiza em tempo real",
+        "Visualização por canal funcionando",
+        "Toggle before/after operacional",
+        "Fine-tuning sliders responsivos"
+      ],
+      "observability": [
+        "Preview generation metrics",
+        "User interaction tracking",
+        "Personalization adjustment usage"
+      ],
+      "security_notes": [
+        "Validação de preview data",
+        "Sanitização de conteúdo personalizado"
+      ],
+      "artifacts": [
+        "client/src/components/preview/PreviewDisplay.tsx",
+        "client/src/components/preview/SettingsPanel.tsx",
+        "client/src/components/preview/ChannelSelector.tsx", 
+        "client/src/pages/PersonalizationPreview.tsx",
+        "client/src/hooks/usePersonalizationPreview.ts"
+      ],
+      "last_update": "2025-01-16T18:00:00Z",
+      "completed_at": "2025-01-16T18:00:00Z",
+      "notes": "Interface completa de preview de personalização implementada com preview em tempo real, seleção de canais, configurações avançadas e comparação antes/depois"
+    },
+    {
+      "id": "T-010",
+      "title": "Campaign Creation Wizard",
+      "owner": "Frontend_Developer", 
+      "status": "completed",
+      "effort": 24,
+      "depends_on": ["T-006", "T-009"],
+      "acceptance": [
+        "Wizard de 4 steps funcionando",
+        "Validação impedindo avanço incorreto",
+        "Progress indicator visual",
+        "Draft saving automático"
+      ],
+      "observability": [
+        "Wizard completion rates",
+        "Step abandonment analytics", 
+        "Draft save frequency"
+      ],
+      "security_notes": [
+        "Validação de steps",
+        "Proteção de drafts por usuário"
+      ],
+      "artifacts": [
+        "client/src/pages/CampaignWizard.tsx",
+        "client/src/components/wizard/WizardProgress.tsx",
+        "client/src/components/wizard/TemplateSelectionStep.tsx",
+        "client/src/components/wizard/PersonalizationStep.tsx", 
+        "client/src/components/wizard/ConfigurationStep.tsx",
+        "client/src/components/wizard/ReviewStep.tsx",
+        "client/src/hooks/useCampaignWizard.ts"
+      ],
+      "last_update": "2025-01-16T18:30:00Z",
+      "completed_at": "2025-01-16T18:30:00Z",
+      "notes": "Wizard completo implementado com 4 etapas (Template Selection, Personalization, Configuration, Review), validação robusta, navegação inteligente, auto-save de drafts e integração com todas as APIs necessárias"
+    },
+    {
+      "id": "T-011",
+      "title": "Visual Assets Library",
+      "owner": "Frontend_Developer",
+      "status": "completed",
+      "effort": 16, 
+      "depends_on": [],
+      "acceptance": [
+        "Grid de assets com performance otimizada",
+        "Filtros múltiplos funcionando",
+        "Preview modal informativo",
+        "Sistema de favoritos persistente"
+      ],
+      "observability": [
+        "Asset loading performance",
+        "Filter usage patterns",
+        "Favorites usage metrics"
+      ],
+      "security_notes": [
+        "Validação de upload de assets",
+        "Controle de acesso a assets premium"
+      ],
+      "artifacts": [
+        "client/src/hooks/useAssets.ts",
+        "client/src/components/AssetsLibrary.tsx",
+        "client/src/components/AssetCard.tsx",
+        "client/src/components/AssetFiltersPanel.tsx",
+        "client/src/components/AssetPreviewModal.tsx",
+        "client/src/components/AssetUploadModal.tsx",
+        "client/src/components/CollectionModal.tsx",
+        "client/src/pages/VisualAssetsLibrary.tsx",
+        "client/src/lib/utils.ts (updated with formatBytes and formatDistanceToNow)"
+      ],
+      "last_update": "2025-01-16T19:00:00Z",
+      "completed_at": "2025-01-16T19:00:00Z",
+      "notes": "Biblioteca completa de assets visuais implementada com grid responsivo, filtros avançados, sistema de favoritos, upload com drag & drop, coleções organizadas, preview detalhado e gerenciamento completo de assets"
+    },
+    {
+      "id": "T-012",
+      "title": "Performance Dashboard",
+      "owner": "Frontend_Developer",
+      "status": "completed",
+      "effort": 16,
+      "depends_on": ["T-005"],
+      "acceptance": [
+        "Charts de performance funcionando", 
+        "Comparação com benchmarks exibida",
+        "Filtros temporais operacionais",
+        "Export de dados implementado"
+      ],
+      "observability": [
+        "Dashboard load performance",
+        "Chart rendering metrics",
+        "Export usage analytics"
+      ],
+      "security_notes": [
+        "Controle de acesso a dados",
+        "Anonimização em exports"
+      ],
+      "artifacts": [
+        "client/src/hooks/usePerformance.ts",
+        "client/src/components/PerformanceDashboard.tsx",
+        "client/src/components/MetricCard.tsx",
+        "client/src/components/PerformanceChart.tsx",
+        "client/src/components/CampaignTable.tsx",
+        "client/src/components/TemplateRanking.tsx",
+        "client/src/components/BenchmarkComparison.tsx",
+        "client/src/components/InsightsPanel.tsx",
+        "client/src/components/PerformanceFilters.tsx",
+        "client/src/components/ExportModal.tsx"
+      ],
+      "last_update": "2025-01-16T20:00:00Z",
+      "completed_at": "2025-01-16T20:00:00Z",
+      "notes": "Dashboard completo de performance implementado com analytics avançados, gráficos interativos, comparação com benchmarks, insights automatizados e sistema de exportação"
+    },
+    {
+      "id": "T-013",
+      "title": "Integration Testing",
+      "owner": "QA_Engineer",
+      "status": "completed",
+      "effort": 20,
+      "depends_on": ["T-012"],
+      "acceptance": [
+        "Suíte end-to-end cobrindo todos fluxos principais",
+        "Testes cross-browser (Chrome, Firefox, Safari)",
+        "Validação WCAG 2.1 AA compliance",
+        "Performance testing com 1000+ templates",
+        "Observability de métricas em tempo real"
+      ],
+      "observability": [
+        "Test execution metrics",
+        "Browser compatibility reports",
+        "Accessibility audit results",
+        "Performance benchmark data"
+      ],
+      "security_notes": [
+        "Validar input sanitization",
+        "Testar rate limiting",
+        "Verificar CORS policies"
+      ],
+      "artifacts": [
+        "tests/integration/biblioteca-campanhas.test.ts",
+        "tests/integration/browser-compatibility.test.ts",
+        "tests/integration/accessibility.test.ts",
+        "tests/integration/performance-load.test.ts",
+        "tests/helpers/database.ts",
+        "tests/helpers/client.ts",
+        "tests/helpers/fixtures.ts",
+        "tests/package.json",
+        "tests/vitest.config.ts",
+        "tests/playwright.config.ts",
+        "tests/setup.ts",
+        "tests/run-integration-tests.sh",
+        "tests/T013_VALIDATION_GUIDE.md"
+      ],
+      "last_update": "2025-01-16T21:00:00Z",
+      "completed_at": "2025-01-16T21:00:00Z",
+      "notes": "Suíte completa de testes implementada: 33 integration tests, cross-browser compatibility para 5 navegadores, WCAG 2.1 AA compliance validation, performance testing com load simulation até 100+ concurrent requests. Infrastructure completa com helpers, mocks e automated test runner."
+    },
+    {
+      "id": "T-014",
+      "title": "Performance Optimization",
+      "owner": "Backend_Developer",
+      "status": "skipped",
+      "effort": 16,
+      "depends_on": ["T-013"],
+      "acceptance": [
+        "Queries de template < 100ms",
+        "Cache hit rate > 80%",
+        "Image loading otimizado",
+        "Bundle size reduzido em 30%"
+      ],
+      "observability": [
+        "Performance optimization metrics",
+        "Cache effectiveness tracking",
+        "Bundle size monitoring"
+      ],
+      "security_notes": [
+        "Otimizações não comprometem segurança",
+        "Cache invalidation secure"
+      ],
+      "artifacts": [
+        "config/optimization.ts",
+        "server/cache/",
+        "docs/performance-report.md"
+      ],
+      "last_update": "2025-09-06T00:00:00Z",
+      "notes": "Tarefa ignorada a pedido do usuário para acelerar o deploy."
+    },
+    {
+      "id": "T-015",
+      "title": "Documentation & Deployment",
+      "owner": "Backend_Developer",
+      "status": "in_progress",
+      "effort": 8,
+      "depends_on": ["T-014"],
+      "acceptance": [
+        "API docs completas e atualizadas",
+        "User guides escritos e testados",
+        "Sistema deployed em produção", 
+        "Monitoring e alertas configurados"
+      ],
+      "observability": [
+        "Documentation completeness metrics",
+        "Deployment success tracking",
+        "Monitoring system health"
+      ],
+      "security_notes": [
+        "Secrets não expostos em docs",
+        "Production security hardening"
+      ],
+      "artifacts": [
+        "docs/api/",
+        "docs/user-guides/",
+        "deployment/"
+      ],
+      "last_update": "2025-09-06T00:00:00Z",
+      "notes": "Finalização e deploy para produção"
+    }
+  ],
+  "blocks": [
+    {
+      "tag": "RESOLVED",
+      "description": "Unit tests strategy - Vitest com cobertura ≥85% definido",
+      "owner": "Backend_Developer", 
+      "unblock_next_step": "✅ RESOLVIDO - Framework e patterns implementados",
+      "resolved_at": "2025-01-16T12:00:00Z"
+    },
+    {
+      "tag": "RESOLVED",
+      "description": "Integration tests com Supertest - Environment e fixtures definidos",
+      "owner": "QA_Engineer",
+      "unblock_next_step": "✅ RESOLVIDO - Test database e suites configurados",
+      "resolved_at": "2025-01-16T12:00:00Z"
+    },
+    {
+      "tag": "RESOLVED", 
+      "description": "Estratégia de cache para templates - Hybrid L1+L2 implementada",
+      "owner": "Tech_Lead",
+      "unblock_next_step": "✅ RESOLVIDO - CacheProvider interface e métricas definidas",
+      "resolved_at": "2025-01-16T12:00:00Z"
+    },
+    {
+      "tag": "RESOLVED",
+      "description": "Brand Voice JSON APIs - Strategy robusta com circuit breaker + fallback",
+      "owner": "Backend_Developer",
+      "unblock_next_step": "✅ RESOLVIDO - Contract Zod + cliente robusto + smoke tests implementados",
+      "resolved_at": "2025-01-16T12:00:00Z"
+    }
+  ],
+  "current_progress": {
+    "phase": "documentation_deployment",
+    "completed_tasks": 13,
+    "total_tasks": 15,
+    "percentage": 87,
+    "current_focus": "T-015 Documentation & Deployment",
+    "next_milestone": "Production deployment readiness",
+    "estimated_completion": "2025-01-17T18:00:00Z",
+    "last_update": "2025-09-06T00:00:00Z"
+  }
+}
