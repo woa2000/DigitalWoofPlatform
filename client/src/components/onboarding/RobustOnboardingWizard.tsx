@@ -54,7 +54,7 @@ const STEPS = [
   }
 ];
 
-export function RobustOnboardingWizard() {
+export function RobustOnboardingWizard({ userId }: { userId?: string }) {
   const {
     currentStep,
     state,
@@ -71,17 +71,17 @@ export function RobustOnboardingWizard() {
     updateToneConfig,
     updateLanguageConfig,
     updateBrandValues
-  } = useOnboarding();
+  } = useOnboarding(userId);
 
   const CurrentStepComponent = STEPS[currentStep]?.component;
   const progressPercentage = ((currentStep + 1) / STEPS.length) * 100;
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep === STEPS.length - 1) {
       // Last step - complete wizard
-      completWizard();
+      await completWizard();
     } else {
-      nextStep();
+      await nextStep();
     }
   };
 
@@ -203,6 +203,7 @@ export function RobustOnboardingWizard() {
                 updateToneConfig={updateToneConfig}
                 updateLanguageConfig={updateLanguageConfig}
                 updateBrandValues={updateBrandValues}
+                userId={userId}
               />
             )}
           </CardContent>
@@ -211,7 +212,7 @@ export function RobustOnboardingWizard() {
           <div className="border-t px-6 py-4 bg-gray-50 rounded-b-lg">
             <div className="flex justify-between items-center">
               <Button
-                onClick={prevStep}
+                onClick={() => prevStep()}
                 disabled={!canGoPrev || isLoading}
                 variant="outline"
                 className="flex items-center space-x-2"

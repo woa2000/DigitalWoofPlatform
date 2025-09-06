@@ -42,14 +42,8 @@ router.post('/logo/:userId', upload.single('logo'), async (req: MulterRequest, r
       });
     }
     
-    // Ensure bucket exists
-    const bucketReady = await LogoStorageService.ensureBucketExists();
-    if (!bucketReady) {
-      return res.status(500).json({
-        success: false,
-        error: 'Storage bucket not available'
-      });
-    }
+    // Bucket creation is now handled in the uploadLogo method
+    console.log('🔄 Processing logo upload for user:', userId);
     
     // Upload logo
     const uploadResult = await LogoStorageService.uploadLogo(

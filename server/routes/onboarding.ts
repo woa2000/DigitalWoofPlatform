@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { BrandOnboardingService } from '../services/brand-onboarding.service.js';
+import { BrandOnboardingService } from '../services/brand-onboarding.service';
 
 const router = Router();
 

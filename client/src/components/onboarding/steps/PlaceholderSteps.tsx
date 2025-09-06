@@ -16,10 +16,11 @@ interface StepProps {
   updateToneConfig?: (config: ToneConfiguration) => void;
   updateLanguageConfig?: (config: LanguageConfiguration) => void;
   updateBrandValues?: (values: BrandValues) => void;
+  userId?: string;
 }
 
 // Use the real components
-export function LogoUploadStep({ state, onNext, onPrevious, errors, isLoading, updateLogoData }: StepProps) {
+export function LogoUploadStep({ state, onNext, onPrevious, errors, isLoading, updateLogoData, userId }: StepProps) {
   return (
     <RealLogoUploadStep
       stepNumber={1}
@@ -27,6 +28,7 @@ export function LogoUploadStep({ state, onNext, onPrevious, errors, isLoading, u
       onPrevious={onPrevious}
       isCompleted={!!state.logoData}
       updateLogoData={updateLogoData}
+      userId={userId}
     />
   );
 }
