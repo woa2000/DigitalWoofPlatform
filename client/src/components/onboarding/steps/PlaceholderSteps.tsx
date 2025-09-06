@@ -16,10 +16,11 @@ interface StepProps {
   updateToneConfig?: (config: ToneConfiguration) => void;
   updateLanguageConfig?: (config: LanguageConfiguration) => void;
   updateBrandValues?: (values: BrandValues) => void;
+  userId?: string;
 }
 
 // Use the real components
-export function LogoUploadStep({ state, onNext, onPrevious, errors, isLoading, updateLogoData }: StepProps) {
+export function LogoUploadStep({ state, onNext, onPrevious, errors, isLoading, updateLogoData, userId }: StepProps) {
   return (
     <RealLogoUploadStep
       stepNumber={1}
@@ -27,6 +28,7 @@ export function LogoUploadStep({ state, onNext, onPrevious, errors, isLoading, u
       onPrevious={onPrevious}
       isCompleted={!!state.logoData}
       updateLogoData={updateLogoData}
+      userId={userId}
     />
   );
 }
@@ -45,12 +47,30 @@ export function BrandValuesStep(props: StepProps) {
 
 export function PreviewStep({ state, onNext, onPrevious, errors, isLoading }: StepProps) {
   return (
-    <RealPreviewStep
-      stepNumber={5}
-      onNext={onNext}
-      onPrevious={onPrevious}
-      isCompleted={!!state.brandVoiceJson}
-      wizardData={state}
-    />
+    <div className="space-y-4">
+      {/* Informational banner about final save */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div className="flex items-center space-x-2">
+          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+            <span className="text-blue-600 font-semibold text-sm">💾</span>
+          </div>
+          <div>
+            <p className="font-medium text-blue-900">Revisão Final</p>
+            <p className="text-sm text-blue-700">
+              Revise todas as informações abaixo. Ao clicar em "Finalizar e Salvar", 
+              todos os dados serão enviados para o servidor e sua identidade de marca será criada.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <RealPreviewStep
+        stepNumber={5}
+        onNext={onNext}
+        onPrevious={onPrevious}
+        isCompleted={!!state.brandVoiceJson}
+        wizardData={state}
+      />
+    </div>
   );
 }

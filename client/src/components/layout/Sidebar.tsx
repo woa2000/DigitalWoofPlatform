@@ -2,14 +2,14 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { 
-  ChartLine, 
-  Megaphone, 
-  Bot, 
-  Book, 
-  Stethoscope, 
-  Shield, 
-  Images, 
+import {
+  ChartLine,
+  Megaphone,
+  Bot,
+  Book,
+  Stethoscope,
+  Shield,
+  Images,
   Menu,
   Settings,
   User,
@@ -20,7 +20,10 @@ import {
   PaintBucket,
   MessageSquare,
   Type,
-  CheckCircle
+  CheckCircle,
+  Calendar,
+  TrendingUp,
+  LogOut
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
@@ -36,13 +39,14 @@ interface NavigationItem {
 }
 
 const navigation: NavigationItem[] = [
+  // Visão Geral
   { name: "Dashboard", href: "/", icon: ChartLine },
+
+  // Criação de Marca
   { name: "Onboarding de Marca", href: "/onboarding", icon: Palette },
-  { name: "Campanhas", href: "/campaigns", icon: Megaphone },
-  { name: "IA Content", href: "/ai-content", icon: Bot },
-  { 
-    name: "Manual da Marca", 
-    href: "/manual-marca", 
+  {
+    name: "Manual da Marca",
+    href: "/manual-marca",
     icon: Book,
     children: [
       { name: "Visão Geral", href: "/manual-marca/default/overview", icon: Eye },
@@ -52,8 +56,17 @@ const navigation: NavigationItem[] = [
       { name: "Conformidade", href: "/manual-marca/default/compliance", icon: CheckCircle },
     ]
   },
+
+  // Planejamento e Criação
+  { name: "Campanhas", href: "/campaigns", icon: Megaphone },
+  { name: "Calendário Editorial", href: "/calendar", icon: Calendar },
+  { name: "Geração de Conteúdo IA", href: "/content-generation", icon: Bot },
+
+  // Análise e Monitoramento
   { name: "Anamnese Digital", href: "/anamnesis", icon: Stethoscope },
-  { name: "Compliance", href: "/compliance", icon: Shield },
+  { name: "Performance", href: "/performance", icon: TrendingUp },
+
+  // Recursos
   { name: "Assets", href: "/assets", icon: Images },
 ];
 
@@ -64,7 +77,7 @@ export function Sidebar({ className }: SidebarProps) {
   const { user, logout } = useAuth();
 
   const toggleExpanded = (itemName: string) => {
-    setExpandedItems(prev => 
+    setExpandedItems(prev =>
       prev.includes(itemName)
         ? prev.filter(name => name !== itemName)
         : [...prev, itemName]
@@ -91,15 +104,15 @@ export function Sidebar({ className }: SidebarProps) {
           className={cn(
             "flex items-center space-x-3 p-3 rounded-lg transition-colors cursor-pointer group",
             isActive || hasActiveChild
-              ? "bg-primary text-primary-foreground" 
-              : "hover:bg-muted",
+              ? "bg-gray-600 text-white"
+              : "text-gray-300 hover:text-white hover:bg-gray-600",
             collapsed && "justify-center",
             level > 0 && "ml-4"
           )}
           data-testid={`nav-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
         >
           {hasChildren && !collapsed ? (
-            <div 
+            <div
               className="flex items-center space-x-3 w-full"
               onClick={() => toggleExpanded(item.name)}
             >
@@ -130,24 +143,25 @@ export function Sidebar({ className }: SidebarProps) {
   };
 
   return (
-    <div 
+    <div
       className={cn(
-        "fixed left-0 top-0 h-full bg-card border-r border-border transition-all duration-300 z-50",
+        "fixed left-0 top-0 h-full bg-gray-700 transition-all duration-300 z-50",
         collapsed ? "w-16" : "w-64",
         className
       )}
       data-testid="sidebar"
     >
       {/* Header */}
-      <div className="p-6 border-b border-border">
+      <div className="p-6 border-b border-gray-600">
         <div className="flex items-center justify-between">
           <div className={cn("flex items-center space-x-3", collapsed && "hidden")}>
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground text-sm">🐾</span>
-            </div>
-            <div>
-              <h1 className="text-lg font-semibold text-foreground">Woof</h1>
-              <p className="text-xs text-muted-foreground">Marketing Platform</p>
+            <div className="flex items-center">
+              <img
+                src="/WOOF_logo.svg"
+                alt="WOOF Pet Marketing"
+                className="h-8 w-auto"
+                style={{ filter: 'brightness(0) invert(1)' }}
+              />
             </div>
           </div>
           <Button
@@ -155,6 +169,7 @@ export function Sidebar({ className }: SidebarProps) {
             size="sm"
             onClick={() => setCollapsed(!collapsed)}
             data-testid="button-toggle-sidebar"
+            className="text-gray-300 hover:text-white hover:bg-gray-600"
           >
             <Menu className="h-4 w-4" />
           </Button>
@@ -163,19 +178,64 @@ export function Sidebar({ className }: SidebarProps) {
 
       {/* Navigation */}
       <nav className="p-4 space-y-2">
-        {navigation.map((item) => renderNavigationItem(item))}
+        {/* Visão Geral */}
+        {navigation.slice(0, 1).map((item) => renderNavigationItem(item))}
+
+        {/* Separator */}
+        <div className="border-t border-gray-600 my-4"></div>
+
+        {/* Criação de Marca */}
+        <div className="px-3 py-2">
+          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            Criação de Marca
+          </h3>
+        </div>
+        {navigation.slice(1, 3).map((item) => renderNavigationItem(item))}
+
+        {/* Separator */}
+        <div className="border-t border-gray-600 my-4"></div>
+
+        {/* Planejamento e Criação */}
+        <div className="px-3 py-2">
+          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            Planejamento
+          </h3>
+        </div>
+        {navigation.slice(3, 6).map((item) => renderNavigationItem(item))}
+
+        {/* Separator */}
+        <div className="border-t border-gray-600 my-4"></div>
+
+        {/* Análise e Monitoramento */}
+        <div className="px-3 py-2">
+          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            Análise
+          </h3>
+        </div>
+        {navigation.slice(6, 8).map((item) => renderNavigationItem(item))}
+
+        {/* Separator */}
+        <div className="border-t border-gray-600 my-4"></div>
+
+        {/* Recursos */}
+        <div className="px-3 py-2">
+          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            Recursos
+          </h3>
+        </div>
+        {navigation.slice(8).map((item) => renderNavigationItem(item))}
       </nav>
 
       {/* User Profile */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border">
+      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-600">
         <div className={cn("flex items-center space-x-3", collapsed && "justify-center")}>
-          <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-            <User className="h-5 w-5 text-primary-foreground" />
+          <div className="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center">
+            <User className="h-5 w-5 text-white" />
           </div>
           {!collapsed && (
             <div className="flex-1">
-              <p className="text-sm font-medium">{user?.email || 'Usuário'}</p>
-              <p className="text-xs text-muted-foreground">Digital Woof</p>
+              <p className="text-sm font-medium text-white">{user?.email || 'Usuário'}</p>
+              <p className="text-xs text-gray-400">Digital Woof</p>
             </div>
           )}
           <Button
@@ -183,6 +243,7 @@ export function Sidebar({ className }: SidebarProps) {
             size="sm"
             onClick={logout}
             data-testid="button-settings"
+            className="text-gray-300 hover:text-white hover:bg-gray-600"
           >
             <Settings className="h-4 w-4" />
           </Button>

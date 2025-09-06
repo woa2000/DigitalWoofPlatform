@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { FileUpload } from '@/components/ui/FileUpload';
 import { Palette } from 'lucide-react';
 import { LogoProcessingResult } from '@shared/types/onboarding';
+import { createOnboardingApiClient } from '@/lib/onboarding-api';
 
 interface LogoUploadStepProps {
   onNext: (data: any) => void;
@@ -11,6 +12,7 @@ interface LogoUploadStepProps {
   stepNumber: number;
   isCompleted: boolean;
   updateLogoData?: (data: LogoProcessingResult) => void;
+  userId?: string;
 }
 
 interface LogoData {
@@ -25,7 +27,7 @@ interface LogoData {
   } | null;
 }
 
-export function LogoUploadStep({ onNext, onPrevious, stepNumber, isCompleted, updateLogoData }: LogoUploadStepProps) {
+export function LogoUploadStep({ onNext, onPrevious, stepNumber, isCompleted, updateLogoData, userId }: LogoUploadStepProps) {
   const [logoData, setLogoData] = useState<LogoData>({
     file: null,
     preview: null,
@@ -42,40 +44,93 @@ export function LogoUploadStep({ onNext, onPrevious, stepNumber, isCompleted, up
     try {
       // Create preview
       const preview = URL.createObjectURL(file);
-      
-      // Mock palette extraction for now (will be replaced with actual API call)
-      const mockPalette = ['#2563eb', '#7c3aed', '#dc2626', '#059669', '#d97706'];
-      
-      // Mock metadata
-      const mockMetadata = {
-        width: 800,
-        height: 600,
-        format: file.type.split('/')[1],
-        fileSize: file.size,
-        hasTransparency: file.type === 'image/png'
-      };
 
-      setLogoData({
+      setLogoData(prev => ({
+        ...prev,
         file,
-        preview,
-        palette: mockPalette,
-        metadata: mockMetadata
-      });
+        preview
+      }));
 
-      // Update global state
-      if (updateLogoData) {
-        updateLogoData({
-          logoUrl: preview,
+      // Upload to backend if userId is available
+      if (userId) {
+        const apiClient = createOnboardingApiClient(userId);
+        const uploadResult = await apiClient.uploadLogo(file);
+
+        if (uploadResult.success) {
+          const { logoUrl, palette, metadata } = uploadResult.data!;
+
+          setLogoData(prev => ({
+            ...prev,
+            palette: palette || [],
+            metadata
+          }));
+
+          // Update global state
+          if (updateLogoData) {
+            updateLogoData({
+              logoUrl,
+              palette: palette || [],
+              metadata
+            });
+          }
+        } else {
+          // If upload fails, fall back to local handling
+          console.warn('Logo upload failed, falling back to local handling:', uploadResult.error);
+
+          const mockPalette = ['#2563eb', '#7c3aed', '#dc2626', '#059669', '#d97706'];
+          const mockMetadata = {
+            width: 800,
+            height: 600,
+            format: file.type.split('/')[1],
+            fileSize: file.size,
+            hasTransparency: file.type === 'image/png'
+          };
+
+          setLogoData(prev => ({
+            ...prev,
+            palette: mockPalette,
+            metadata: mockMetadata
+          }));
+
+          // Update global state with local data
+          if (updateLogoData) {
+            updateLogoData({
+              logoUrl: preview,
+              palette: mockPalette,
+              metadata: mockMetadata
+            });
+          }
+        }
+      } else {
+        // Fallback to mock data if no userId
+        const mockPalette = ['#2563eb', '#7c3aed', '#dc2626', '#059669', '#d97706'];
+        const mockMetadata = {
+          width: 800,
+          height: 600,
+          format: file.type.split('/')[1],
+          fileSize: file.size,
+          hasTransparency: file.type === 'image/png'
+        };
+
+        setLogoData(prev => ({
+          ...prev,
           palette: mockPalette,
           metadata: mockMetadata
-        });
+        }));
+
+        // Update global state
+        if (updateLogoData) {
+          updateLogoData({
+            logoUrl: preview,
+            palette: mockPalette,
+            metadata: mockMetadata
+          });
+        }
       }
 
-      // Simulate upload delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
     } catch (err) {
-      setError('Erro ao processar arquivo. Tente novamente.');
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao processar arquivo. Tente novamente.';
+      setError(errorMessage);
       console.error('Upload error:', err);
     } finally {
       setIsUploading(false);

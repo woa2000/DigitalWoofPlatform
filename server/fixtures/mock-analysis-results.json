@@ -448,6 +448,297 @@
         "Desenvolver linha editorial mais diversificada"
       ],
       "confidence": "high"
+    },
+    "personas": {
+      "primaryPersona": {
+        "name": "Ana - Tutora Premium",
+        "age": "30-45 anos",
+        "profile": "Profissional estabelecida, renda alta, busca produtos premium e experiências diferenciadas",
+        "needs": [
+          "Produtos de alta qualidade e importados",
+          "Atendimento personalizado e consultoria",
+          "Entrega rápida e conveniente",
+          "Experiências exclusivas para pets"
+        ],
+        "painPoints": [
+          "Dificuldade para encontrar produtos especializados",
+          "Preocupação com qualidade e procedência",
+          "Falta de orientação especializada",
+          "Produtos comuns não atendem necessidades específicas"
+        ]
+      },
+      "secondaryPersonas": [
+        {
+          "name": "Carlos - Pai de Pet",
+          "profile": "Homem, 35-50 anos, primeiro pet, busca praticidade",
+          "percentage": 40
+        },
+        {
+          "name": "Família Premium",
+          "profile": "Múltiplos pets, foco em bem-estar e qualidade",
+          "percentage": 30
+        }
+      ],
+      "insights": [
+        "Público valoriza qualidade acima do preço",
+        "Busca por produtos diferenciados e exclusivos",
+        "Importante ter consultoria especializada",
+        "Experiências únicas geram fidelidade"
+      ]
+    },
+    "ux": {
+      "navigation": {
+        "score": 88,
+        "issues": [
+          "Categoria de produtos poderia ser mais intuitiva"
+        ],
+        "strengths": [
+          "Busca por produto muito eficiente",
+          "Filtros avançados funcionais",
+          "Carrinho de compras otimizado"
+        ]
+      },
+      "content": {
+        "score": 82,
+        "readability": 85,
+        "engagement": [
+          "Descrições detalhadas dos produtos",
+          "Fotos profissionais de alta qualidade",
+          "Vídeos demonstrativos dos produtos"
+        ]
+      },
+      "conversion": {
+        "score": 90,
+        "ctaPresence": true,
+        "trustSignals": [
+          "Certificações de qualidade",
+          "Avaliações e comentários",
+          "Política de devolução clara"
+        ]
+      },
+      "mobile": {
+        "score": 85,
+        "responsive": true,
+        "issues": [
+          "Galeria de produtos poderia ser mais fluida"
+        ]
+      }
+    },
+    "ecosystem": {
+      "socialPresence": [
+        {
+          "platform": "Instagram",
+          "handle": "@petshoppremium",
+          "followers": 8500,
+          "engagement": 6.8,
+          "lastPost": "1 dia atrás",
+          "contentQuality": 88
+        },
+        {
+          "platform": "Facebook",
+          "handle": "Pet Shop Premium",
+          "followers": 4200,
+          "engagement": 3.2,
+          "lastPost": "3 dias atrás",
+          "contentQuality": 82
+        }
+      ],
+      "competitors": [
+        {
+          "name": "Pet Center Premium",
+          "url": "https://petcenterpremium.com.br",
+          "strengths": [
+            "Variedade de produtos premium",
+            "Atendimento especializado",
+            "Entrega rápida"
+          ],
+          "opportunities": [
+            "Preços mais competitivos",
+            "Programa de fidelidade",
+            "Experiências diferenciadas"
+          ]
+        }
+      ],
+      "marketPosition": {
+        "category": "Pet shop premium",
+        "differentiation": [
+          "Produtos importados exclusivos",
+          "Consultoria especializada",
+          "Experiências únicas",
+          "Atendimento personalizado"
+        ],
+        "threats": [
+          "E-commerce geral",
+          "Novos concorrentes premium",
+          "Mudanças nos hábitos de consumo"
+        ]
+      }
+    },
+    "actionPlan": {
+      "immediate": [
+        {
+          "action": "Implementar programa de fidelidade digital",
+          "priority": "high",
+          "effort": "medium",
+          "impact": "high",
+          "timeline": "2 semanas"
+        },
+        {
+          "action": "Otimizar filtros de busca por produto",
+          "priority": "medium",
+          "effort": "small",
+          "impact": "medium",
+          "timeline": "1 semana"
+        }
+      ],
+      "shortTerm": [
+        {
+          "action": "Criar seção de consultoria especializada",
+          "priority": "high",
+          "effort": "medium",
+          "impact": "high",
+          "timeline": "1 mês"
+        },
+        {
+          "action": "Desenvolver conteúdo educativo sobre produtos",
+          "priority": "medium",
+          "effort": "medium",
+          "impact": "medium",
+          "timeline": "6 semanas"
+        }
+      ],
+      "longTerm": [
+        {
+          "action": "Expandir para marketplace de produtos premium",
+          "priority": "medium",
+          "effort": "large",
+          "impact": "high",
+          "timeline": "6-12 meses"
+        }
+      ]
+    },
+    "roadmap": {
+      "phases": [
+        {
+          "name": "Fase 1 - Otimização de Conversão",
+          "duration": "6 semanas",
+          "objectives": [
+            "Aumentar taxa de conversão",
+            "Melhorar experiência do usuário",
+            "Implementar fidelidade digital"
+          ],
+          "deliverables": [
+            "Programa de fidelidade",
+            "Otimização de checkout",
+            "Sistema de recomendações"
+          ]
+        }
+      ],
+      "milestones": [
+        {
+          "name": "Programa Fidelidade Implementado",
+          "date": "3 semanas",
+          "criteria": [
+            "Sistema funcional",
+            "Integração com e-commerce",
+            "Comunicação aos clientes"
+          ]
+        }
+      ],
+      "budget": {
+        "total": 12000,
+        "breakdown": [
+          {
+            "category": "Desenvolvimento",
+            "amount": 6000,
+            "justification": "Programa fidelidade e otimizações"
+          },
+          {
+            "category": "Marketing",
+            "amount": 4000,
+            "justification": "Campanhas e conteúdo"
+          },
+          {
+            "category": "Ferramentas",
+            "amount": 2000,
+            "justification": "Analytics e automação"
+          }
+        ]
+      }
+    },
+    "homeAnatomy": {
+      "structure": {
+        "header": {
+          "logo": true,
+          "navigation": ["Produtos", "Marcas", "Serviços", "Blog", "Contato"],
+          "contact": true,
+          "cta": true
+        },
+        "hero": {
+          "headline": "Produtos Premium para seu Pet",
+          "subheadline": "A melhor seleção de produtos importados e nacionais para o bem-estar do seu pet",
+          "cta": "Ver Produtos",
+          "media": "carousel"
+        },
+        "sections": [
+          {
+            "type": "Destaques",
+            "purpose": "Produtos em destaque",
+            "effectiveness": 88
+          },
+          {
+            "type": "Categorias",
+            "purpose": "Navegação por categoria",
+            "effectiveness": 92
+          },
+          {
+            "type": "Marcas",
+            "purpose": "Apresentar marcas parceiras",
+            "effectiveness": 85
+          }
+        ],
+        "footer": {
+          "links": ["Sobre", "Política", "Entrega", "Trocas"],
+          "contact": true,
+          "social": ["Instagram", "Facebook", "WhatsApp"]
+        }
+      },
+      "performance": {
+        "loadTime": 2.1,
+        "mobileOptimized": true,
+        "seoScore": 82,
+        "accessibilityScore": 78
+      }
+    },
+    "questions": {
+      "brandStrategy": [
+        {
+          "question": "Como vocês se diferenciam dos pet shops tradicionais?",
+          "importance": "critical",
+          "rationale": "Define posicionamento premium da marca"
+        }
+      ],
+      "contentStrategy": [
+        {
+          "question": "Que tipo de conteúdo educativo vocês podem oferecer?",
+          "importance": "important",
+          "rationale": "Complementa experiência de compra"
+        }
+      ],
+      "technical": [
+        {
+          "question": "Qual plataforma de e-commerce vocês utilizam?",
+          "importance": "critical",
+          "rationale": "Impacta possibilidades de implementação"
+        }
+      ],
+      "business": [
+        {
+          "question": "Qual o ticket médio atual e meta?",
+          "importance": "important",
+          "rationale": "Orienta estratégia de produtos"
+        }
+      ]
     }
   },
   "genericBusiness": {
@@ -466,6 +757,369 @@
         "Melhorar presença em redes sociais"
       ],
       "confidence": "medium"
+    },
+    "personas": {
+      "primaryPersona": {
+        "name": "Cliente Geral",
+        "age": "25-50 anos",
+        "profile": "Cliente comum buscando soluções práticas e confiáveis",
+        "needs": [
+          "Informações claras sobre produtos/serviços",
+          "Facilidade de contato",
+          "Preços competitivos",
+          "Atendimento eficiente"
+        ],
+        "painPoints": [
+          "Dificuldade para encontrar informações",
+          "Processos complicados",
+          "Falta de clareza nos preços",
+          "Atendimento demorado"
+        ]
+      },
+      "secondaryPersonas": [
+        {
+          "name": "Cliente Corporativo",
+          "profile": "Empresas buscando soluções B2B",
+          "percentage": 30
+        },
+        {
+          "name": "Cliente Recorrente",
+          "profile": "Clientes fiéis que retornam",
+          "percentage": 25
+        }
+      ],
+      "insights": [
+        "Público valoriza praticidade e clareza",
+        "Decisão baseada em confiança e preço",
+        "Importante ter canais de comunicação eficientes",
+        "Experiência do usuário impacta fidelidade"
+      ]
+    },
+    "ux": {
+      "navigation": {
+        "score": 68,
+        "issues": [
+          "Menu confuso com muitas opções",
+          "Falta de hierarquia visual clara",
+          "Busca interna pouco eficiente"
+        ],
+        "strengths": [
+          "Design limpo e moderno",
+          "Carregamento relativamente rápido",
+          "Informações básicas acessíveis"
+        ]
+      },
+      "content": {
+        "score": 72,
+        "readability": 75,
+        "engagement": [
+          "Informações básicas presentes",
+          "Imagens ilustrativas",
+          "Linguagem acessível"
+        ]
+      },
+      "conversion": {
+        "score": 58,
+        "ctaPresence": false,
+        "trustSignals": [
+          "Informações de contato presentes",
+          "Política básica de privacidade"
+        ]
+      },
+      "mobile": {
+        "score": 65,
+        "responsive": true,
+        "issues": [
+          "Botões pequenos para toque",
+          "Formulários não otimizados",
+          "Navegação mobile confusa"
+        ]
+      }
+    },
+    "ecosystem": {
+      "socialPresence": [
+        {
+          "platform": "Facebook",
+          "handle": "Empresa Exemplo",
+          "followers": 450,
+          "engagement": 1.2,
+          "lastPost": "2 semanas atrás",
+          "contentQuality": 55
+        }
+      ],
+      "competitors": [
+        {
+          "name": "Concorrente A",
+          "url": "https://concorrentea.com.br",
+          "strengths": [
+            "Presença digital mais forte",
+            "Maior variedade de produtos",
+            "Preços competitivos"
+          ],
+          "opportunities": [
+            "Melhorar identidade visual",
+            "Otimizar experiência do usuário",
+            "Fortalecer presença online"
+          ]
+        }
+      ],
+      "marketPosition": {
+        "category": "Negócio local tradicional",
+        "differentiation": [
+          "Atendimento personalizado",
+          "Conhecimento do mercado local",
+          "Relacionamento com clientes"
+        ],
+        "threats": [
+          "Concorrentes digitais",
+          "Mudanças nos hábitos de consumo",
+          "Novos entrantes no mercado"
+        ]
+      }
+    },
+    "actionPlan": {
+      "immediate": [
+        {
+          "action": "Criar calls-to-action claros no site",
+          "priority": "high",
+          "effort": "small",
+          "impact": "high",
+          "timeline": "1 semana"
+        },
+        {
+          "action": "Otimizar formulários de contato",
+          "priority": "high",
+          "effort": "small",
+          "impact": "medium",
+          "timeline": "1 semana"
+        },
+        {
+          "action": "Melhorar navegação mobile",
+          "priority": "medium",
+          "effort": "small",
+          "impact": "medium",
+          "timeline": "2 semanas"
+        }
+      ],
+      "shortTerm": [
+        {
+          "action": "Redesenhar identidade visual",
+          "priority": "high",
+          "effort": "medium",
+          "impact": "high",
+          "timeline": "1-2 meses"
+        },
+        {
+          "action": "Implementar blog institucional",
+          "priority": "medium",
+          "effort": "medium",
+          "impact": "medium",
+          "timeline": "6 semanas"
+        },
+        {
+          "action": "Otimizar SEO básico",
+          "priority": "high",
+          "effort": "small",
+          "impact": "high",
+          "timeline": "3 semanas"
+        }
+      ],
+      "longTerm": [
+        {
+          "action": "Desenvolver estratégia de conteúdo consistente",
+          "priority": "medium",
+          "effort": "medium",
+          "impact": "high",
+          "timeline": "3-6 meses"
+        },
+        {
+          "action": "Expandir presença em redes sociais",
+          "priority": "medium",
+          "effort": "medium",
+          "impact": "medium",
+          "timeline": "4-8 meses"
+        }
+      ]
+    },
+    "roadmap": {
+      "phases": [
+        {
+          "name": "Fase 1 - Otimizações Básicas",
+          "duration": "4 semanas",
+          "objectives": [
+            "Melhorar usabilidade imediata",
+            "Corrigir problemas críticos",
+            "Estabelecer base sólida"
+          ],
+          "deliverables": [
+            "Site mobile otimizado",
+            "CTAs implementados",
+            "Formulários funcionais"
+          ],
+          "dependencies": [],
+          "risks": [
+            "Recursos técnicos limitados",
+            "Curva de aprendizado"
+          ]
+        },
+        {
+          "name": "Fase 2 - Presença Digital",
+          "duration": "8 semanas",
+          "objectives": [
+            "Fortalecer identidade online",
+            "Melhorar posicionamento",
+            "Aumentar engajamento"
+          ],
+          "deliverables": [
+            "Nova identidade visual",
+            "Blog implementado",
+            "Redes sociais ativas"
+          ],
+          "dependencies": [
+            "Conclusão da Fase 1"
+          ],
+          "risks": [
+            "Manter consistência",
+            "Produção de conteúdo regular"
+          ]
+        }
+      ],
+      "milestones": [
+        {
+          "name": "Site Otimizado",
+          "date": "2 semanas",
+          "criteria": [
+            "Mobile funcional",
+            "CTAs visíveis",
+            "Formulários otimizados"
+          ],
+          "responsible": "Desenvolvedor"
+        },
+        {
+          "name": "Identidade Renovada",
+          "date": "6 semanas",
+          "criteria": [
+            "Logo atualizado",
+            "Paleta de cores definida",
+            "Aplicado em todos os canais"
+          ],
+          "responsible": "Designer"
+        }
+      ],
+      "budget": {
+        "total": 6500,
+        "breakdown": [
+          {
+            "category": "Design",
+            "amount": 2500,
+            "justification": "Identidade visual e materiais"
+          },
+          {
+            "category": "Desenvolvimento",
+            "amount": 2500,
+            "justification": "Otimização do site"
+          },
+          {
+            "category": "Marketing",
+            "amount": 1500,
+            "justification": "Redes sociais e conteúdo"
+          }
+        ]
+      }
+    },
+    "homeAnatomy": {
+      "structure": {
+        "header": {
+          "logo": true,
+          "navigation": ["Início", "Sobre", "Serviços", "Contato"],
+          "contact": true,
+          "cta": false
+        },
+        "hero": {
+          "headline": "Bem-vindo à Nossa Empresa",
+          "subheadline": "Oferecemos soluções completas para seu negócio",
+          "cta": "",
+          "media": "image"
+        },
+        "sections": [
+          {
+            "type": "Sobre",
+            "purpose": "Apresentar empresa",
+            "effectiveness": 65
+          },
+          {
+            "type": "Serviços",
+            "purpose": "Mostrar ofertas",
+            "effectiveness": 70
+          },
+          {
+            "type": "Contato",
+            "purpose": "Facilitar comunicação",
+            "effectiveness": 60
+          }
+        ],
+        "footer": {
+          "links": ["Sobre", "Contato", "Política"],
+          "contact": true,
+          "social": ["Facebook"]
+        }
+      },
+      "performance": {
+        "loadTime": 4.2,
+        "mobileOptimized": false,
+        "seoScore": 45,
+        "accessibilityScore": 55
+      }
+    },
+    "questions": {
+      "brandStrategy": [
+        {
+          "question": "Qual é a proposta de valor principal da empresa?",
+          "importance": "critical",
+          "rationale": "Fundamental para posicionamento e comunicação"
+        },
+        {
+          "question": "Quem são os principais concorrentes?",
+          "importance": "important",
+          "rationale": "Orienta estratégia de diferenciação"
+        }
+      ],
+      "contentStrategy": [
+        {
+          "question": "Que tipo de conteúdo vocês podem produzir?",
+          "importance": "important",
+          "rationale": "Define possibilidades de marketing de conteúdo"
+        },
+        {
+          "question": "Qual a frequência ideal de publicação?",
+          "importance": "medium",
+          "rationale": "Determina viabilidade da estratégia"
+        }
+      ],
+      "technical": [
+        {
+          "question": "Qual plataforma vocês usam para o site?",
+          "importance": "critical",
+          "rationale": "Impacta possibilidades de implementação"
+        },
+        {
+          "question": "Há orçamento para melhorias técnicas?",
+          "importance": "important",
+          "rationale": "Define escopo das implementações"
+        }
+      ],
+      "business": [
+        {
+          "question": "Quais são os principais objetivos de negócio?",
+          "importance": "critical",
+          "rationale": "Alinha estratégia digital com metas"
+        },
+        {
+          "question": "Qual o perfil do cliente ideal?",
+          "importance": "important",
+          "rationale": "Orienta criação de personas e conteúdo"
+        }
+      ]
     }
   }
 }

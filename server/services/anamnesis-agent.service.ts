@@ -1,12 +1,14 @@
-import { 
-  AnalysisRequest, 
-  AnalysisResult, 
+import {
+  AnalysisRequest,
+  AnalysisResult,
   AnamnesisFindings,
   AnalysisMetadata,
   MockEngineConfig,
   AnalysisSource
 } from '../../shared/types/anamnesis.js';
 import mockData from '../fixtures/mock-analysis-results.json';
+import { openai, withOpenAILimit } from './openai.js';
+import axios from 'axios';
 
 /**
  * Mock Analysis Engine
@@ -26,32 +28,47 @@ export class AnamnesisAgentService {
   }
 
   /**
-   * Analyzes digital presence based on provided sources
-   * Returns mock analysis results with realistic timing
+   * Analyzes digital presence using AI and real data
+   * Falls back to mock data if AI analysis fails
    */
   async analyzeDigitalPresence(request: AnalysisRequest): Promise<AnalysisResult> {
     const startTime = Date.now();
-    
+
     try {
       // Simulate random errors based on error rate
       if (this.config.enableRandomness && Math.random() < this.config.errorRate) {
         throw new Error('Simulated analysis error - service temporarily unavailable');
       }
 
+      // Try AI-powered analysis first
+      let findings: AnamnesisFindings;
+      let aiAnalysisSuccessful = false;
+
+      try {
+        findings = await this.performAIAnalysis(request);
+        aiAnalysisSuccessful = true;
+        console.log('AI analysis completed successfully');
+      } catch (aiError) {
+        console.warn('AI analysis failed, falling back to mock data:', aiError);
+        // Fallback to mock data
+        const businessType = this.detectBusinessType(request.primaryUrl, request.socialUrls);
+        findings = this.generateFindings(businessType, request.sources);
+      }
+
       // Simulate processing time
       await this.simulateProcessingTime();
 
-      // Determine business type from URL analysis
-      const businessType = this.detectBusinessType(request.primaryUrl, request.socialUrls);
-      
-      // Generate analysis findings
-      const findings = this.generateFindings(businessType, request.sources);
-      
       // Calculate completeness score
       const scoreCompleteness = this.calculateCompletenessScore(request.sources, findings);
-      
+
       // Generate metadata
       const metadata = this.generateMetadata(startTime, request.sources, findings);
+      if (!aiAnalysisSuccessful) {
+        metadata.warnings = metadata.warnings || [];
+        metadata.warnings.push('Analysis used fallback mock data due to AI service unavailability');
+        metadata.limitations = metadata.limitations || [];
+        metadata.limitations.push('Mock data used - results may not reflect actual website content');
+      }
 
       return {
         id: request.requestId,
@@ -70,7 +87,7 @@ export class AnamnesisAgentService {
 
     } catch (error) {
       const endTime = Date.now();
-      
+
       return {
         id: request.requestId,
         status: 'error',
@@ -99,22 +116,116 @@ export class AnamnesisAgentService {
   }
 
   /**
-   * Simulates processing time with some randomness
+   * Analyzes a URL using AI and web scraping
    */
-  private async simulateProcessingTime(): Promise<void> {
-    let delay = this.config.processingTimeMs;
-    
-    if (this.config.enableRandomness) {
-      // Add ±25% randomness to processing time
-      const variation = delay * 0.25;
-      delay = delay + (Math.random() - 0.5) * 2 * variation;
+  private async analyzeUrlWithAI(url: string, type: 'site' | 'social'): Promise<any> {
+    try {
+      // Try to fetch basic content from the URL
+      const content = await this.scrapeUrlContent(url);
+
+      // Use AI to analyze the content
+      const analysisPrompt = `
+        Analise o seguinte conteúdo de ${type === 'site' ? 'website' : 'rede social'} e forneça insights estruturados:
+
+        URL: ${url}
+        Tipo: ${type}
+        Conteúdo coletado: ${content}
+
+        Forneça análise em JSON com as seguintes seções:
+        {
+          "identity": {
+            "score": number (0-100),
+            "findings": ["array de descobertas"],
+            "recommendations": ["array de recomendações"]
+          },
+          "ux": {
+            "navigation": {"score": number, "issues": [], "strengths": []},
+            "content": {"score": number, "readability": number},
+            "conversion": {"score": number, "ctaPresence": boolean},
+            "mobile": {"score": number, "responsive": boolean}
+          },
+          "ecosystem": {
+            "socialPresence": [{"platform": "string", "followers": number}],
+            "competitors": []
+          }
+        }
+      `;
+
+      const response = await withOpenAILimit(() =>
+        openai.chat.completions.create({
+          model: "gpt-4",
+          messages: [
+            {
+              role: "system",
+              content: "Você é um especialista em análise de presença digital. Forneça análises precisas e estruturadas em formato JSON."
+            },
+            {
+              role: "user",
+              content: analysisPrompt
+            }
+          ],
+          response_format: { type: "json_object" },
+          temperature: 0.3,
+          max_tokens: 2000
+        })
+      );
+
+      return JSON.parse(response.choices[0].message.content || "{}");
+    } catch (error) {
+      console.warn(`Failed to analyze URL ${url} with AI:`, error);
+      return null;
     }
-    
-    // Ensure minimum 5 seconds, maximum 2 minutes
-    delay = Math.max(5000, Math.min(120000, delay));
-    
-    return new Promise(resolve => setTimeout(resolve, delay));
   }
+
+  /**
+   * Scrapes basic content from a URL
+   */
+  private async scrapeUrlContent(url: string): Promise<string> {
+    try {
+      const response = await axios.get(url, {
+        timeout: 10000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; DigitalWoof/1.0; +https://digitalwoof.com/bot)'
+        }
+      });
+
+      // Extract basic information from HTML
+      const html = response.data;
+      const title = html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1] || '';
+      const metaDescription = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["'][^>]*>/i)?.[1] || '';
+      const headings = html.match(/<h[1-6][^>]*>([^<]+)<\/h[1-6]>/gi) || [];
+      const links = html.match(/<a[^>]*href=["']([^"']+)["'][^>]*>([^<]+)<\/a>/gi) || [];
+
+      return `
+        Title: ${title}
+        Description: ${metaDescription}
+        Headings: ${headings.slice(0, 5).join(', ')}
+        Links: ${links.slice(0, 10).length} links found
+        Content Length: ${html.length} characters
+      `.trim();
+    } catch (error) {
+      console.warn(`Failed to scrape ${url}:`, error);
+      return `Unable to access content from ${url}`;
+    }
+  }
+
+  /**
+    * Simulates processing time with some randomness
+    */
+   private async simulateProcessingTime(): Promise<void> {
+     let delay = this.config.processingTimeMs;
+
+     if (this.config.enableRandomness) {
+       // Add ±25% randomness to processing time
+       const variation = delay * 0.25;
+       delay = delay + (Math.random() - 0.5) * 2 * variation;
+     }
+
+     // Ensure minimum 5 seconds, maximum 2 minutes
+     delay = Math.max(5000, Math.min(120000, delay));
+
+     return new Promise(resolve => setTimeout(resolve, delay));
+   }
 
   /**
    * Detects business type based on URL patterns and content
@@ -133,6 +244,123 @@ export class AnamnesisAgentService {
     }
     
     return 'genericBusiness';
+  }
+
+  /**
+   * Performs AI-powered analysis of all sources
+   */
+  private async performAIAnalysis(request: AnalysisRequest): Promise<AnamnesisFindings> {
+    const { primaryUrl, socialUrls, sources } = request;
+
+    // Analyze primary URL
+    const primaryAnalysis = await this.analyzeUrlWithAI(primaryUrl, 'site');
+
+    // Analyze social URLs
+    const socialAnalyses = await Promise.all(
+      socialUrls.map(url => this.analyzeUrlWithAI(url, 'social'))
+    );
+
+    // Combine analyses using AI
+    const combinedAnalysis = await this.combineAnalysesWithAI(primaryAnalysis, socialAnalyses, sources);
+
+    return this.ensureCompleteFindingsStructure(combinedAnalysis);
+  }
+
+  /**
+   * Combines multiple URL analyses into comprehensive findings
+   */
+  private async combineAnalysesWithAI(primaryAnalysis: any, socialAnalyses: any[], sources: AnalysisSource[]): Promise<Partial<AnamnesisFindings>> {
+    const analysisData = {
+      primary: primaryAnalysis,
+      social: socialAnalyses.filter(a => a !== null),
+      sources: sources
+    };
+
+    const combinePrompt = `
+      Combine as seguintes análises de presença digital em um relatório estruturado de 8 seções:
+
+      Dados de análise: ${JSON.stringify(analysisData, null, 2)}
+
+      Gere um relatório completo em JSON com as seguintes seções obrigatórias:
+      {
+        "identity": {
+          "score": number (0-100),
+          "findings": ["array de descobertas sobre identidade da marca"],
+          "recommendations": ["array de recomendações"],
+          "confidence": "high|medium|low"
+        },
+        "personas": {
+          "primaryPersona": {
+            "name": "string",
+            "age": "string",
+            "profile": "string",
+            "needs": ["array"],
+            "painPoints": ["array"]
+          },
+          "secondaryPersonas": [{"name": "string", "profile": "string"}],
+          "insights": ["array de insights sobre público"]
+        },
+        "ux": {
+          "navigation": {"score": number, "issues": [], "strengths": []},
+          "content": {"score": number, "readability": number, "engagement": []},
+          "conversion": {"score": number, "ctaPresence": boolean, "trustSignals": []},
+          "mobile": {"score": number, "responsive": boolean, "issues": []}
+        },
+        "ecosystem": {
+          "socialPresence": [{"platform": "string", "handle": "string", "followers": number, "engagement": number}],
+          "competitors": [{"name": "string", "url": "string", "strengths": [], "opportunities": []}],
+          "marketPosition": {"category": "string", "differentiation": [], "threats": []}
+        },
+        "actionPlan": {
+          "immediate": [{"action": "string", "priority": "high|medium|low", "effort": "small|medium|large", "impact": "high|medium|low", "timeline": "string"}],
+          "shortTerm": [{"action": "string", "priority": "string", "effort": "string", "impact": "string", "timeline": "string"}],
+          "longTerm": [{"action": "string", "priority": "string", "effort": "string", "impact": "string", "timeline": "string"}]
+        },
+        "roadmap": {
+          "phases": [{"name": "string", "duration": "string", "objectives": [], "deliverables": [], "risks": []}],
+          "milestones": [{"name": "string", "date": "string", "criteria": [], "responsible": "string"}],
+          "budget": {"total": number, "breakdown": [{"category": "string", "amount": number}]}
+        },
+        "homeAnatomy": {
+          "structure": {
+            "header": {"logo": boolean, "navigation": [], "contact": boolean, "cta": boolean},
+            "hero": {"headline": "string", "subheadline": "string", "cta": "string", "media": "image|video|none"},
+            "sections": [{"type": "string", "purpose": "string", "effectiveness": number}],
+            "footer": {"links": [], "contact": boolean, "social": []}
+          },
+          "performance": {"loadTime": number, "mobileOptimized": boolean, "seoScore": number, "accessibilityScore": number}
+        },
+        "questions": {
+          "brandStrategy": [{"question": "string", "importance": "critical|important|medium", "rationale": "string"}],
+          "contentStrategy": [{"question": "string", "importance": "string", "rationale": "string"}],
+          "technical": [{"question": "string", "importance": "string", "rationale": "string"}],
+          "business": [{"question": "string", "importance": "string", "rationale": "string"}]
+        }
+      }
+
+      Seja específico e baseie suas recomendações nos dados reais analisados.
+    `;
+
+    const response = await withOpenAILimit(() =>
+      openai.chat.completions.create({
+        model: "gpt-4",
+        messages: [
+          {
+            role: "system",
+            content: "Você é um especialista em análise de presença digital. Forneça análises abrangentes e acionáveis baseadas em dados reais."
+          },
+          {
+            role: "user",
+            content: combinePrompt
+          }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.4,
+        max_tokens: 4000
+      })
+    );
+
+    return JSON.parse(response.choices[0].message.content || "{}");
   }
 
   /**

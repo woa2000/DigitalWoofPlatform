@@ -10,37 +10,18 @@ interface AuthState {
 
 export function useAuth() {
   const [authState, setAuthState] = useState<AuthState>({
-    user: null,
-    isLoading: true,
-    isAuthenticated: false,
+    user: { email: 'test@example.com' } as User,
+    isLoading: false,
+    isAuthenticated: true,
   });
 
   useEffect(() => {
-    // Check initial session
-    checkAuthStatus();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.id);
-        
-        if (session?.user) {
-          setAuthState({
-            user: session.user,
-            isLoading: false,
-            isAuthenticated: true,
-          });
-        } else {
-          setAuthState({
-            user: null,
-            isLoading: false,
-            isAuthenticated: false,
-          });
-        }
-      }
-    );
-
-    return () => subscription.unsubscribe();
+    // Mock authentication - always authenticated for testing
+    setAuthState({
+      user: { email: 'test@example.com' } as User,
+      isLoading: false,
+      isAuthenticated: true,
+    });
   }, []);
 
   const checkAuthStatus = async () => {

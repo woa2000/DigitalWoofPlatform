@@ -11,6 +11,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useDebounce } from './useDebounce';
+import { supabase } from '../lib/supabase';
 
 export interface Asset {
   id: string;
@@ -140,6 +141,25 @@ const DEFAULT_FILTERS: AssetFilters = {
 
 const ITEMS_PER_PAGE = 24;
 
+// Helper function to make authenticated requests
+const makeAuthenticatedRequest = async (url: string, options: RequestInit = {}) => {
+  const { data: { session } } = await supabase.auth.getSession();
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...options.headers as Record<string, string>,
+  };
+
+  if (session?.access_token) {
+    headers['Authorization'] = `Bearer ${session.access_token}`;
+  }
+
+  return fetch(url, {
+    ...options,
+    headers,
+  });
+};
+
 export function useAssets(): UseAssetsReturn {
   // State
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -176,9 +196,8 @@ export function useAssets(): UseAssetsReturn {
     setError(null);
 
     try {
-      const response = await fetch('/api/assets/search', {
+      const response = await makeAuthenticatedRequest('/api/assets/search', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(params)
       });
 
@@ -187,7 +206,7 @@ export function useAssets(): UseAssetsReturn {
       }
 
       const data = await response.json();
-      
+
       setAssets(prev => append ? [...prev, ...data.assets] : data.assets);
       setTotal(data.total);
       setFacets(data.facets);
@@ -204,7 +223,7 @@ export function useAssets(): UseAssetsReturn {
   // Load collections
   const loadCollections = useCallback(async () => {
     try {
-      const response = await fetch('/api/assets/collections');
+      const response = await makeAuthenticatedRequest('/api/assets/collections');
       if (response.ok) {
         const data = await response.json();
         setCollections(data.collections);
@@ -217,7 +236,7 @@ export function useAssets(): UseAssetsReturn {
   // Load favorites
   const loadFavorites = useCallback(async () => {
     try {
-      const response = await fetch('/api/assets/favorites');
+      const response = await makeAuthenticatedRequest('/api/assets/favorites');
       if (response.ok) {
         const data = await response.json();
         setFavorites(data.favoriteIds);
@@ -261,7 +280,7 @@ export function useAssets(): UseAssetsReturn {
   // Get single asset
   const getAsset = useCallback(async (id: string): Promise<Asset | null> => {
     try {
-      const response = await fetch(`/api/assets/${id}`);
+      const response = await makeAuthenticatedRequest(`/api/assets/${id}`);
       if (response.ok) {
         const data = await response.json();
         return data.asset;

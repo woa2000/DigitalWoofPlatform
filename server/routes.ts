@@ -5,7 +5,7 @@ import { loggingMiddleware } from "./utils/logger";
 import { HybridCacheProvider, cacheMiddleware, CacheKeys } from './cache/CacheProvider';
 import { QueryOptimizer, queryAnalysisMiddleware } from './services/QueryOptimizer';
 
-import dashboardRoutes from "./routes/dashboard"; 
+import dashboardRoutes from "./routes/dashboard";
 import campaignsRoutes from "./routes/campaigns";
 import brandVoiceRoutes from "./routes/brand-voice";
 import complianceRoutes from "./routes/compliance";
@@ -18,6 +18,7 @@ import analyticsRoutes from "./routes/analytics";
 import templatesRoutes from "./routes/templates";
 import templateSearchRoutes from "./routes/template-search";
 import templateComparisonRoutes from "./routes/template-comparison";
+import assetsRoutes from "./routes/assets";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize services
@@ -46,6 +47,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/content", contentRoutes);
   app.use("/api/performance", performanceRoutes);
   app.use("/api/analytics", analyticsRoutes);
+  app.use("/api/assets", assetsRoutes);
   
   // Apply caching to template routes
   app.use(

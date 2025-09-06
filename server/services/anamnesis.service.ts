@@ -41,6 +41,11 @@ const analysisStorage = new Map<string, any>();
 const sourceStorage = new Map<string, any[]>();
 const findingStorage = new Map<string, any>();
 
+// Clear storage on startup for testing
+analysisStorage.clear();
+sourceStorage.clear();
+findingStorage.clear();
+
 export class AnamnesisService {
   
   /**

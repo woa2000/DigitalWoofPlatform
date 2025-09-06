@@ -75,12 +75,14 @@ export function OnboardingWizard() {
 
   const CurrentStepComponent = STEPS[currentStep]?.component;
   const progressPercentage = ((currentStep + 1) / STEPS.length) * 100;
+  const isLastStep = currentStep === STEPS.length - 1;
 
-  const handleNext = () => {
-    if (currentStep === STEPS.length - 1) {
-      // Last step - complete wizard
-      completWizard();
+  const handleNext = async () => {
+    if (isLastStep) {
+      // Last step - save everything and complete wizard
+      await completWizard();
     } else {
+      // Regular step - just move to next
       nextStep();
     }
   };
@@ -227,15 +229,27 @@ export function OnboardingWizard() {
           <Button
             onClick={handleNext}
             disabled={!validateCurrentStep() || isLoading}
-            className="flex items-center space-x-2"
+            className={cn(
+              "flex items-center space-x-2",
+              isLastStep && "bg-green-600 hover:bg-green-700"
+            )}
           >
-            <span>
-              {currentStep === STEPS.length - 1 ? 'Finalizar' : 'Próximo'}
-            </span>
-            {currentStep === STEPS.length - 1 ? (
-              <Check className="w-4 h-4" />
+            {isLoading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Salvando...</span>
+              </>
             ) : (
-              <ArrowRight className="w-4 h-4" />
+              <>
+                <span>
+                  {isLastStep ? 'Finalizar e Salvar' : 'Próximo'}
+                </span>
+                {isLastStep ? (
+                  <Check className="w-4 h-4" />
+                ) : (
+                  <ArrowRight className="w-4 h-4" />
+                )}
+              </>
             )}
           </Button>
         </div>
@@ -243,7 +257,13 @@ export function OnboardingWizard() {
         {/* Help Text */}
         <div className="mt-8 text-center">
           <p className="text-sm text-gray-500">
-            Seu progresso é salvo automaticamente. Você pode sair e retornar a qualquer momento.
+            {isLastStep ? (
+              <span className="font-medium text-blue-600">
+                📝 Revise seus dados e clique em "Finalizar e Salvar" para concluir a configuração
+              </span>
+            ) : (
+              "Seu progresso é salvo localmente. Complete todos os passos para salvar no servidor."
+            )}
           </p>
         </div>
       </div>

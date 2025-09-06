@@ -16,7 +16,8 @@
     "sync-seasonal": "tsx server/scripts/sync-seasonal-kb.ts",
     "sync-seasonal:test": "tsx server/scripts/sync-seasonal-kb.ts test",
     "sync-seasonal:validate": "tsx server/scripts/sync-seasonal-kb.ts validate",
-    "sync-seasonal:all": "tsx server/scripts/sync-seasonal-kb.ts all"
+    "sync-seasonal:all": "tsx server/scripts/sync-seasonal-kb.ts all",
+    "setup:storage": "node scripts/setup-storage.js"
   },
   "dependencies": {
     "@esbuild/darwin-arm64": "^0.25.9",
@@ -56,6 +57,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
     "@types/react-router-dom": "^5.3.3",
+    "axios": "^1.11.0",
     "bottleneck": "^2.19.5",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

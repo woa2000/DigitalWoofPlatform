@@ -43,3 +43,20 @@ export const complianceApi = {
   getMetrics: () => apiRequest("GET", "/api/compliance/metrics"),
   getViolations: () => apiRequest("GET", "/api/compliance/violations"),
 };
+
+// Anamnesis API
+export const anamnesisApi = {
+  create: (data: { primaryUrl: string; socialUrls: string[] }) =>
+    apiRequest("POST", "/api/anamnesis", data),
+  getById: (id: string) => apiRequest("GET", `/api/anamnesis/${id}`),
+  getAll: (params?: { page?: number; limit?: number; status?: string }) => {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.status) queryParams.append('status', params.status);
+    const queryString = queryParams.toString();
+    return apiRequest("GET", `/api/anamnesis${queryString ? `?${queryString}` : ''}`);
+  },
+  getStatus: (id: string) => apiRequest("GET", `/api/anamnesis/${id}/status`),
+  delete: (id: string) => apiRequest("DELETE", `/api/anamnesis/${id}`),
+};

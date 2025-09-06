@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -54,7 +54,10 @@ const STEPS = [
   }
 ];
 
-export function RobustOnboardingWizard() {
+export function RobustOnboardingWizard({ userId }: { userId?: string }) {
+  const [isCompleting, setIsCompleting] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  
   const {
     currentStep,
     state,
@@ -67,28 +70,38 @@ export function RobustOnboardingWizard() {
     getStepStatus,
     completWizard,
     validateCurrentStep,
+    validateAndNextStep,
     updateLogoData,
     updateToneConfig,
     updateLanguageConfig,
     updateBrandValues
-  } = useOnboarding();
+  } = useOnboarding(userId);
 
   const CurrentStepComponent = STEPS[currentStep]?.component;
   const progressPercentage = ((currentStep + 1) / STEPS.length) * 100;
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep === STEPS.length - 1) {
       // Last step - complete wizard
-      completWizard();
+      setIsCompleting(true);
+      try {
+        await completWizard();
+        setShowSuccessMessage(true);
+      } catch (error) {
+        setIsCompleting(false);
+      }
     } else {
-      nextStep();
+      // Use the new validation function
+      const success = await validateAndNextStep();
+      if (!success) {
+        // Validation failed, error is already set in state
+        console.log('Validation failed for step:', currentStep);
+      }
     }
   };
 
   const handleValidateAndNext = () => {
-    if (validateCurrentStep()) {
-      handleNext();
-    }
+    handleNext();
   };
 
   return (
@@ -198,11 +211,12 @@ export function RobustOnboardingWizard() {
                 onNext={() => {}} // Empty function - steps shouldn't navigate directly
                 onPrevious={() => {}} // Empty function - navigation handled by wizard
                 errors={errors}
-                isLoading={isLoading}
+                isLoading={false} // Don't pass global loading state to individual steps
                 updateLogoData={updateLogoData}
                 updateToneConfig={updateToneConfig}
                 updateLanguageConfig={updateLanguageConfig}
                 updateBrandValues={updateBrandValues}
+                userId={userId}
               />
             )}
           </CardContent>
@@ -211,7 +225,7 @@ export function RobustOnboardingWizard() {
           <div className="border-t px-6 py-4 bg-gray-50 rounded-b-lg">
             <div className="flex justify-between items-center">
               <Button
-                onClick={prevStep}
+                onClick={() => prevStep()}
                 disabled={!canGoPrev || isLoading}
                 variant="outline"
                 className="flex items-center space-x-2"
@@ -237,27 +251,68 @@ export function RobustOnboardingWizard() {
 
               <Button
                 onClick={handleValidateAndNext}
-                disabled={isLoading}
+                disabled={isCompleting}
                 className="flex items-center space-x-2"
               >
-                <span>
-                  {currentStep === STEPS.length - 1 ? 'Finalizar' : 'Próximo'}
-                </span>
-                {currentStep === STEPS.length - 1 ? (
-                  <Check className="w-4 h-4" />
+                {isCompleting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Finalizando...</span>
+                  </>
                 ) : (
-                  <ArrowRight className="w-4 h-4" />
+                  <>
+                    <span>
+                      {currentStep === STEPS.length - 1 ? 'Finalizar Configuração' : 'Próximo'}
+                    </span>
+                    {currentStep === STEPS.length - 1 ? (
+                      <Check className="w-4 h-4" />
+                    ) : (
+                      <ArrowRight className="w-4 h-4" />
+                    )}
+                  </>
                 )}
               </Button>
             </div>
           </div>
         </Card>
 
+        {/* Success Message */}
+        {showSuccessMessage && (
+          <Card className="mb-6 border-green-200 bg-green-50">
+            <CardContent className="pt-6">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                  <Check className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-green-800 font-medium">
+                    🎉 Configuração concluída com sucesso!
+                  </p>
+                  <p className="text-green-700 text-sm">
+                    Redirecionando para o dashboard...
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Help Text */}
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-500">
-            Seu progresso é salvo automaticamente. Você pode sair e retornar a qualquer momento.
-          </p>
+          {currentStep === STEPS.length - 1 ? (
+            <div className="space-y-2">
+              <p className="text-sm text-gray-700 font-medium">
+                🎉 Configuração quase concluída!
+              </p>
+              <p className="text-sm text-gray-500">
+                Ao finalizar, seus dados serão salvos e você será redirecionado para o dashboard.
+              </p>
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500">
+              Complete cada etapa para prosseguir. Seus dados serão salvos apenas ao finalizar.
+            </p>
+          )}
         </div>
       </div>
     </div>
