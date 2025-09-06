@@ -1,4 +1,5 @@
 import { useReducer, useEffect, useCallback } from 'react';
+import { useLocation } from 'wouter';
 import {
   OnboardingState,
   ToneConfiguration,
@@ -124,6 +125,9 @@ interface UseOnboardingReturn {
 export function useOnboarding(userId?: string): UseOnboardingReturn {
   // Initialize reducer with state
   const [state, dispatch] = useReducer(onboardingReducer, createInitialState());
+  
+  // Navigation hook
+  const [, setLocation] = useLocation();
 
   // API client
   const apiClient = userId ? createOnboardingApiClient(userId) : null;
@@ -302,6 +306,9 @@ export function useOnboarding(userId?: string): UseOnboardingReturn {
 
       // Clear localStorage on successful completion
       localStorage.removeItem(ONBOARDING_STORAGE_KEY);
+      
+      // Navigate to dashboard after completion
+      setLocation('/');
     } catch (error) {
       console.error('Failed to complete wizard:', error);
       dispatch({ type: 'SET_ERRORS', payload: { general: 'Failed to complete onboarding' } });

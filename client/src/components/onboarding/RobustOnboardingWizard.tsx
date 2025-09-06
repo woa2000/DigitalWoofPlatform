@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -55,6 +55,8 @@ const STEPS = [
 ];
 
 export function RobustOnboardingWizard({ userId }: { userId?: string }) {
+  const [isCompleting, setIsCompleting] = useState(false);
+  
   const {
     currentStep,
     state,
@@ -79,7 +81,12 @@ export function RobustOnboardingWizard({ userId }: { userId?: string }) {
   const handleNext = async () => {
     if (currentStep === STEPS.length - 1) {
       // Last step - complete wizard
-      await completWizard();
+      setIsCompleting(true);
+      try {
+        await completWizard();
+      } catch (error) {
+        setIsCompleting(false);
+      }
     } else {
       await nextStep();
     }
@@ -238,16 +245,25 @@ export function RobustOnboardingWizard({ userId }: { userId?: string }) {
 
               <Button
                 onClick={handleValidateAndNext}
-                disabled={isLoading}
+                disabled={isLoading || isCompleting}
                 className="flex items-center space-x-2"
               >
-                <span>
-                  {currentStep === STEPS.length - 1 ? 'Finalizar' : 'Próximo'}
-                </span>
-                {currentStep === STEPS.length - 1 ? (
-                  <Check className="w-4 h-4" />
+                {isCompleting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Finalizando...</span>
+                  </>
                 ) : (
-                  <ArrowRight className="w-4 h-4" />
+                  <>
+                    <span>
+                      {currentStep === STEPS.length - 1 ? 'Finalizar Configuração' : 'Próximo'}
+                    </span>
+                    {currentStep === STEPS.length - 1 ? (
+                      <Check className="w-4 h-4" />
+                    ) : (
+                      <ArrowRight className="w-4 h-4" />
+                    )}
+                  </>
                 )}
               </Button>
             </div>
@@ -256,9 +272,20 @@ export function RobustOnboardingWizard({ userId }: { userId?: string }) {
 
         {/* Help Text */}
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-500">
-            Seu progresso é salvo automaticamente. Você pode sair e retornar a qualquer momento.
-          </p>
+          {currentStep === STEPS.length - 1 ? (
+            <div className="space-y-2">
+              <p className="text-sm text-gray-700 font-medium">
+                🎉 Configuração quase concluída!
+              </p>
+              <p className="text-sm text-gray-500">
+                Ao finalizar, você será redirecionado para o dashboard onde poderá começar a usar a plataforma.
+              </p>
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500">
+              Seu progresso é salvo automaticamente. Você pode sair e retornar a qualquer momento.
+            </p>
+          )}
         </div>
       </div>
     </div>
