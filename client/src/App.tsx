@@ -9,6 +9,7 @@ import Login from "@/pages/Login";
 import Onboarding from "@/pages/Onboarding";
 import ManualMarca from "@/pages/ManualMarca";
 import NotFound from "@/pages/not-found";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -39,12 +40,22 @@ function Router() {
       </Route>
       <Route path="/manual-marca/:brandId/:section?/:subsection?">
         <ProtectedRoute>
-          <ManualMarca />
+          <DashboardLayout 
+            title="Manual da Marca" 
+            subtitle="Gerencie a identidade e diretrizes da sua marca"
+          >
+            <ManualMarca />
+          </DashboardLayout>
         </ProtectedRoute>
       </Route>
       <Route path="/manual-marca/:brandId?">
         <ProtectedRoute>
-          <ManualMarca />
+          <DashboardLayout 
+            title="Manual da Marca" 
+            subtitle="Gerencie a identidade e diretrizes da sua marca"
+          >
+            <ManualMarca />
+          </DashboardLayout>
         </ProtectedRoute>
       </Route>
       <Route path="/">

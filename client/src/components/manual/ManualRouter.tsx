@@ -2,9 +2,9 @@ import React, { Suspense } from 'react';
 import { useLocation } from 'wouter';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useManualData } from '@/hooks/useManualData';
-import { AlertTriangle, Home } from 'lucide-react';
-import { ManualLayout } from './ManualLayout';
+import { AlertTriangle, Home, ChevronRight } from 'lucide-react';
 
 // Import existing sections
 import OverviewSection from './sections/OverviewSection';
@@ -44,34 +44,50 @@ export function ManualRouter({ brandId }: ManualRouterProps) {
   };
 
   const navigateToHome = () => {
-    setLocation('/dashboard');
+    setLocation('/');
   };
+
+  const getSectionTitle = (sectionId: string) => {
+    const sectionTitles: Record<string, string> = {
+      'overview': 'Visão Geral',
+      'visual-identity': 'Identidade Visual',
+      'voice': 'Tom de Voz',
+      'language': 'Linguagem',
+      'compliance': 'Conformidade',
+    };
+    return sectionTitles[sectionId] || 'Manual da Marca';
+  };
+
+  // Breadcrumb component
+  const Breadcrumb = () => (
+    <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-6">
+      <span>Manual da Marca</span>
+      <ChevronRight className="h-4 w-4" />
+      <Badge variant="outline">{getSectionTitle(currentSection)}</Badge>
+    </div>
+  );
 
   // Loading state
   if (isLoading) {
     return (
-      <ManualLayout 
-        currentSection={currentSection}
-        onSectionChange={navigateToSection}
-      >
+      <div className="space-y-6">
+        <Breadcrumb />
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center space-y-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="text-gray-600">Carregando manual da marca...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="text-muted-foreground">Carregando manual da marca...</p>
           </div>
         </div>
-      </ManualLayout>
+      </div>
     );
   }
 
   // Error state
   if (error) {
     return (
-      <ManualLayout 
-        currentSection={currentSection}
-        onSectionChange={navigateToSection}
-      >
-        <div className="max-w-2xl mx-auto py-12">
+      <div className="space-y-6">
+        <Breadcrumb />
+        <div className="max-w-2xl mx-auto">
           <Alert className="border-red-200 bg-red-50">
             <AlertTriangle className="h-4 w-4 text-red-600" />
             <AlertDescription className="text-red-800">
@@ -85,7 +101,7 @@ export function ManualRouter({ brandId }: ManualRouterProps) {
             </Button>
           </div>
         </div>
-      </ManualLayout>
+      </div>
     );
   }
 
@@ -260,7 +276,7 @@ export function ManualRouter({ brandId }: ManualRouterProps) {
         }} />;
       default:
         return (
-          <div className="max-w-2xl mx-auto py-12">
+          <div className="max-w-2xl mx-auto">
             <Alert className="border-yellow-200 bg-yellow-50">
               <AlertTriangle className="h-4 w-4 text-yellow-600" />
               <AlertDescription className="text-yellow-800">
@@ -278,23 +294,21 @@ export function ManualRouter({ brandId }: ManualRouterProps) {
   };
 
   return (
-    <ManualLayout 
-      currentSection={currentSection}
-      onSectionChange={navigateToSection}
-    >
+    <div className="space-y-6">
+      <Breadcrumb />
       <Suspense
         fallback={
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center space-y-4">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="text-gray-600">Carregando seção...</p>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+              <p className="text-muted-foreground">Carregando seção...</p>
             </div>
           </div>
         }
       >
         {renderSection()}
       </Suspense>
-    </ManualLayout>
+    </div>
   );
 }
 
