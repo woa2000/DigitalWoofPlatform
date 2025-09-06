@@ -1,5 +1,8 @@
 import dotenv from "dotenv";
-dotenv.config();
+dotenv.config({ path: './.env' });
+
+console.log('CWD:', process.cwd());
+console.log('DATABASE_URL after dotenv:', process.env.DATABASE_URL);
 
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
