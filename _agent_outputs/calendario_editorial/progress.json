@@ -1,0 +1,475 @@
+{
+  "plan": {
+    "title": "Calendário Editorial Inteligente",
+    "version": "1.0",
+    "status": "dry-run",
+    "run_mode": "dry-run",
+    "generated_at": "2025-09-06T21:00:00.000Z"
+  },
+  "tasks": [
+    {
+      "id": "T-001",
+      "title": "Gerar Resumo Pré-Execução",
+      "owner": "Frontend_Developer",
+      "status": "done",
+      "effort": 1,
+      "depends_on": [],
+      "acceptance": [
+        "PRE_EXEC_SUMMARY.md completo com escopo, critérios, interfaces, stack e dependências"
+      ],
+      "observability": [
+        "Arquivo PRE_EXEC_SUMMARY.md criado em _agent_outputs/calendario_editorial/"
+      ],
+      "security_notes": [],
+      "artifacts": [
+        "_agent_outputs/calendario_editorial/PRE_EXEC_SUMMARY.md"
+      ],
+      "last_update": "2025-09-06T21:00:00.000Z",
+      "notes": "Resumo pré-execução completo baseado no plano Calendario_Editorial_Plan.md"
+    },
+    {
+      "id": "T-002",
+      "title": "Implementar Schema de Banco de Dados",
+      "owner": "Database_Admin",
+      "status": "todo",
+      "effort": 2,
+      "depends_on": [],
+      "acceptance": [
+        "Todas as tabelas criadas sem erros",
+        "Indexes otimizados para range queries",
+        "50+ eventos sazonais inseridos como seed",
+        "Constraints validando datas e relacionamentos"
+      ],
+      "observability": [
+        "Drizzle migrations executadas com sucesso",
+        "Seed data inserido corretamente"
+      ],
+      "security_notes": [
+        "Validar RLS policies no Supabase",
+        "Encrypting sensitive campaign data"
+      ],
+      "artifacts": [
+        "migrations/calendar_schema.sql",
+        "server/models/calendar.ts"
+      ],
+      "last_update": "2025-09-06T21:00:00.000Z",
+      "notes": "Base schema para todo o sistema de calendário"
+    },
+    {
+      "id": "T-003",
+      "title": "Desenvolver Seasonal Intelligence Engine",
+      "owner": "Backend_Developer",
+      "status": "todo",
+      "effort": 3,
+      "depends_on": ["T-002"],
+      "acceptance": [
+        "Detecção automática de sazonalidades relevantes",
+        "Sugestões contextualmente apropriadas por business type",
+        "Consideração de localização geográfica",
+        "Performance < 500ms para período de 3 meses"
+      ],
+      "observability": [
+        "Logs de seasonal detection performance",
+        "Métricas de relevância das sugestões"
+      ],
+      "security_notes": [],
+      "artifacts": [
+        "server/services/SeasonalIntelligenceService.ts",
+        "server/repositories/SeasonalRepository.ts"
+      ],
+      "last_update": "2025-09-06T21:00:00.000Z",
+      "notes": "Core da inteligência sazonal para sugestões de conteúdo"
+    },
+    {
+      "id": "T-004",
+      "title": "Criar Campaign Template System",
+      "owner": "Backend_Developer",
+      "status": "todo",
+      "effort": 2,
+      "depends_on": ["T-002"],
+      "acceptance": [
+        "Templates aplicam corretamente ao calendário",
+        "Customizações preservadas durante aplicação",
+        "Objetivos por fase configurados corretamente",
+        "Timing otimizado para cada post"
+      ],
+      "observability": [
+        "Template application success rate",
+        "Customization preservation metrics"
+      ],
+      "security_notes": [],
+      "artifacts": [
+        "server/services/CampaignTemplateService.ts",
+        "server/repositories/CampaignTemplateRepository.ts"
+      ],
+      "last_update": "2025-09-06T21:00:00.000Z",
+      "notes": "Sistema de templates estruturados para campanhas"
+    },
+    {
+      "id": "T-005",
+      "title": "Implementar Optimal Timing Calculator",
+      "owner": "Backend_Developer",
+      "status": "todo",
+      "effort": 2,
+      "depends_on": ["T-002"],
+      "acceptance": [
+        "Cálculo baseado em dados históricos quando disponível",
+        "Fallback para benchmarks da indústria",
+        "Confidence score calculado corretamente",
+        "Sugestões específicas por tipo de conteúdo e canal"
+      ],
+      "observability": [
+        "Timing calculation performance metrics",
+        "Confidence score accuracy tracking"
+      ],
+      "security_notes": [],
+      "artifacts": [
+        "server/services/TimingOptimizationService.ts",
+        "server/repositories/OptimalTimingRepository.ts"
+      ],
+      "last_update": "2025-09-06T21:00:00.000Z",
+      "notes": "Calculator de timing ótimo baseado em dados históricos"
+    },
+    {
+      "id": "T-006",
+      "title": "Criar Calendar Suggestions API",
+      "owner": "Backend_Developer",
+      "status": "todo",
+      "effort": 2,
+      "depends_on": ["T-003", "T-004", "T-005"],
+      "acceptance": [
+        "Integração completa entre todos os serviços de sugestão",
+        "Ranking inteligente baseado em objetivos",
+        "Response time < 2s para período de 1 mês",
+        "Sugestões contextualmente relevantes"
+      ],
+      "observability": [
+        "API response time metrics",
+        "Suggestion relevance scoring"
+      ],
+      "security_notes": [
+        "Rate limiting para API de sugestões",
+        "Validação de business type authorization"
+      ],
+      "artifacts": [
+        "server/routes/calendar-suggestions.ts",
+        "server/controllers/CalendarSuggestionsController.ts"
+      ],
+      "last_update": "2025-09-06T21:00:00.000Z",
+      "notes": "API central para geração de sugestões inteligentes"
+    },
+    {
+      "id": "T-007",
+      "title": "Implementar Real-time Calendar Updates",
+      "owner": "Backend_Developer",
+      "status": "todo",
+      "effort": 1,
+      "depends_on": ["T-002"],
+      "acceptance": [
+        "Updates em tempo real para todos os clientes conectados",
+        "Recálculo automático de sugestões quando necessário",
+        "Handling robusto de conexões/desconexões",
+        "Latência < 100ms para updates"
+      ],
+      "observability": [
+        "WebSocket connection stability metrics",
+        "Real-time update latency tracking"
+      ],
+      "security_notes": [
+        "WebSocket authentication via JWT",
+        "Account-based message filtering"
+      ],
+      "artifacts": [
+        "server/services/CalendarWebSocketService.ts",
+        "server/middleware/websocket-auth.ts"
+      ],
+      "last_update": "2025-09-06T21:00:00.000Z",
+      "notes": "Sistema de colaboração em tempo real via WebSocket"
+    },
+    {
+      "id": "T-008",
+      "title": "Desenvolver Calendar UI Core Component",
+      "owner": "Frontend_Developer",
+      "status": "todo",
+      "effort": 3,
+      "depends_on": ["T-006"],
+      "acceptance": [
+        "Três views (semana, mês, quarter) funcionando",
+        "Drag-and-drop fluido entre datas",
+        "Responsive design para diferentes resoluções",
+        "Performance otimizada para 100+ items"
+      ],
+      "observability": [
+        "Calendar render performance metrics",
+        "User interaction tracking"
+      ],
+      "security_notes": [],
+      "artifacts": [
+        "client/src/components/Calendar/Calendar.tsx",
+        "client/src/components/Calendar/CalendarItem.tsx"
+      ],
+      "last_update": "2025-09-06T21:00:00.000Z",
+      "notes": "Componente base do calendário com múltiplas views"
+    },
+    {
+      "id": "T-009",
+      "title": "Implementar Content Type Color Coding",
+      "owner": "Frontend_Developer",
+      "status": "todo",
+      "effort": 1,
+      "depends_on": [],
+      "acceptance": [
+        "Cores consistentes entre diferentes views",
+        "Acessibilidade (contrast ratio > 4.5:1)",
+        "Icons intuitivos para cada tipo",
+        "Customização por preferências do usuário"
+      ],
+      "observability": [
+        "Color accessibility compliance check"
+      ],
+      "security_notes": [],
+      "artifacts": [
+        "client/src/components/Calendar/ContentTypeStyles.ts",
+        "client/src/styles/calendar-colors.css"
+      ],
+      "last_update": "2025-09-06T21:00:00.000Z",
+      "notes": "Sistema visual consistente para tipos de conteúdo"
+    },
+    {
+      "id": "T-010",
+      "title": "Desenvolver Drag-and-Drop System",
+      "owner": "Frontend_Developer",
+      "status": "todo",
+      "effort": 2,
+      "depends_on": ["T-008"],
+      "acceptance": [
+        "Drag visual feedback implementado",
+        "Drop zones claramente indicados",
+        "Validação de drops (não permitir conflitos)",
+        "Undo/redo para operações de drag"
+      ],
+      "observability": [
+        "Drag-and-drop operation success rate",
+        "User interaction completion metrics"
+      ],
+      "security_notes": [],
+      "artifacts": [
+        "client/src/components/Calendar/DraggableCalendarItem.tsx",
+        "client/src/components/Calendar/DroppableTimeSlot.tsx"
+      ],
+      "last_update": "2025-09-06T21:00:00.000Z",
+      "notes": "Sistema completo de drag-and-drop com react-dnd"
+    },
+    {
+      "id": "T-011",
+      "title": "Criar Campaign Template Application UI",
+      "owner": "Frontend_Developer",
+      "status": "todo",
+      "effort": 2,
+      "depends_on": ["T-004", "T-008"],
+      "acceptance": [
+        "Seleção visual de templates",
+        "Preview da campanha antes de aplicar",
+        "Validação de conflitos com calendar existente",
+        "Customização básica de templates"
+      ],
+      "observability": [
+        "Template application success rate",
+        "User preview engagement metrics"
+      ],
+      "security_notes": [],
+      "artifacts": [
+        "client/src/components/Campaign/CampaignTemplateSelector.tsx",
+        "client/src/components/Campaign/CampaignPreview.tsx"
+      ],
+      "last_update": "2025-09-06T21:00:00.000Z",
+      "notes": "Interface para aplicação de templates de campanha"
+    },
+    {
+      "id": "T-012",
+      "title": "Implementar Suggestions Panel",
+      "owner": "Frontend_Developer",
+      "status": "todo",
+      "effort": 2,
+      "depends_on": ["T-006", "T-008"],
+      "acceptance": [
+        "Sugestões categorizadas claramente",
+        "One-click application de sugestões",
+        "Refresh automático baseado em mudanças",
+        "Collapse/expand de seções"
+      ],
+      "observability": [
+        "Suggestion application rate",
+        "Panel interaction metrics"
+      ],
+      "security_notes": [],
+      "artifacts": [
+        "client/src/components/Suggestions/SuggestionsPanel.tsx",
+        "client/src/components/Suggestions/SuggestionCard.tsx"
+      ],
+      "last_update": "2025-09-06T21:00:00.000Z",
+      "notes": "Painel lateral para sugestões inteligentes"
+    },
+    {
+      "id": "T-013",
+      "title": "Desenvolver Calendar Views",
+      "owner": "Frontend_Developer",
+      "status": "todo",
+      "effort": 3,
+      "depends_on": ["T-008", "T-010"],
+      "acceptance": [
+        "Week view com grid de horas funcionando",
+        "Month view com overview diário",
+        "Quarter view com visão estratégica",
+        "Navegação fluida entre views"
+      ],
+      "observability": [
+        "View switching performance",
+        "User preference tracking por view"
+      ],
+      "security_notes": [],
+      "artifacts": [
+        "client/src/components/Calendar/WeekView.tsx",
+        "client/src/components/Calendar/MonthView.tsx",
+        "client/src/components/Calendar/QuarterView.tsx"
+      ],
+      "last_update": "2025-09-06T21:00:00.000Z",
+      "notes": "Implementação específica das três views do calendário"
+    },
+    {
+      "id": "T-014",
+      "title": "Otimizar Performance",
+      "owner": "Frontend_Developer",
+      "status": "todo",
+      "effort": 1,
+      "depends_on": ["T-013"],
+      "acceptance": [
+        "Performance com 1000+ calendar items",
+        "Smooth scrolling em todas as views",
+        "Memory usage estável durante uso prolongado",
+        "Load time < 2s para mês completo"
+      ],
+      "observability": [
+        "Calendar performance metrics dashboard",
+        "Memory usage tracking",
+        "FPS monitoring durante scroll"
+      ],
+      "security_notes": [],
+      "artifacts": [
+        "client/src/components/Calendar/VirtualizedCalendarGrid.tsx",
+        "client/src/hooks/useCalendarPerformance.ts"
+      ],
+      "last_update": "2025-09-06T21:00:00.000Z",
+      "notes": "Otimizações de performance com virtualization"
+    },
+    {
+      "id": "T-015",
+      "title": "Implementar Responsive Design",
+      "owner": "Frontend_Developer",
+      "status": "todo",
+      "effort": 2,
+      "depends_on": ["T-013"],
+      "acceptance": [
+        "Touch-friendly interface em tablets/phones",
+        "Swipe gestures para navegação",
+        "Modal editing para mobile",
+        "Performance otimizada para devices móveis"
+      ],
+      "observability": [
+        "Mobile usage analytics",
+        "Touch interaction success rate"
+      ],
+      "security_notes": [],
+      "artifacts": [
+        "client/src/components/Calendar/ResponsiveCalendar.tsx",
+        "client/src/components/Calendar/MobileCalendarView.tsx"
+      ],
+      "last_update": "2025-09-06T21:00:00.000Z",
+      "notes": "Adaptação mobile-first para tablets e phones"
+    },
+    {
+      "id": "T-016",
+      "title": "Executar Integration Testing",
+      "owner": "QA_Engineer",
+      "status": "todo",
+      "effort": 3,
+      "depends_on": ["T-014", "T-015"],
+      "acceptance": [
+        "Todos os fluxos principais testados end-to-end",
+        "Performance benchmarks validados",
+        "Cross-browser compatibility verificada",
+        "Mobile functionality testada"
+      ],
+      "observability": [
+        "Test execution dashboard",
+        "Performance benchmark results",
+        "Bug tracking metrics"
+      ],
+      "security_notes": [
+        "Security testing para WebSocket connections",
+        "Authorization testing para calendar operations"
+      ],
+      "artifacts": [
+        "tests/integration/calendar-e2e.spec.ts",
+        "tests/performance/calendar-performance.spec.ts"
+      ],
+      "last_update": "2025-09-06T21:00:00.000Z",
+      "notes": "Testes end-to-end completos de todo o sistema"
+    },
+    {
+      "id": "T-017",
+      "title": "Deploy e Documentação",
+      "owner": "Backend_Developer",
+      "status": "todo",
+      "effort": 1,
+      "depends_on": ["T-016"],
+      "acceptance": [
+        "Documentation completa e atualizada",
+        "User onboarding flow testado",
+        "System deployed to production",
+        "Monitoring and alerting configured"
+      ],
+      "observability": [
+        "Production deployment health check",
+        "User onboarding completion rate",
+        "System monitoring dashboard"
+      ],
+      "security_notes": [
+        "Production security review",
+        "Environment variables security audit"
+      ],
+      "artifacts": [
+        "docs/calendar-user-guide.md",
+        "docs/calendar-admin-guide.md"
+      ],
+      "last_update": "2025-09-06T21:00:00.000Z",
+      "notes": "Finalização com deploy e documentação completa"
+    }
+  ],
+  "blocks": [
+    {
+      "tag": "RESOLVIDO",
+      "description": "Seasonality KB v0.1 (pt-BR, setor pet) definido com schema JSON estruturado",
+      "owner": "Backend_Developer",
+      "unblock_next_step": "Implementar data/seasonality.br-pet.json conforme especificação"
+    },
+    {
+      "tag": "RESOLVIDO", 
+      "description": "Analytics baseline interno definido com metrics DDL para performance tracking",
+      "owner": "Backend_Developer",
+      "unblock_next_step": "Implementar analytics_post_metrics table e dashboard interno"
+    },
+    {
+      "tag": "RESOLVIDO",
+      "description": "Social media export strategy definida: Fase 0 ICS + CSV, Fase 1 adapters",
+      "owner": "Backend_Developer",
+      "unblock_next_step": "Implementar endpoints de export e interface SchedulerProvider"
+    },
+    {
+      "tag": "RESOLVIDO",
+      "description": "Backup policies definidas: RTO ≤ 60min / RPO ≤ 15min com versionamento + export diário", 
+      "owner": "Backend_Developer",
+      "unblock_next_step": "Implementar calendar_events_versions table e job de backup automatizado"
+    }
+  ]
+}
