@@ -1,6 +1,6 @@
 import { SeasonalityKnowledgeBase, SeasonalityItem, BusinessType, ContentSuggestion, SeasonalEventType } from '../../shared/types/calendar.js';
-import fs from 'fs/promises';
-import path from 'path';
+import * as fs from 'fs/promises';
+import * as path from 'path';
 
 export interface SeasonalSuggestion {
   event: SeasonalityItem;
