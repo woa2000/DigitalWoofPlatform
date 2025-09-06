@@ -264,22 +264,16 @@ export function PreviewStep({ onNext, onPrevious, wizardData }: PreviewStepProps
         </CardContent>
       </Card>
 
-      {/* Actions */}
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={onPrevious}>
-          Anterior
+      {/* Actions - Only for downloading, navigation handled by wizard */}
+      <div className="text-center">
+        <Button variant="outline" onClick={downloadBrandVoice} className="mr-4">
+          <Download className="h-4 w-4 mr-2" />
+          Download JSON
         </Button>
         
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={downloadBrandVoice}>
-            <Download className="h-4 w-4 mr-2" />
-            Download JSON
-          </Button>
-          
-          <Button onClick={handleFinish}>
-            Finalizar Onboarding
-          </Button>
-        </div>
+        <p className="text-sm text-gray-500 mt-3">
+          Use o botão "Finalizar" abaixo para completar o onboarding
+        </p>
       </div>
     </div>
   );

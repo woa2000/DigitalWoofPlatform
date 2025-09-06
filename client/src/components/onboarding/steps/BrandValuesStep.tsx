@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { OnboardingState } from '@shared/types/onboarding';
+import { OnboardingState, BrandValues } from '@shared/types/onboarding';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -15,6 +15,7 @@ interface BrandValuesStepProps {
   onPrevious: () => void;
   errors: Record<string, string>;
   isLoading: boolean;
+  updateBrandValues?: (values: BrandValues) => void;
 }
 
 export function BrandValuesStep({ 
@@ -22,7 +23,8 @@ export function BrandValuesStep({
   onNext, 
   onPrevious, 
   errors, 
-  isLoading 
+  isLoading,
+  updateBrandValues
 }: BrandValuesStepProps) {
   const [newValueName, setNewValueName] = useState('');
   const [newValueDescription, setNewValueDescription] = useState('');
@@ -41,16 +43,29 @@ export function BrandValuesStep({
       weight: newValueWeight[0]
     };
 
-    // This would be handled by parent component through useOnboarding hook
-    // For now, just reset the form
+    const updatedBrandValues = {
+      ...brandValues,
+      values: [...values, newValue]
+    };
+
+    // Update state through parent component
+    updateBrandValues?.(updatedBrandValues);
+    
+    // Reset the form
     setNewValueName('');
     setNewValueDescription('');
     setNewValueWeight([0.5]);
   };
 
   const removeValue = (index: number) => {
-    // This would be handled by parent component
-    console.log('Remove value at index:', index);
+    const updatedValues = values.filter((_, i) => i !== index);
+    const updatedBrandValues = {
+      ...brandValues,
+      values: updatedValues
+    };
+
+    // Update state through parent component
+    updateBrandValues?.(updatedBrandValues);
   };
 
   const canAddValue = values.length < 5 && newValueName.trim();
@@ -80,8 +95,11 @@ export function BrandValuesStep({
               placeholder="Ex: Transformar vidas através de soluções sustentáveis e inovadoras..."
               value={mission}
               onChange={(e) => {
-                // This would be handled by parent component
-                console.log('Mission updated:', e.target.value);
+                const updatedBrandValues = {
+                  ...brandValues,
+                  mission: e.target.value
+                };
+                updateBrandValues?.(updatedBrandValues);
               }}
               maxLength={200}
               className="min-h-[100px]"
@@ -232,41 +250,6 @@ export function BrandValuesStep({
         </CardContent>
       </Card>
 
-      {/* Preview */}
-      {values.length > 0 && (
-        <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
-          <CardHeader>
-            <CardTitle className="text-lg">Preview dos Valores</CardTitle>
-            <CardDescription>
-              Como seus valores aparecerão no Brand Voice JSON
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="bg-white p-4 rounded-lg border font-mono text-sm">
-              <div className="text-gray-600">brand_voice.json</div>
-              <pre className="mt-2 whitespace-pre-wrap">
-{`{
-  "brand_values": {`}
-{mission && `
-    "mission": "${mission}",`}
-{`
-    "values": [`}
-{values.map((value, index) => `
-      {
-        "name": "${value.name}",${value.description ? `
-        "description": "${value.description}",` : ''}
-        "weight": ${value.weight.toFixed(1)}
-      }${index < values.length - 1 ? ',' : ''}`).join('')}
-{`
-    ]
-  }
-}`}
-              </pre>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Validation Errors */}
       {Object.keys(errors).length > 0 && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -280,32 +263,6 @@ export function BrandValuesStep({
           </ul>
         </div>
       )}
-
-      {/* Navigation */}
-      <div className="flex justify-between pt-6">
-        <Button 
-          variant="outline" 
-          onClick={onPrevious}
-          disabled={isLoading}
-        >
-          Voltar
-        </Button>
-        
-        <Button 
-          onClick={onNext}
-          disabled={isLoading || values.length === 0}
-          className="min-w-[120px]"
-        >
-          {isLoading ? (
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Salvando...
-            </div>
-          ) : (
-            'Continuar'
-          )}
-        </Button>
-      </div>
     </div>
   );
 }

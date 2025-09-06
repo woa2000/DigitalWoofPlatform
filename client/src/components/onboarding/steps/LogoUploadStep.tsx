@@ -3,12 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FileUpload } from '@/components/ui/FileUpload';
 import { Palette } from 'lucide-react';
+import { LogoProcessingResult } from '@shared/types/onboarding';
 
 interface LogoUploadStepProps {
   onNext: (data: any) => void;
   onPrevious: () => void;
   stepNumber: number;
   isCompleted: boolean;
+  updateLogoData?: (data: LogoProcessingResult) => void;
 }
 
 interface LogoData {
@@ -23,7 +25,7 @@ interface LogoData {
   } | null;
 }
 
-export function LogoUploadStep({ onNext, onPrevious, stepNumber, isCompleted }: LogoUploadStepProps) {
+export function LogoUploadStep({ onNext, onPrevious, stepNumber, isCompleted, updateLogoData }: LogoUploadStepProps) {
   const [logoData, setLogoData] = useState<LogoData>({
     file: null,
     preview: null,
@@ -49,7 +51,8 @@ export function LogoUploadStep({ onNext, onPrevious, stepNumber, isCompleted }: 
         width: 800,
         height: 600,
         format: file.type.split('/')[1],
-        fileSize: file.size
+        fileSize: file.size,
+        hasTransparency: file.type === 'image/png'
       };
 
       setLogoData({
@@ -58,6 +61,15 @@ export function LogoUploadStep({ onNext, onPrevious, stepNumber, isCompleted }: 
         palette: mockPalette,
         metadata: mockMetadata
       });
+
+      // Update global state
+      if (updateLogoData) {
+        updateLogoData({
+          logoUrl: preview,
+          palette: mockPalette,
+          metadata: mockMetadata
+        });
+      }
 
       // Simulate upload delay
       await new Promise(resolve => setTimeout(resolve, 1500));
@@ -93,6 +105,14 @@ export function LogoUploadStep({ onNext, onPrevious, stepNumber, isCompleted }: 
       });
     }
   };
+
+  // Auto-trigger next when logo is successfully uploaded
+  React.useEffect(() => {
+    if (logoData.file && logoData.preview && !isUploading) {
+      // Optionally auto-advance or just notify parent
+      // handleNext(); // Uncomment to auto-advance
+    }
+  }, [logoData.file, logoData.preview, isUploading]);
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
@@ -152,18 +172,14 @@ export function LogoUploadStep({ onNext, onPrevious, stepNumber, isCompleted }: 
         </Card>
       )}
 
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={onPrevious} disabled={stepNumber === 1}>
-          Anterior
-        </Button>
-        
-        <Button 
-          onClick={handleNext} 
-          disabled={!logoData.file || isUploading}
-        >
-          {isUploading ? 'Processando...' : 'Próximo'}
-        </Button>
-      </div>
+      {/* Status indicator */}
+      {logoData.file && (
+        <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+          <p className="text-green-800 font-medium">
+            ✅ Logo carregada com sucesso! Use os botões abaixo para continuar.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

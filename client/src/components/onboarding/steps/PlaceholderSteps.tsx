@@ -19,13 +19,14 @@ interface StepProps {
 }
 
 // Use the real components
-export function LogoUploadStep({ state, onNext, onPrevious, errors, isLoading }: StepProps) {
+export function LogoUploadStep({ state, onNext, onPrevious, errors, isLoading, updateLogoData }: StepProps) {
   return (
     <RealLogoUploadStep
       stepNumber={1}
       onNext={onNext}
       onPrevious={onPrevious}
       isCompleted={!!state.logoData}
+      updateLogoData={updateLogoData}
     />
   );
 }
@@ -35,11 +36,11 @@ export function ToneConfigStep(props: StepProps) {
 }
 
 export function LanguageConfigStep(props: StepProps) {
-  return <RealLanguageConfigStep {...props} />;
+  return <RealLanguageConfigStep {...props} updateLanguageConfig={props.updateLanguageConfig} />;
 }
 
 export function BrandValuesStep(props: StepProps) {
-  return <RealBrandValuesStep {...props} />;
+  return <RealBrandValuesStep {...props} updateBrandValues={props.updateBrandValues} />;
 }
 
 export function PreviewStep({ state, onNext, onPrevious, errors, isLoading }: StepProps) {

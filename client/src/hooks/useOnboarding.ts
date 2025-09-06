@@ -133,24 +133,21 @@ export function useOnboarding(): UseOnboardingReturn {
     }
   }, []);
 
-  // Note: Auto-save disabled to prevent re-render loops
-  // Manual save will be implemented later
-
-  // Validation functions (no setState to avoid loops)
-  const validateStep = useCallback((stepToValidate: number): { isValid: boolean; errors: Record<string, string> } => {
+  // Validation function without useCallback to avoid dependency issues
+  const validateStep = (stepToValidate: number, currentState = state): { isValid: boolean; errors: Record<string, string> } => {
     const errors: Record<string, string> = {};
     let isValid = true;
 
     switch (stepToValidate) {
       case 0: // Logo step
-        if (!state.logoData?.logoUrl) {
+        if (!currentState.logoData?.logoUrl) {
           errors.logo = 'Por favor, faça upload de uma logo';
           isValid = false;
         }
         break;
 
       case 1: // Tone step
-        const { confianca, acolhimento, humor, especializacao } = state.toneConfig;
+        const { confianca, acolhimento, humor, especializacao } = currentState.toneConfig;
         if ([confianca, acolhimento, humor, especializacao].some(v => v < 0 || v > 1)) {
           errors.tone = 'Valores de tom devem estar entre 0 e 1';
           isValid = false;
@@ -158,7 +155,7 @@ export function useOnboarding(): UseOnboardingReturn {
         break;
 
       case 2: // Language step
-        const { preferredTerms, defaultCTAs } = state.languageConfig;
+        const { preferredTerms, defaultCTAs } = currentState.languageConfig;
         if (preferredTerms.length === 0) {
           errors.language = 'Adicione pelo menos 1 termo preferido';
           isValid = false;
@@ -170,7 +167,7 @@ export function useOnboarding(): UseOnboardingReturn {
         break;
 
       case 3: // Values step
-        const { values, disclaimer } = state.brandValues;
+        const { values, disclaimer } = currentState.brandValues;
         if (values.length === 0) {
           errors.values = 'Adicione pelo menos 1 valor da marca';
           isValid = false;
@@ -183,91 +180,92 @@ export function useOnboarding(): UseOnboardingReturn {
     }
 
     return { isValid, errors };
-  }, [state.logoData, state.toneConfig, state.languageConfig, state.brandValues]);
+  };
 
-  const validateCurrentStep = useCallback((): boolean => {
-    const { isValid, errors } = validateStep(state.currentStep);
+  const validateCurrentStep = (): boolean => {
+    const { isValid, errors } = validateStep(state.currentStep, state);
+    
     if (!isValid) {
       dispatch({ type: 'SET_ERRORS', payload: errors });
     } else {
       dispatch({ type: 'CLEAR_ERRORS' });
     }
     return isValid;
-  }, [state.currentStep, validateStep]);
+  };
 
   // Navigation actions
-  const nextStep = useCallback(() => {
+  const nextStep = () => {
     if (state.currentStep < STEPS.length - 1) {
       dispatch({ type: 'SET_CURRENT_STEP', payload: state.currentStep + 1 });
     }
-  }, [state.currentStep]);
+  };
 
-  const prevStep = useCallback(() => {
+  const prevStep = () => {
     if (state.currentStep > 0) {
       dispatch({ type: 'SET_CURRENT_STEP', payload: state.currentStep - 1 });
     }
-  }, [state.currentStep]);
+  };
 
-  const goToStep = useCallback((step: number) => {
+  const goToStep = (step: number) => {
     if (step >= 0 && step < STEPS.length) {
       dispatch({ type: 'SET_CURRENT_STEP', payload: step });
     }
-  }, []);
+  };
 
   // Data update actions
-  const updateLogoData = useCallback((data: LogoProcessingResult) => {
+  const updateLogoData = (data: LogoProcessingResult) => {
     dispatch({ type: 'UPDATE_LOGO_DATA', payload: data });
-  }, []);
+  };
 
-  const updateToneConfig = useCallback((config: ToneConfiguration) => {
+  const updateToneConfig = (config: ToneConfiguration) => {
     dispatch({ type: 'UPDATE_TONE_CONFIG', payload: config });
-  }, []);
+  };
 
-  const updateLanguageConfig = useCallback((config: LanguageConfiguration) => {
+  const updateLanguageConfig = (config: LanguageConfiguration) => {
     dispatch({ type: 'UPDATE_LANGUAGE_CONFIG', payload: config });
-  }, []);
+  };
 
-  const updateBrandValues = useCallback((values: BrandValues) => {
+  const updateBrandValues = (values: BrandValues) => {
     dispatch({ type: 'UPDATE_BRAND_VALUES', payload: values });
-  }, []);
+  };
 
   // Async actions
-  const saveProgress = useCallback(async () => {
+  const saveProgress = async () => {
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
       // Implementation for saving progress to backend
-      console.log('Saving progress:', state);
+      console.log('Saving progress...');
     } catch (error) {
       console.error('Failed to save progress:', error);
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
-  }, [state]);
+  };
 
-  const completWizard = useCallback(async () => {
+  const completWizard = async () => {
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
       // Implementation for completing wizard
-      console.log('Completing wizard with state:', state);
+      console.log('Completing wizard...');
       // TODO: Generate Brand Voice JSON and save to backend
     } catch (error) {
       console.error('Failed to complete wizard:', error);
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
-  }, [state]);
+  };
 
-  const resetWizard = useCallback(() => {
+  const resetWizard = () => {
     localStorage.removeItem(ONBOARDING_STORAGE_KEY);
     dispatch({ type: 'RESET_STATE' });
-  }, []);
+  };
 
   // Step status computation
-  const getStepStatus = useCallback((stepIndex: number): 'completed' | 'current' | 'pending' => {
+  const getStepStatus = (stepIndex: number): 'completed' | 'current' | 'pending' => {
     if (stepIndex < state.currentStep) return 'completed';
     if (stepIndex === state.currentStep) return 'current';
     return 'pending';
-  }, [state.currentStep]);
+  };
 
   // Computed properties
   const canGoNext = state.currentStep < STEPS.length - 1;

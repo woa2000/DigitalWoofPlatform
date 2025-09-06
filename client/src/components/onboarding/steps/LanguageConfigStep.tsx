@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { OnboardingState } from '@shared/types/onboarding';
+import { OnboardingState, LanguageConfiguration } from '@shared/types/onboarding';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -13,6 +13,7 @@ interface LanguageConfigStepProps {
   onPrevious: () => void;
   errors: Record<string, string>;
   isLoading: boolean;
+  updateLanguageConfig?: (config: LanguageConfiguration) => void;
 }
 
 export function LanguageConfigStep({ 
@@ -20,7 +21,8 @@ export function LanguageConfigStep({
   onNext, 
   onPrevious, 
   errors, 
-  isLoading 
+  isLoading,
+  updateLanguageConfig
 }: LanguageConfigStepProps) {
   const [preferredInput, setPreferredInput] = useState('');
   const [avoidedInput, setAvoidedInput] = useState('');
@@ -47,7 +49,8 @@ export function LanguageConfigStep({
     };
 
     // Update state through parent component
-    // This would be handled by the useOnboarding hook
+    updateLanguageConfig?.(newConfig);
+    
     if (type === 'preferred') setPreferredInput('');
     else if (type === 'avoided') setAvoidedInput('');
     else setCTAInput('');
@@ -65,6 +68,7 @@ export function LanguageConfigStep({
     };
     
     // Update state through parent component
+    updateLanguageConfig?.(newConfig);
   };
 
   const handleKeyPress = (
@@ -303,32 +307,6 @@ export function LanguageConfigStep({
           </ul>
         </div>
       )}
-
-      {/* Navigation */}
-      <div className="flex justify-between pt-6">
-        <Button 
-          variant="outline" 
-          onClick={onPrevious}
-          disabled={isLoading}
-        >
-          Voltar
-        </Button>
-        
-        <Button 
-          onClick={onNext}
-          disabled={isLoading}
-          className="min-w-[120px]"
-        >
-          {isLoading ? (
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Salvando...
-            </div>
-          ) : (
-            'Continuar'
-          )}
-        </Button>
-      </div>
     </div>
   );
 }

@@ -3,8 +3,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, ArrowRight, Upload, Volume2, MessageSquare, Palette, Eye } from 'lucide-react';
-import { useSimpleOnboarding } from '@/hooks/useOnboardingSimple';
+import { ArrowLeft, ArrowRight, Check, Upload, Palette, Volume2, MessageSquare, Eye } from 'lucide-react';
+import { useOnboarding } from '@/hooks/useOnboarding';
+import { cn } from '@/lib/utils';
+
+// Step imports (placeholders for now)
+import { 
+  LogoUploadStep, 
+  ToneConfigStep, 
+  LanguageConfigStep, 
+  BrandValuesStep, 
+  PreviewStep 
+} from './steps/PlaceholderSteps';
 
 const STEPS = [
   {
@@ -12,47 +22,74 @@ const STEPS = [
     title: 'Logo da Marca',
     description: 'Faça upload da logo para extrair a paleta de cores',
     icon: Upload,
+    component: LogoUploadStep
   },
   {
     id: 'tone',
     title: 'Tom de Voz',
     description: 'Configure a personalidade da sua marca',
     icon: Volume2,
+    component: ToneConfigStep
   },
   {
     id: 'language',
     title: 'Linguagem',
     description: 'Defina termos preferidos e CTAs padrão',
     icon: MessageSquare,
+    component: LanguageConfigStep
   },
   {
     id: 'values',
     title: 'Valores da Marca',
     description: 'Configure missão, valores e disclaimer',
     icon: Palette,
+    component: BrandValuesStep
   },
   {
     id: 'preview',
     title: 'Preview Final',
     description: 'Visualize sua identidade de marca',
     icon: Eye,
+    component: PreviewStep
   }
 ];
 
 export function RobustOnboardingWizard() {
   const {
     currentStep,
+    state,
+    isLoading,
+    errors,
     nextStep,
     prevStep,
     canGoNext,
     canGoPrev,
-    getStepStatus
-  } = useSimpleOnboarding();
+    getStepStatus,
+    completWizard,
+    validateCurrentStep,
+    updateLogoData,
+    updateToneConfig,
+    updateLanguageConfig,
+    updateBrandValues
+  } = useOnboarding();
 
-  console.log('RobustOnboardingWizard render - currentStep:', currentStep);
-
+  const CurrentStepComponent = STEPS[currentStep]?.component;
   const progressPercentage = ((currentStep + 1) / STEPS.length) * 100;
-  const currentStepData = STEPS[currentStep];
+
+  const handleNext = () => {
+    if (currentStep === STEPS.length - 1) {
+      // Last step - complete wizard
+      completWizard();
+    } else {
+      nextStep();
+    }
+  };
+
+  const handleValidateAndNext = () => {
+    if (validateCurrentStep()) {
+      handleNext();
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
@@ -88,21 +125,27 @@ export function RobustOnboardingWizard() {
             const Icon = step.icon;
             
             return (
-              <div key={step.id} className="flex flex-col items-center space-y-2">
-                <div className={`
-                  w-12 h-12 rounded-full flex items-center justify-center border-2 transition-colors
-                  ${status === 'current' ? 'bg-blue-600 border-blue-600 text-white' : ''}
-                  ${status === 'completed' ? 'bg-green-600 border-green-600 text-white' : ''}
-                  ${status === 'pending' ? 'bg-gray-100 border-gray-300 text-gray-400' : ''}
-                `}>
-                  <Icon className="w-6 h-6" />
+              <div key={step.id} className="flex flex-col items-center">
+                <div
+                  className={cn(
+                    "w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-all",
+                    status === 'completed' && "bg-green-500 text-white",
+                    status === 'current' && "bg-blue-500 text-white ring-4 ring-blue-200",
+                    status === 'pending' && "bg-gray-200 text-gray-400"
+                  )}
+                >
+                  {status === 'completed' ? (
+                    <Check className="w-6 h-6" />
+                  ) : (
+                    <Icon className="w-6 h-6" />
+                  )}
                 </div>
-                <span className={`
-                  text-xs text-center font-medium
-                  ${status === 'current' ? 'text-blue-600' : ''}
-                  ${status === 'completed' ? 'text-green-600' : ''}
-                  ${status === 'pending' ? 'text-gray-400' : ''}
-                `}>
+                <span className={cn(
+                  "text-xs text-center font-medium",
+                  status === 'current' && "text-blue-600",
+                  status === 'completed' && "text-green-600",
+                  status === 'pending' && "text-gray-400"
+                )}>
                   {step.title}
                 </span>
               </div>
@@ -110,21 +153,35 @@ export function RobustOnboardingWizard() {
           })}
         </div>
 
+        {/* Error Display */}
+        {Object.keys(errors).length > 0 && (
+          <Card className="mb-6 border-red-200 bg-red-50">
+            <CardContent className="pt-6">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-red-500 rounded-full" />
+                <p className="text-red-700 text-sm">
+                  {Object.values(errors)[0]}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Main Content */}
         <Card className="mb-8">
           <CardHeader>
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-blue-100 rounded-lg">
-                {React.createElement(currentStepData.icon, { 
+                {React.createElement(STEPS[currentStep]?.icon, { 
                   className: "w-6 h-6 text-blue-600" 
                 })}
               </div>
               <div>
                 <CardTitle className="text-xl">
-                  {currentStepData.title}
+                  {STEPS[currentStep]?.title}
                 </CardTitle>
                 <p className="text-gray-600 text-sm mt-1">
-                  {currentStepData.description}
+                  {STEPS[currentStep]?.description}
                 </p>
               </div>
               <div className="ml-auto">
@@ -134,52 +191,73 @@ export function RobustOnboardingWizard() {
               </div>
             </div>
           </CardHeader>
-          <CardContent>
-            {/* Step Content */}
-            <div className="min-h-[300px] flex items-center justify-center">
-              <div className="text-center">
-                <h3 className="text-2xl font-semibold mb-4">
-                  {currentStepData.title}
-                </h3>
-                <p className="text-gray-600 mb-8">
-                  Conteúdo da etapa {currentStep + 1} será implementado aqui.
-                </p>
-                <div className="p-8 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-500">
-                    Placeholder para componente do step: {currentStepData.id}
-                  </p>
-                </div>
-              </div>
-            </div>
+          <CardContent className="pb-8">
+            {CurrentStepComponent && (
+              <CurrentStepComponent
+                state={state}
+                onNext={() => {}} // Empty function - steps shouldn't navigate directly
+                onPrevious={() => {}} // Empty function - navigation handled by wizard
+                errors={errors}
+                isLoading={isLoading}
+                updateLogoData={updateLogoData}
+                updateToneConfig={updateToneConfig}
+                updateLanguageConfig={updateLanguageConfig}
+                updateBrandValues={updateBrandValues}
+              />
+            )}
           </CardContent>
+          
+          {/* Navigation integrated in card footer */}
+          <div className="border-t px-6 py-4 bg-gray-50 rounded-b-lg">
+            <div className="flex justify-between items-center">
+              <Button
+                onClick={prevStep}
+                disabled={!canGoPrev || isLoading}
+                variant="outline"
+                className="flex items-center space-x-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Anterior</span>
+              </Button>
+
+              <div className="flex items-center space-x-4">
+                {/* Save Progress Indicator */}
+                {isLoading && (
+                  <div className="flex items-center space-x-2 text-sm text-gray-500">
+                    <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin" />
+                    <span>Salvando...</span>
+                  </div>
+                )}
+                
+                {/* Step indicator */}
+                <span className="text-sm text-gray-500">
+                  {currentStep + 1} de {STEPS.length}
+                </span>
+              </div>
+
+              <Button
+                onClick={handleValidateAndNext}
+                disabled={isLoading}
+                className="flex items-center space-x-2"
+              >
+                <span>
+                  {currentStep === STEPS.length - 1 ? 'Finalizar' : 'Próximo'}
+                </span>
+                {currentStep === STEPS.length - 1 ? (
+                  <Check className="w-4 h-4" />
+                ) : (
+                  <ArrowRight className="w-4 h-4" />
+                )}
+              </Button>
+            </div>
+          </div>
         </Card>
 
-        {/* Navigation Footer */}
-        <div className="flex justify-between items-center">
-          <Button
-            onClick={prevStep}
-            disabled={!canGoPrev}
-            variant="outline"
-            className="flex items-center space-x-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Anterior</span>
-          </Button>
-
-          <div className="text-center">
-            <p className="text-sm text-gray-500">
-              {currentStep + 1} de {STEPS.length} passos
-            </p>
-          </div>
-
-          <Button
-            onClick={nextStep}
-            disabled={!canGoNext}
-            className="flex items-center space-x-2"
-          >
-            <span>{currentStep === STEPS.length - 1 ? 'Finalizar' : 'Próximo'}</span>
-            <ArrowRight className="w-4 h-4" />
-          </Button>
+        {/* Help Text */}
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-500">
+            Seu progresso é salvo automaticamente. Você pode sair e retornar a qualquer momento.
+          </p>
         </div>
       </div>
     </div>
