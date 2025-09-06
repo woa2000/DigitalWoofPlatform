@@ -103,7 +103,7 @@ export function ManualLayout({
     const sectionTitles: Record<string, string> = {
       'overview': 'Visão Geral',
       'visual-identity': 'Identidade Visual',
-      'voice-tone': 'Tom de Voz',
+      'voice': 'Tom de Voz',
       'language': 'Linguagem',
       'compliance': 'Conformidade',
       'export': 'Exportar Manual',

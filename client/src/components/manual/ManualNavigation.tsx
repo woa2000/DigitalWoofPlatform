@@ -61,7 +61,7 @@ const navigationSections: ManualSection[] = [
     ]
   },
   {
-    id: 'voice-tone',
+    id: 'voice',
     title: 'Tom de Voz',
     icon: MessageSquare,
     description: 'Personalidade e comunicação',

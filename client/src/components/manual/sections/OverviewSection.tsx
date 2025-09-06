@@ -162,7 +162,7 @@ function OverviewSection({
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { id: 'visual-identity', name: 'Identidade Visual', description: 'Cores, logo e tipografia' },
-              { id: 'voice-tone', name: 'Tom de Voz', description: 'Personalidade e comunicação' },
+              { id: 'voice', name: 'Tom de Voz', description: 'Personalidade e comunicação' },
               { id: 'language', name: 'Linguagem', description: 'Glossário e diretrizes' },
               { id: 'compliance', name: 'Conformidade', description: 'Políticas e regulamentações' }
             ].map((section) => (
