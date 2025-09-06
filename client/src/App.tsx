@@ -8,6 +8,7 @@ import Dashboard from "@/pages/Dashboard";
 import Login from "@/pages/Login";
 import Onboarding from "@/pages/Onboarding";
 import ManualMarca from "@/pages/ManualMarca";
+import { ContentGenerationPage } from "@/pages/ContentGeneration";
 import NotFound from "@/pages/not-found";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 
@@ -55,6 +56,16 @@ function Router() {
             subtitle="Gerencie a identidade e diretrizes da sua marca"
           >
             <ManualMarca />
+          </DashboardLayout>
+        </ProtectedRoute>
+      </Route>
+      <Route path="/content-generation">
+        <ProtectedRoute>
+          <DashboardLayout 
+            title="Geração de Conteúdo IA" 
+            subtitle="Crie conteúdo personalizado com inteligência artificial"
+          >
+            <ContentGenerationPage />
           </DashboardLayout>
         </ProtectedRoute>
       </Route>

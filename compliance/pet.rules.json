@@ -1,0 +1,142 @@
+{
+  "version": "v0.1-pending-legal",
+  "last_updated": "2025-09-06",
+  "blocking_threshold": "high",
+  "description": "Regras de compliance para conteúdo do setor pet - configuração inicial conservadora",
+  "categories": {
+    "Saude": {
+      "description": "Claims relacionados à saúde animal",
+      "deny": [
+        {
+          "pattern": "(cura|garantia de cura|100% de cura)",
+          "severity": "high",
+          "message": "Evite promessas de cura absoluta",
+          "suggestion": "Use termos como 'pode ajudar', 'contribui para' ou 'suporte ao tratamento'"
+        },
+        {
+          "pattern": "(elimina[r]?\\s+(vírus|bactérias?|parasitas?))",
+          "severity": "high", 
+          "message": "Claims de eliminação total são proibidos",
+          "suggestion": "Use 'ajuda a controlar' ou 'reduz a carga de'"
+        },
+        {
+          "pattern": "(tratamento definitivo|solução final)",
+          "severity": "medium",
+          "message": "Evite termos definitivos em tratamentos",
+          "suggestion": "Use 'opção de tratamento' ou 'pode auxiliar no tratamento'"
+        }
+      ],
+      "warn": [
+        {
+          "pattern": "(previne 100%|prevenção total)",
+          "severity": "medium",
+          "message": "Claims de prevenção absoluta devem ser cuidadosos",
+          "suggestion": "Use 'ajuda a prevenir' ou 'reduz o risco de'"
+        }
+      ]
+    },
+    "Promessas": {
+      "description": "Promessas comerciais excessivas",
+      "deny": [
+        {
+          "pattern": "(resultado[s]?\\s+garantido[s]?|100% eficaz)",
+          "severity": "high",
+          "message": "Evite garantias absolutas de resultado",
+          "suggestion": "Use 'resultados podem variar' ou 'eficaz para muitos casos'"
+        },
+        {
+          "pattern": "(melhor do mercado|único no mundo)",
+          "severity": "medium",
+          "message": "Claims comparativos absolutos são arriscados",
+          "suggestion": "Use 'uma das melhores opções' ou 'reconhecido no mercado'"
+        }
+      ]
+    },
+    "AntesDespois": {
+      "description": "Promessas de transformação irreais",
+      "warn": [
+        {
+          "pattern": "(antes e depois|transformação completa)",
+          "severity": "medium",
+          "message": "Claims de transformação devem ser moderados",
+          "suggestion": "Use 'melhoria gradual' ou 'evolução positiva'"
+        }
+      ]
+    },
+    "Medicamentos": {
+      "description": "Referências a medicamentos e tratamentos",
+      "deny": [
+        {
+          "pattern": "(substitui\\s+medicamento|dispensa\\s+veterinário)",
+          "severity": "high",
+          "message": "Nunca sugira substituição de cuidado veterinário",
+          "suggestion": "Use 'complementa o tratamento' ou 'consulte sempre um veterinário'"
+        }
+      ],
+      "require": [
+        {
+          "pattern": "(tratamento|medicação|diagnóstico)",
+          "severity": "medium",
+          "message": "Conteúdo médico requer disclaimer",
+          "disclaimer": "Este conteúdo é apenas informativo. Consulte sempre um médico veterinário."
+        }
+      ]
+    },
+    "ContatoProfissional": {
+      "description": "Exigências de contato profissional",
+      "require": [
+        {
+          "field": "responsavel_tecnico",
+          "when_content_contains": "(prescrição|diagnóstico|tratamento médico)",
+          "severity": "medium",
+          "message": "Informe CRMV do responsável técnico quando aplicável",
+          "suggestion": "Adicione 'Dr(a) [Nome] - CRMV/[Estado] [Número]'"
+        }
+      ]
+    },
+    "Diagnostico": {
+      "description": "Conteúdo relacionado a diagnóstico",
+      "deny": [
+        {
+          "pattern": "(auto[\\-\\s]?diagnóstico|diagnóstico em casa)",
+          "severity": "high",
+          "message": "Nunca incentive autodiagnóstico",
+          "suggestion": "Use 'consulte um veterinário para diagnóstico adequado'"
+        }
+      ]
+    }
+  },
+  "general_disclaimers": [
+    {
+      "trigger": ["saúde", "doença", "sintoma", "tratamento"],
+      "text": "Este conteúdo é apenas informativo. Consulte sempre um médico veterinário.",
+      "placement": "end"
+    },
+    {
+      "trigger": ["produto", "suplemento", "medicamento"],
+      "text": "Resultados podem variar. Uso sob orientação profissional.",
+      "placement": "end"
+    }
+  ],
+  "positive_terminology": {
+    "pet_references": ["pet", "companheiro", "amigo", "parceiro"],
+    "avoid_terms": ["animal de estimação", "posse", "dono"],
+    "preferred_terms": ["tutor", "responsável", "família"]
+  },
+  "guidelines": {
+    "tone": "Use sempre tom acolhedor e não alarmista",
+    "uncertainty": "Quando em dúvida, seja mais conservador",
+    "references": "Sempre que possível, cite fontes veterinárias",
+    "emergency": "Para situações de emergência, sempre direcione para atendimento veterinário"
+  },
+  "metadata": {
+    "created_by": "Backend_Developer_Agent",
+    "review_status": "pending_legal_review",
+    "next_review": "2025-10-06",
+    "telemetry": {
+      "track_false_positives": true,
+      "collect_user_feedback": true,
+      "auto_improve": false
+    }
+  }
+}

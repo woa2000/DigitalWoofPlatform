@@ -256,6 +256,105 @@ export const insertComplianceCheckSchema = createInsertSchema(complianceChecks).
   createdAt: true,
 });
 
+// === CONTENT GENERATION SYSTEM ===
+
+// Content Briefs for Content Generation
+export const contentBriefs = pgTable("content_briefs", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id").references(() => authUsers.id).notNull(),
+  
+  // Especificação do conteúdo
+  theme: text("theme").notNull(),
+  objective: text("objective").notNull(), // educar, vender, engajar, recall, awareness
+  channel: text("channel").notNull(), // instagram_post, instagram_story, facebook_post, whatsapp, email, website
+  format: text("format").notNull(), // texto, carrossel, video_script, email_campaign
+  
+  // Configuração
+  brandVoiceId: uuid("brand_voice_id").references(() => brandVoiceJsons.id).notNull(),
+  customInstructions: text("custom_instructions"),
+  wordsToAvoid: jsonb("words_to_avoid").$type<string[]>(),
+  
+  // Metadata
+  campaignId: uuid("campaign_id").references(() => campaigns.id),
+  templateId: uuid("template_id"), // References campaign_templates if exists
+  
+  createdAt: timestamp("created_at").default(sql`now()`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`now()`).notNull(),
+});
+
+// Generated Content
+export const generatedContent = pgTable("generated_content", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  briefId: uuid("brief_id").references(() => contentBriefs.id).notNull(),
+  
+  // Conteúdo gerado
+  variations: jsonb("variations").notNull(), // array de ContentVariation
+  creativeBrief: jsonb("creative_brief"),
+  
+  // Compliance e qualidade
+  complianceFlags: jsonb("compliance_flags").default([]),
+  complianceScore: decimal("compliance_score", { precision: 3, scale: 2 }).notNull(),
+  qualityMetrics: jsonb("quality_metrics"),
+  
+  // Status e aprovação
+  status: text("status").default("generated").notNull(), // generated, approved, rejected, regenerated, published
+  approvedVariationId: text("approved_variation_id"),
+  approvedBy: uuid("approved_by").references(() => authUsers.id),
+  approvedAt: timestamp("approved_at"),
+  
+  // Métricas de geração
+  generationMetrics: jsonb("generation_metrics"), // tokens, time, cost
+  
+  createdAt: timestamp("created_at").default(sql`now()`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`now()`).notNull(),
+});
+
+// Content Feedback for AI improvement
+export const contentFeedback = pgTable("content_feedback", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  contentId: uuid("content_id").references(() => generatedContent.id).notNull(),
+  variationId: text("variation_id").notNull(),
+  
+  // Tipo de feedback
+  feedbackType: text("feedback_type").notNull(), // approval, rejection, edit_request, regeneration, rating
+  feedbackText: text("feedback_text"),
+  rating: integer("rating"), // 1-5 stars
+  
+  // Melhorias específicas
+  improvementSuggestions: jsonb("improvement_suggestions"),
+  regenerationNotes: text("regeneration_notes"),
+  
+  // Metadata
+  userId: uuid("user_id").references(() => authUsers.id).notNull(),
+  createdAt: timestamp("created_at").default(sql`now()`).notNull(),
+});
+
+// AI Prompts and configurations
+export const aiPrompts = pgTable("ai_prompts", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name", { length: 200 }).notNull(),
+  promptType: text("prompt_type").notNull(), // educational, promotional, recall, engagement, health_awareness
+  
+  // Conteúdo do prompt
+  systemPrompt: text("system_prompt").notNull(),
+  userPromptTemplate: text("user_prompt_template").notNull(),
+  
+  // Configuração
+  model: varchar("model", { length: 50 }).default("gpt-4"),
+  temperature: decimal("temperature", { precision: 3, scale: 2 }).default("0.7"),
+  maxTokens: integer("max_tokens").default(1000),
+  
+  // Versionamento
+  version: integer("version").default(1),
+  isActive: boolean("is_active").default(true),
+  
+  // Performance
+  usageCount: integer("usage_count").default(0),
+  avgQualityScore: decimal("avg_quality_score", { precision: 3, scale: 2 }),
+  
+  createdAt: timestamp("created_at").default(sql`now()`).notNull(),
+});
+
 export const insertBrandAssetSchema = createInsertSchema(brandAssets).omit({
   id: true,
   createdAt: true,
@@ -276,6 +375,28 @@ export const insertAnamnesisAnalysisSchema = createInsertSchema(anamnesisAnalysi
   id: true,
   createdAt: true,
   updatedAt: true,
+});
+
+export const insertContentBriefSchema = createInsertSchema(contentBriefs).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertGeneratedContentSchema = createInsertSchema(generatedContent).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertContentFeedbackSchema = createInsertSchema(contentFeedback).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertAIPromptSchema = createInsertSchema(aiPrompts).omit({
+  id: true,
+  createdAt: true,
 });
 
 export const insertAnamnesisSourceSchema = createInsertSchema(anamnesisSource).omit({
@@ -317,3 +438,13 @@ export type AnamnesisSource = typeof anamnesisSource.$inferSelect;
 export type InsertAnamnesisSource = z.infer<typeof insertAnamnesisSourceSchema>;
 export type AnamnesisFinding = typeof anamnesisFinding.$inferSelect;
 export type InsertAnamnesisFinding = z.infer<typeof insertAnamnesisFindingSchema>;
+
+// Content Generation Types
+export type ContentBrief = typeof contentBriefs.$inferSelect;
+export type InsertContentBrief = z.infer<typeof insertContentBriefSchema>;
+export type GeneratedContent = typeof generatedContent.$inferSelect;
+export type InsertGeneratedContent = z.infer<typeof insertGeneratedContentSchema>;
+export type ContentFeedback = typeof contentFeedback.$inferSelect;
+export type InsertContentFeedback = z.infer<typeof insertContentFeedbackSchema>;
+export type AIPrompt = typeof aiPrompts.$inferSelect;
+export type InsertAIPrompt = z.infer<typeof insertAIPromptSchema>;

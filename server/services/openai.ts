@@ -148,3 +148,20 @@ export async function validateCompliance(content: string, businessType: string):
     throw new Error("Failed to validate compliance: " + error.message);
   }
 }
+
+// Rate limiting for OpenAI API calls
+import Bottleneck from 'bottleneck';
+
+const openAILimiter = new Bottleneck({
+  reservoir: 60, // 60 requests per interval
+  reservoirRefreshAmount: 60,
+  reservoirRefreshInterval: 60 * 1000, // 1 minute
+  maxConcurrent: 3,
+  minTime: 1000 // 1 second between requests
+});
+
+export async function withOpenAILimit<T>(fn: () => Promise<T>): Promise<T> {
+  return openAILimiter.schedule(fn);
+}
+
+export { openai };
