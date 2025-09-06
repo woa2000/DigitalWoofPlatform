@@ -1,0 +1,531 @@
+{
+  "title": "Manual de Marca Digital - API Contracts",
+  "version": "1.0.0",
+  "generated": "2025-09-06T00:00:00Z",
+  "base_url": "/api/manual-marca",
+  
+  "endpoints": {
+    "get_manual": {
+      "method": "GET",
+      "path": "/:userId",
+      "description": "Retrieve complete manual for user",
+      "parameters": {
+        "path": {
+          "userId": {
+            "type": "string",
+            "format": "uuid",
+            "required": true,
+            "description": "User identifier"
+          }
+        },
+        "query": {
+          "brandVoiceId": {
+            "type": "string", 
+            "format": "uuid",
+            "required": false,
+            "description": "Specific Brand Voice to render"
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["visual", "voice", "language", "compliance"]
+            },
+            "required": false,
+            "description": "Specific sections to include"
+          },
+          "format": {
+            "type": "string",
+            "enum": ["full", "summary", "preview"],
+            "default": "full",
+            "description": "Response detail level"
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Manual retrieved successfully",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {"type": "boolean", "value": true},
+              "data": {
+                "type": "object",
+                "properties": {
+                  "manual": {"$ref": "#/schemas/RenderedManual"},
+                  "sharing": {"$ref": "#/schemas/SharingConfig"},
+                  "metadata": {
+                    "type": "object",
+                    "properties": {
+                      "last_updated": {"type": "string", "format": "date-time"},
+                      "last_viewed": {"type": "string", "format": "date-time"},
+                      "version": {"type": "string"},
+                      "completeness_score": {"type": "number", "min": 0, "max": 100}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "Manual not found",
+          "schema": {"$ref": "#/schemas/ErrorResponse"}
+        },
+        "403": {
+          "description": "Access denied",
+          "schema": {"$ref": "#/schemas/ErrorResponse"}
+        }
+      },
+      "cache": {
+        "ttl": 1800,
+        "invalidate_on": ["brand_voice_update", "manual_config_change"]
+      },
+      "performance": {
+        "target_response_time": "< 2s",
+        "cache_hit_target": "> 90%"
+      }
+    },
+
+    "export_manual": {
+      "method": "POST", 
+      "path": "/export",
+      "description": "Generate manual export in specified format",
+      "request_body": {
+        "type": "object",
+        "properties": {
+          "userId": {"type": "string", "format": "uuid", "required": true},
+          "brandVoiceId": {"type": "string", "format": "uuid", "required": false},
+          "format": {
+            "type": "string",
+            "enum": ["pdf", "json", "brand_kit"],
+            "required": true
+          },
+          "sections": {
+            "type": "array",
+            "items": {"type": "string", "enum": ["visual", "voice", "language", "compliance"]},
+            "default": ["visual", "voice", "language", "compliance"]
+          },
+          "options": {
+            "type": "object",
+            "properties": {
+              "include_examples": {"type": "boolean", "default": true},
+              "include_history": {"type": "boolean", "default": false},
+              "custom_template": {"type": "string", "required": false},
+              "watermark": {"type": "boolean", "default": false},
+              "compress": {"type": "boolean", "default": true}
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Export generated successfully",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {"type": "boolean", "value": true},
+              "data": {
+                "type": "object", 
+                "properties": {
+                  "download_url": {"type": "string", "format": "url"},
+                  "format": {"type": "string"},
+                  "file_size": {"type": "number"},
+                  "expires_at": {"type": "string", "format": "date-time"},
+                  "export_id": {"type": "string", "format": "uuid"}
+                }
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Invalid export request",
+          "schema": {"$ref": "#/schemas/ErrorResponse"}
+        },
+        "429": {
+          "description": "Rate limit exceeded",
+          "schema": {"$ref": "#/schemas/ErrorResponse"}
+        }
+      },
+      "performance": {
+        "target_generation_time": "< 10s",
+        "max_file_size": "50MB",
+        "rate_limit": "5 exports per minute per user"
+      }
+    },
+
+    "update_sharing": {
+      "method": "PUT",
+      "path": "/:id/sharing", 
+      "description": "Update manual sharing configuration",
+      "parameters": {
+        "path": {
+          "id": {
+            "type": "string",
+            "format": "uuid", 
+            "required": true,
+            "description": "Manual identifier"
+          }
+        }
+      },
+      "request_body": {
+        "type": "object",
+        "properties": {
+          "access_level": {
+            "type": "string",
+            "enum": ["private", "team", "public"],
+            "required": true
+          },
+          "embed_enabled": {"type": "boolean", "required": true},
+          "allowed_users": {
+            "type": "array",
+            "items": {"type": "string", "format": "uuid"}
+          },
+          "allowed_domains": {
+            "type": "array", 
+            "items": {"type": "string", "format": "hostname"}
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "required": false
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Sharing updated successfully",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {"type": "boolean", "value": true},
+              "data": {
+                "type": "object",
+                "properties": {
+                  "public_url": {"type": "string", "format": "url"},
+                  "embed_code": {"type": "string"},
+                  "access_level": {"type": "string"},
+                  "updated_at": {"type": "string", "format": "date-time"}
+                }
+              }
+            }
+          }
+        },
+        "403": {
+          "description": "Permission denied",
+          "schema": {"$ref": "#/schemas/ErrorResponse"}
+        }
+      }
+    },
+
+    "get_export_status": {
+      "method": "GET",
+      "path": "/export/:exportId/status",
+      "description": "Check export generation status",
+      "parameters": {
+        "path": {
+          "exportId": {
+            "type": "string",
+            "format": "uuid",
+            "required": true
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Export status retrieved",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {"type": "boolean", "value": true},
+              "data": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string", 
+                    "enum": ["queued", "processing", "completed", "failed"]
+                  },
+                  "progress": {"type": "number", "min": 0, "max": 100},
+                  "estimated_completion": {"type": "string", "format": "date-time"},
+                  "download_url": {"type": "string", "format": "url"},
+                  "error_message": {"type": "string"}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "get_public_manual": {
+      "method": "GET",
+      "path": "/public/:shareId",
+      "description": "Access publicly shared manual",
+      "parameters": {
+        "path": {
+          "shareId": {
+            "type": "string",
+            "required": true,
+            "description": "Public sharing identifier"
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Public manual retrieved",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {"type": "boolean", "value": true},
+              "data": {
+                "type": "object",
+                "properties": {
+                  "manual": {"$ref": "#/schemas/RenderedManual"},
+                  "branding": {
+                    "type": "object",
+                    "properties": {
+                      "show_watermark": {"type": "boolean"},
+                      "attribution": {"type": "string"}
+                    }
+                  },
+                  "restrictions": {
+                    "type": "object", 
+                    "properties": {
+                      "download_allowed": {"type": "boolean"},
+                      "embed_allowed": {"type": "boolean"}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "Public manual not found or expired",
+          "schema": {"$ref": "#/schemas/ErrorResponse"}
+        }
+      }
+    }
+  },
+
+  "schemas": {
+    "RenderedManual": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string", "format": "uuid"},
+        "brand_voice_id": {"type": "string", "format": "uuid"},
+        "sections": {
+          "type": "object",
+          "properties": {
+            "visual": {"$ref": "#/schemas/VisualIdentitySection"},
+            "voice": {"$ref": "#/schemas/VoiceSection"},
+            "language": {"$ref": "#/schemas/LanguageSection"},
+            "compliance": {"$ref": "#/schemas/ComplianceSection"}
+          }
+        },
+        "examples": {
+          "type": "object",
+          "properties": {
+            "content_previews": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "comparison_examples": {
+              "type": "array", 
+              "items": {"$ref": "#/schemas/ComparisonExample"}
+            },
+            "channel_adaptations": {
+              "type": "array",
+              "items": {"$ref": "#/schemas/ChannelExample"}
+            }
+          }
+        },
+        "quality": {
+          "type": "object",
+          "properties": {
+            "completeness_score": {"type": "number", "min": 0, "max": 100},
+            "consistency_warnings": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "improvement_suggestions": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+
+    "VisualIdentitySection": {
+      "type": "object",
+      "properties": {
+        "palette": {
+          "type": "object",
+          "properties": {
+            "primary": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
+            "secondary": {
+              "type": "array",
+              "items": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"}
+            },
+            "neutral": {
+              "type": "array", 
+              "items": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"}
+            },
+            "usage_examples": {
+              "type": "array",
+              "items": {"$ref": "#/schemas/ColorUsageExample"}
+            },
+            "accessibility": {"$ref": "#/schemas/AccessibilityInfo"}
+          }
+        },
+        "logo": {
+          "type": "object",
+          "properties": {
+            "url": {"type": "string", "format": "url"},
+            "variants": {
+              "type": "array",
+              "items": {"$ref": "#/schemas/LogoVariant"}
+            },
+            "usage_guidelines": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          }
+        },
+        "typography": {
+          "type": "object",
+          "properties": {
+            "primary": {"type": "string"},
+            "style": {"type": "string"},
+            "examples": {
+              "type": "array", 
+              "items": {"$ref": "#/schemas/TypographyExample"}
+            }
+          }
+        }
+      }
+    },
+
+    "VoiceSection": {
+      "type": "object",
+      "properties": {
+        "personality": {
+          "type": "object",
+          "properties": {
+            "dimensions": {
+              "type": "array",
+              "items": {"$ref": "#/schemas/VoiceDimension"}
+            },
+            "radar_data": {"$ref": "#/schemas/RadarChartData"},
+            "persona_description": {"type": "string"}
+          }
+        },
+        "examples": {
+          "type": "object",
+          "properties": {
+            "do_examples": {
+              "type": "array",
+              "items": {"$ref": "#/schemas/VoiceExample"}
+            },
+            "dont_examples": {
+              "type": "array", 
+              "items": {"$ref": "#/schemas/VoiceExample"}
+            },
+            "channel_adaptations": {
+              "type": "array",
+              "items": {"$ref": "#/schemas/ChannelVoiceExample"}
+            }
+          }
+        }
+      }
+    },
+
+    "SharingConfig": {
+      "type": "object",
+      "properties": {
+        "public_url": {"type": "string", "format": "url"},
+        "access_level": {
+          "type": "string",
+          "enum": ["private", "team", "public"]
+        },
+        "embed_enabled": {"type": "boolean"},
+        "allowed_users": {
+          "type": "array",
+          "items": {"type": "string", "format": "uuid"}
+        },
+        "expires_at": {"type": "string", "format": "date-time"}
+      }
+    },
+
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "success": {"type": "boolean", "value": false},
+        "error": {
+          "type": "object",
+          "properties": {
+            "code": {"type": "string"},
+            "message": {"type": "string"},
+            "details": {"type": "object"}
+          }
+        }
+      }
+    }
+  },
+
+  "authentication": {
+    "type": "Bearer",
+    "description": "JWT token required for all endpoints except public manual access",
+    "header": "Authorization: Bearer <token>"
+  },
+
+  "rate_limits": {
+    "get_manual": "100 requests per minute per user",
+    "export_manual": "5 requests per minute per user", 
+    "update_sharing": "10 requests per minute per user",
+    "public_access": "1000 requests per hour per IP"
+  },
+
+  "caching": {
+    "strategy": "Multi-layer cache with smart invalidation",
+    "layers": {
+      "browser": "5 minutes for static content",
+      "cdn": "1 hour for public manuals",
+      "application": "30 minutes for rendered manuals",
+      "database": "Query result caching with TTL"
+    },
+    "invalidation_triggers": [
+      "brand_voice_update",
+      "manual_config_change", 
+      "sharing_settings_change"
+    ]
+  },
+
+  "webhooks": {
+    "manual_updated": {
+      "event": "manual.updated",
+      "payload": {
+        "manual_id": "string",
+        "user_id": "string", 
+        "changes": "array",
+        "timestamp": "date-time"
+      }
+    },
+    "export_completed": {
+      "event": "export.completed",
+      "payload": {
+        "export_id": "string",
+        "download_url": "string",
+        "status": "string"
+      }
+    }
+  },
+
+  "security": {
+    "data_access": "User isolation enforced at database level",
+    "public_sharing": "Share tokens with expiration and revocation",
+    "file_uploads": "Virus scanning and size limits",
+    "embed_security": "CSP headers and domain whitelisting"
+  }
+}

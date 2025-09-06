@@ -1,0 +1,482 @@
+{
+  "plan": {
+    "title": "Manual de Marca Digital (F-4)",
+    "version": "1.0",
+    "status": "executing",
+    "run_mode": "execute",
+    "generated_at": "2025-09-06T00:00:00Z",
+    "blockers_resolved_at": "2025-09-06T00:00:00Z",
+    "execution_started_at": "2025-09-06T00:00:00Z"
+  },
+  "tasks": [
+    {
+      "id": "T-001",
+      "title": "Implementar Manual Data Model e Rendering",
+      "owner": "Frontend_Developer",
+      "status": "in_progress",
+      "effort": 4,
+      "depends_on": [],
+      "acceptance": [
+        "Transform Brand Voice JSON em RenderedManual structure",
+        "Cache inteligente com invalidation em Brand Voice updates",
+        "Error handling para Brand Voice incompletos",
+        "Loading states apropriados",
+        "Data consistency validation"
+      ],
+      "observability": [
+        "Data fetching metrics",
+        "Cache hit rates"
+      ],
+      "security_notes": [
+        "Data sanitization",
+        "User isolation"
+      ],
+      "artifacts": [
+        "shared/types/manual.ts",
+        "hooks/useManualData.ts"
+      ],
+      "last_update": "2025-09-06T00:10:00Z",
+      "notes": "Foundation for all manual functionality - COMPLETED: Type definitions and data hook created successfully"
+    },
+    {
+      "id": "T-002",
+      "title": "Criar Navigation Component e Layout",
+      "owner": "Frontend_Developer",
+      "status": "done",
+      "effort": 3,
+      "depends_on": ["T-001"],
+      "acceptance": [
+        "Sidebar navigation em desktop",
+        "Bottom navigation em mobile",
+        "Section progress indicators",
+        "Smooth transitions entre seções",
+        "Deep linking para seções específicas"
+      ],
+      "observability": [
+        "Navigation usage patterns",
+        "Section engagement"
+      ],
+      "security_notes": [
+        "URL validation",
+        "State sanitization"
+      ],
+      "artifacts": [
+        "components/manual/ManualNavigation.tsx",
+        "components/manual/ManualLayout.tsx",
+        "components/manual/ManualRouter.tsx",
+        "pages/ManualMarca.tsx"
+      ],
+      "last_update": "2025-09-06T00:20:00Z",
+      "notes": "COMPLETED: Navigation, layout, routing and main page implemented successfully"
+    },
+    {
+      "id": "T-003",
+      "title": "Setup Page Layout e Structure",
+      "owner": "Frontend_Developer",
+      "status": "done",
+      "effort": 2,
+      "depends_on": ["T-002"],
+      "acceptance": [
+        "Responsive layout structure",
+        "Section containers properly configured",
+        "Toolbar actions functional",
+        "Mobile-optimized structure"
+      ],
+      "observability": [
+        "Layout performance metrics"
+      ],
+      "security_notes": [
+        "Component isolation"
+      ],
+      "artifacts": [
+        "pages/ManualMarca.tsx",
+        "components/manual/ManualDashboard.tsx"
+      ],
+      "last_update": "2025-09-06T00:20:00Z",
+      "notes": "COMPLETED: Page structure implemented with responsive design and section placeholders"
+    },
+    {
+      "id": "T-004",
+      "title": "Implementar Visual Identity Section",
+      "owner": "Frontend_Developer",
+      "status": "done",
+      "effort": 5,
+      "depends_on": ["T-003"],
+      "acceptance": [
+        "Paleta de cores com códigos hex ✅",
+        "Color combinations e accessibility ratios ✅",
+        "Logo display com diferentes sizes ✅",
+        "Typography examples e guidelines ✅",
+        "Download links para assets ✅"
+      ],
+      "observability": [
+        "Section engagement",
+        "Download metrics"
+      ],
+      "security_notes": [
+        "Asset URL validation",
+        "Download rate limiting"
+      ],
+      "artifacts": [
+        "components/manual/sections/VisualIdentitySection.tsx",
+        "components/manual/sections/OverviewSection.tsx",
+        "hooks/useManualData.ts",
+        "components/manual/ManualRouter.tsx"
+      ],
+      "last_update": "2025-09-06T02:00:00Z",
+      "notes": "COMPLETED: Full visual identity section with working tabs navigation - Colors, Logo, Typography all functional with mock data integration. Fixed data structure compatibility and navigation issues."
+    },
+    {
+      "id": "T-005",
+      "title": "Implementar Voice Section com Radar Chart",
+      "owner": "Frontend_Developer",
+      "status": "done",
+      "effort": 5,
+      "depends_on": ["T-004"],
+      "acceptance": [
+        "Radar chart com 4+ dimensões de tom",
+        "Interactive hover states",
+        "Ejemplos lado-a-lado (Como NÃO vs Como SIM)",
+        "Persona description destacada",
+        "Channel adaptation guidelines"
+      ],
+      "observability": [
+        "Chart interaction metrics",
+        "Example engagement"
+      ],
+      "security_notes": [
+        "Chart data validation",
+        "XSS prevention"
+      ],
+      "artifacts": [
+        "components/manual/sections/VoiceSection.tsx"
+      ],
+      "last_update": "2025-09-06T00:45:00Z",
+      "notes": "COMPLETED: Interactive radar chart, voice guidelines, message examples with copy functionality - Voice section fully functional"
+    },
+    {
+      "id": "T-006",
+      "title": "Implementar Language Section",
+      "owner": "Frontend_Developer",
+      "status": "done",
+      "effort": 4,
+      "depends_on": ["T-005"],
+      "acceptance": [
+        "Glossário com termos preferidos/proibidos",
+        "Search e filter functionality",
+        "CTA library com copy buttons",
+        "Formatting guidelines com exemplos",
+        "Style consistency rules"
+      ],
+      "observability": [
+        "Glossary search patterns",
+        "CTA usage"
+      ],
+      "security_notes": [
+        "Search input sanitization",
+        "Content validation"
+      ],
+      "artifacts": [
+        "components/manual/sections/LanguageSection.tsx"
+      ],
+      "last_update": "2025-09-06T01:00:00Z",
+      "notes": "COMPLETED: Interactive glossary with search/filter, CTA library, style guidelines with emoji policy - Language section fully functional"
+    },
+    {
+      "id": "T-007",
+      "title": "Implementar Compliance Section",
+      "owner": "Frontend_Developer",
+      "status": "done",
+      "effort": 4,
+      "depends_on": ["T-006"],
+      "acceptance": [
+        "Políticas de conteúdo claramente explicadas",
+        "Checklist interativo para validation",
+        "Disclaimer templates",
+        "Alert system para content review",
+        "Escalation process documentation"
+      ],
+      "observability": [
+        "Compliance check usage",
+        "Policy violations"
+      ],
+      "security_notes": [
+        "Policy content validation",
+        "Checklist integrity"
+      ],
+      "artifacts": [
+        "components/manual/sections/ComplianceSection.tsx"
+      ],
+      "last_update": "2025-09-06T01:15:00Z",
+      "notes": "COMPLETED: Interactive compliance checklist, policy cards, disclaimers library, alert triggers - Compliance section fully functional"
+    },
+    {
+      "id": "T-008",
+      "title": "Implementar Dynamic Previews System",
+      "owner": "Frontend_Developer",
+      "status": "todo",
+      "effort": 5,
+      "depends_on": ["T-007"],
+      "acceptance": [
+        "Preview atualiza com changes no Brand Voice",
+        "Multiple content types (social, email, website)",
+        "Before/after comparisons",
+        "Channel-specific adaptations",
+        "Export preview functionality"
+      ],
+      "observability": [
+        "Preview usage",
+        "Content type preferences"
+      ],
+      "security_notes": [
+        "Template injection prevention",
+        "Content sanitization"
+      ],
+      "artifacts": [
+        "components/manual/shared/SectionPreview.tsx"
+      ],
+      "last_update": "2025-09-06T00:00:00Z",
+      "notes": "Real-time preview system"
+    },
+    {
+      "id": "T-009",
+      "title": "Implementar Export System",
+      "owner": "Backend_Developer",
+      "status": "todo",
+      "effort": 6,
+      "depends_on": ["T-008"],
+      "acceptance": [
+        "PDF generation < 10s para manual completo",
+        "Multiple format support (PDF, JSON, brand kit)",
+        "Custom templates por export type",
+        "Download link com expiration",
+        "Export history tracking"
+      ],
+      "observability": [
+        "Export success rates",
+        "Generation times",
+        "Format preferences"
+      ],
+      "security_notes": [
+        "File generation security",
+        "Download authorization"
+      ],
+      "artifacts": [
+        "services/pdf-generator.service.ts",
+        "routes/manual-marca.ts"
+      ],
+      "last_update": "2025-09-06T00:00:00Z",
+      "notes": "PDF and multi-format export"
+    },
+    {
+      "id": "T-010",
+      "title": "Implementar Sharing System",
+      "owner": "Backend_Developer",
+      "status": "todo",
+      "effort": 4,
+      "depends_on": ["T-009"],
+      "acceptance": [
+        "Public URLs com access control",
+        "Embed widgets funcionais",
+        "Team sharing com permissions",
+        "Link expiration e revocation",
+        "Access audit logging"
+      ],
+      "observability": [
+        "Sharing usage",
+        "Access patterns",
+        "Embed performance"
+      ],
+      "security_notes": [
+        "Access control enforcement",
+        "Link security"
+      ],
+      "artifacts": [
+        "services/manual-sharing.service.ts"
+      ],
+      "last_update": "2025-09-06T00:00:00Z",
+      "notes": "Sharing and embed functionality"
+    },
+    {
+      "id": "T-011",
+      "title": "Implementar Cache Optimization",
+      "owner": "Backend_Developer",
+      "status": "todo",
+      "effort": 3,
+      "depends_on": ["T-010"],
+      "acceptance": [
+        "Multi-layer cache (manual data, rendered sections, exports)",
+        "Smart invalidation em Brand Voice changes",
+        "Cache hit rate > 90%",
+        "Memory usage monitoring",
+        "Graceful degradation"
+      ],
+      "observability": [
+        "Cache performance",
+        "Hit rates",
+        "Invalidation patterns"
+      ],
+      "security_notes": [
+        "Cache isolation",
+        "Data expiration"
+      ],
+      "artifacts": [
+        "utils/manual-cache.ts"
+      ],
+      "last_update": "2025-09-06T00:00:00Z",
+      "notes": "Performance optimization via caching"
+    },
+    {
+      "id": "T-012",
+      "title": "Implementar Mobile Responsiveness",
+      "owner": "Frontend_Developer",
+      "status": "todo",
+      "effort": 4,
+      "depends_on": ["T-011"],
+      "acceptance": [
+        "Navigation funcional em mobile (bottom nav)",
+        "Touch gestures para sections",
+        "Readable typography em small screens",
+        "Optimized charts para mobile",
+        "Fast loading em mobile networks"
+      ],
+      "observability": [
+        "Mobile usage metrics",
+        "Performance em mobile"
+      ],
+      "security_notes": [
+        "Mobile-specific security considerations"
+      ],
+      "artifacts": [
+        "Mobile-optimized components",
+        "Touch gesture handlers"
+      ],
+      "last_update": "2025-09-06T00:00:00Z",
+      "notes": "Complete mobile optimization"
+    },
+    {
+      "id": "T-013",
+      "title": "Implementar Accessibility Compliance",
+      "owner": "Frontend_Developer",
+      "status": "todo",
+      "effort": 3,
+      "depends_on": ["T-012"],
+      "acceptance": [
+        "Keyboard navigation completa",
+        "Screen reader compatibility",
+        "Color contrast compliance",
+        "Focus management apropriado",
+        "Semantic HTML structure"
+      ],
+      "observability": [
+        "Accessibility usage patterns",
+        "Assistive technology support"
+      ],
+      "security_notes": [
+        "Accessibility não compromete security"
+      ],
+      "artifacts": [
+        "Accessible components",
+        "Accessibility test automation"
+      ],
+      "last_update": "2025-09-06T00:00:00Z",
+      "notes": "WCAG 2.1 AA compliance"
+    },
+    {
+      "id": "T-014",
+      "title": "Implementar Component Testing",
+      "owner": "QA_Engineer",
+      "status": "todo",
+      "effort": 5,
+      "depends_on": ["T-013"],
+      "acceptance": [
+        "Todos components testados isoladamente",
+        "Chart interactions testadas",
+        "Export functionality testada",
+        "Accessibility automated testing",
+        "Visual regression detection"
+      ],
+      "observability": [
+        "Test coverage",
+        "Execution time",
+        "Regression detection"
+      ],
+      "security_notes": [
+        "Test data isolation",
+        "Mock security"
+      ],
+      "artifacts": [
+        "client/src/tests/manual/"
+      ],
+      "last_update": "2025-09-06T00:00:00Z",
+      "notes": "Comprehensive component testing"
+    },
+    {
+      "id": "T-015",
+      "title": "Implementar E2E Testing",
+      "owner": "QA_Engineer",
+      "status": "todo",
+      "effort": 4,
+      "depends_on": ["T-014"],
+      "acceptance": [
+        "Complete user journey testado",
+        "Export workflows validated",
+        "Sharing system tested",
+        "Performance targets met",
+        "Cross-browser compatibility"
+      ],
+      "observability": [
+        "E2E test metrics",
+        "Performance benchmarks"
+      ],
+      "security_notes": [
+        "E2E test data security",
+        "Environment isolation"
+      ],
+      "artifacts": [
+        "E2E test suite",
+        "Performance validation tests"
+      ],
+      "last_update": "2025-09-06T00:00:00Z",
+      "notes": "End-to-end workflow validation"
+    }
+  ],
+  "blocks": [],
+  "resolved_blocks": [
+    {
+      "tag": "RESOLVIDO",
+      "description": "PDF Generation Tool Selection - Puppeteer chosen for MVP",
+      "owner": "Frontend_Developer",
+      "decision": "Puppeteer for high fidelity, fallback jsPDF for simple exports",
+      "resolved_at": "2025-09-06T00:00:00Z"
+    },
+    {
+      "tag": "RESOLVIDO", 
+      "description": "Visual Testing Strategy - Playwright screenshot testing",
+      "owner": "QA_Engineer",
+      "decision": "Playwright + pixelmatch with git LFS baselines",
+      "resolved_at": "2025-09-06T00:00:00Z"
+    },
+    {
+      "tag": "RESOLVIDO",
+      "description": "Mobile Touch Gestures - @use-gesture/react implementation",
+      "owner": "Frontend_Developer", 
+      "decision": "Horizontal swipe = sections, pinch = zoom, double-tap = reset",
+      "resolved_at": "2025-09-06T00:00:00Z"
+    },
+    {
+      "tag": "RESOLVIDO",
+      "description": "Cache Strategy - LRU in-memory with Redis pluggable",
+      "owner": "Backend_Developer",
+      "decision": "Abstraction layer with LRU for MVP, Redis for scale",
+      "resolved_at": "2025-09-06T00:00:00Z"
+    },
+    {
+      "tag": "RESOLVIDO",
+      "description": "Embed Security - Restrictive CSP with domain allowlist", 
+      "owner": "Backend_Developer",
+      "decision": "*.digitalwoof.com + DNS TXT verification for clients",
+      "resolved_at": "2025-09-06T00:00:00Z"
+    }
+  ]
+}
