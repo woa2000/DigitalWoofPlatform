@@ -329,6 +329,8 @@ export interface TimeSlot {
   day_of_week: number;
   hour: number;
   avg_engagement: number;
+  avg_reach: number;
+  avg_clicks: number;
   sample_size: number;
   confidence: number;
 }
