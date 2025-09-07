@@ -1,0 +1,288 @@
+import { db } from '../db';
+import { tenants, tenantUsers, profiles, type Tenant, type TenantUser, type InsertTenant, type InsertTenantUser } from '@shared/schema';
+import { eq, and, sql } from 'drizzle-orm';
+
+export interface CreateTenantData {
+  name: string;
+  slug?: string;
+  businessType?: string;
+  domain?: string;
+  settings?: any;
+}
+
+export interface UpdateTenantData {
+  name?: string;
+  businessType?: string;
+  domain?: string;
+  settings?: any;
+  brandGuidelines?: any;
+  subscriptionPlan?: 'free' | 'basic' | 'premium';
+  subscriptionStatus?: 'active' | 'cancelled' | 'expired' | 'trial';
+  status?: 'active' | 'suspended' | 'archived';
+}
+
+export interface TenantWithUserRole extends Tenant {
+  userRole: string;
+  userStatus: string;
+  memberCount: number;
+}
+
+export interface InviteUserData {
+  email: string;
+  role: 'admin' | 'member' | 'viewer';
+  permissions?: string[];
+}
+
+export class TenantService {
+  
+  /**
+   * Generate unique slug for tenant
+   */
+  private static async generateUniqueSlug(baseName: string): Promise<string> {
+    const baseSlug = baseName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    
+    if (!baseSlug) {
+      throw new Error('Nome inválido para geração de slug');
+    }
+    
+    let slug = baseSlug;
+    let counter = 0;
+    
+    // Get database instance
+    const dbInstance = await db;
+    
+    // Check if slug exists and generate variant if needed
+    while (true) {
+      const existing = await (dbInstance as any)
+        .select({ id: tenants.id })
+        .from(tenants)
+        .where(eq(tenants.slug, slug))
+        .limit(1);
+        
+      if (existing.length === 0) {
+        break;
+      }
+      
+      counter++;
+      slug = `${baseSlug}-${counter}`;
+    }
+    
+    return slug;
+  }
+  
+  /**
+   * Create new tenant
+   */
+  static async createTenant(ownerId: string, data: CreateTenantData): Promise<Tenant> {
+    try {
+      // Generate unique slug if not provided
+      const slug = data.slug || await this.generateUniqueSlug(data.name);
+      
+      // Create tenant
+      const [newTenant] = await db
+        .insert(tenants)
+        .values({
+          name: data.name,
+          slug,
+          ownerId,
+          businessType: data.businessType,
+          domain: data.domain,
+          settings: data.settings || {},
+          subscriptionPlan: 'free',
+          subscriptionStatus: 'active',
+          status: 'active'
+        })
+        .returning();
+      
+      // Add owner to tenant_users
+      await db
+        .insert(tenantUsers)
+        .values({
+          tenantId: newTenant.id,
+          userId: ownerId,
+          role: 'owner',
+          status: 'active'
+        });
+      
+      console.log(`✅ Created tenant ${newTenant.id} for user ${ownerId}`);
+      return newTenant;
+      
+    } catch (error) {
+      console.error('❌ Error creating tenant:', error);
+      throw new Error('Falha ao criar tenant');
+    }
+  }
+  
+  /**
+   * Get tenants for a user
+   */
+  static async getTenantsByUser(userId: string): Promise<TenantWithUserRole[]> {
+    try {
+      const result = await db
+        .select({
+          id: tenants.id,
+          name: tenants.name,
+          slug: tenants.slug,
+          domain: tenants.domain,
+          businessType: tenants.businessType,
+          subscriptionPlan: tenants.subscriptionPlan,
+          subscriptionStatus: tenants.subscriptionStatus,
+          subscriptionEndDate: tenants.subscriptionEndDate,
+          settings: tenants.settings,
+          brandGuidelines: tenants.brandGuidelines,
+          billingInfo: tenants.billingInfo,
+          ownerId: tenants.ownerId,
+          status: tenants.status,
+          createdAt: tenants.createdAt,
+          updatedAt: tenants.updatedAt,
+          userRole: tenantUsers.role,
+          userStatus: tenantUsers.status,
+        })
+        .from(tenants)
+        .innerJoin(tenantUsers, eq(tenants.id, tenantUsers.tenantId))
+        .where(and(
+          eq(tenantUsers.userId, userId),
+          eq(tenantUsers.status, 'active')
+        ));
+      
+      // Get member count for each tenant
+      const tenantsWithMemberCount = await Promise.all(
+        result.map(async (tenant) => {
+          const [memberCount] = await db
+            .select({ count: sql<number>`count(*)` })
+            .from(tenantUsers)
+            .where(and(
+              eq(tenantUsers.tenantId, tenant.id),
+              eq(tenantUsers.status, 'active')
+            ));
+          
+          return {
+            ...tenant,
+            memberCount: memberCount.count || 0
+          } as TenantWithUserRole;
+        })
+      );
+      
+      return tenantsWithMemberCount;
+      
+    } catch (error) {
+      console.error('❌ Error getting user tenants:', error);
+      throw new Error('Falha ao buscar tenants do usuário');
+    }
+  }
+  
+  /**
+   * Get tenant details by ID
+   */
+  static async getTenantById(tenantId: string, userId: string): Promise<TenantWithUserRole | null> {
+    try {
+      const [result] = await db
+        .select({
+          id: tenants.id,
+          name: tenants.name,
+          slug: tenants.slug,
+          domain: tenants.domain,
+          businessType: tenants.businessType,
+          subscriptionPlan: tenants.subscriptionPlan,
+          subscriptionStatus: tenants.subscriptionStatus,
+          subscriptionEndDate: tenants.subscriptionEndDate,
+          settings: tenants.settings,
+          brandGuidelines: tenants.brandGuidelines,
+          billingInfo: tenants.billingInfo,
+          ownerId: tenants.ownerId,
+          status: tenants.status,
+          createdAt: tenants.createdAt,
+          updatedAt: tenants.updatedAt,
+          userRole: tenantUsers.role,
+          userStatus: tenantUsers.status,
+        })
+        .from(tenants)
+        .innerJoin(tenantUsers, eq(tenants.id, tenantUsers.tenantId))
+        .where(and(
+          eq(tenants.id, tenantId),
+          eq(tenantUsers.userId, userId),
+          eq(tenantUsers.status, 'active')
+        ))
+        .limit(1);
+      
+      if (!result) {
+        return null;
+      }
+      
+      // Get member count
+      const [memberCount] = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(tenantUsers)
+        .where(and(
+          eq(tenantUsers.tenantId, tenantId),
+          eq(tenantUsers.status, 'active')
+        ));
+      
+      return {
+        ...result,
+        memberCount: memberCount.count || 0
+      } as TenantWithUserRole;
+      
+    } catch (error) {
+      console.error('❌ Error getting tenant by ID:', error);
+      throw new Error('Falha ao buscar tenant');
+    }
+  }
+  
+  /**
+   * Update tenant
+   */
+  static async updateTenant(tenantId: string, userId: string, data: UpdateTenantData): Promise<Tenant | null> {
+    try {
+      // Check if user has permission to update (owner or admin)
+      const userAccess = await this.checkUserAccess(tenantId, userId, ['owner', 'admin']);
+      if (!userAccess) {
+        throw new Error('Permissão insuficiente para atualizar tenant');
+      }
+      
+      const [updatedTenant] = await db
+        .update(tenants)
+        .set({
+          ...data,
+          updatedAt: sql`now()`
+        })
+        .where(eq(tenants.id, tenantId))
+        .returning();
+      
+      console.log(`✅ Updated tenant ${tenantId}`);
+      return updatedTenant;
+      
+    } catch (error) {
+      console.error('❌ Error updating tenant:', error);
+      throw new Error('Falha ao atualizar tenant');
+    }
+  }
+  
+  /**
+   * Get tenant members
+   */
+  static async getTenantMembers(tenantId: string, userId: string): Promise<Array<TenantUser & { userProfile?: any }>> {
+    try {
+      // Check if user has access to this tenant
+      const userAccess = await this.checkUserAccess(tenantId, userId);
+      if (!userAccess) {
+        throw new Error('Acesso negado ao tenant');
+      }
+      
+      const members = await db
+        .select({
+          id: tenantUsers.id,
+          tenantId: tenantUsers.tenantId,
+          userId: tenantUsers.userId,
+          role: tenantUsers.role,
+          permissions: tenantUsers.permissions,
+          status: tenantUsers.status,
+          invitedBy: tenantUsers.invitedBy,
+          invitedAt: tenantUsers.invitedAt,
+          joinedAt: tenantUsers.joinedAt,
+          createdAt: tenantUsers.createdAt,
+          updatedAt: tenantUsers.updatedAt,
+          // User profile data\n          userFullName: profiles.fullName,\n          userAvatarUrl: profiles.avatarUrl,\n        })\n        .from(tenantUsers)\n        .leftJoin(profiles, eq(tenantUsers.userId, profiles.id))\n        .where(eq(tenantUsers.tenantId, tenantId))\n        .orderBy(tenantUsers.createdAt);\n      \n      return members;\n      \n    } catch (error) {\n      console.error('❌ Error getting tenant members:', error);\n      throw new Error('Falha ao buscar membros do tenant');\n    }\n  }\n  \n  /**\n   * Invite user to tenant\n   */\n  static async inviteUserToTenant(\n    tenantId: string, \n    inviterUserId: string, \n    data: InviteUserData\n  ): Promise<{ success: boolean; message: string; tenantUser?: TenantUser }> {\n    try {\n      // Check if inviter has permission (owner or admin)\n      const inviterAccess = await this.checkUserAccess(tenantId, inviterUserId, ['owner', 'admin']);\n      if (!inviterAccess) {\n        return { success: false, message: 'Permissão insuficiente para convidar usuários' };\n      }\n      \n      // For now, we'll assume the user exists and use their email as userId\n      // In a real implementation, you'd look up the user by email\n      // and possibly send an invitation email\n      \n      // Check if user is already in tenant\n      const existing = await db\n        .select()\n        .from(tenantUsers)\n        .where(and(\n          eq(tenantUsers.tenantId, tenantId),\n          eq(tenantUsers.userId, data.email) // Using email as placeholder for userId\n        ))\n        .limit(1);\n      \n      if (existing.length > 0) {\n        return { success: false, message: 'Usuário já é membro deste tenant' };\n      }\n      \n      // Add user to tenant\n      const [newTenantUser] = await db\n        .insert(tenantUsers)\n        .values({\n          tenantId,\n          userId: data.email, // Using email as placeholder\n          role: data.role,\n          permissions: data.permissions || [],\n          status: 'invited',\n          invitedBy: inviterUserId,\n          invitedAt: sql`now()`\n        })\n        .returning();\n      \n      console.log(`✅ Invited user ${data.email} to tenant ${tenantId}`);\n      return { \n        success: true, \n        message: 'Usuário convidado com sucesso',\n        tenantUser: newTenantUser\n      };\n      \n    } catch (error) {\n      console.error('❌ Error inviting user to tenant:', error);\n      return { success: false, message: 'Falha ao convidar usuário' };\n    }\n  }\n  \n  /**\n   * Remove user from tenant\n   */\n  static async removeUserFromTenant(\n    tenantId: string, \n    targetUserId: string, \n    requesterUserId: string\n  ): Promise<{ success: boolean; message: string }> {\n    try {\n      // Check if requester has permission (owner or admin)\n      const requesterAccess = await this.checkUserAccess(tenantId, requesterUserId, ['owner', 'admin']);\n      if (!requesterAccess) {\n        return { success: false, message: 'Permissão insuficiente para remover usuários' };\n      }\n      \n      // Can't remove the owner\n      const [targetUser] = await db\n        .select()\n        .from(tenantUsers)\n        .where(and(\n          eq(tenantUsers.tenantId, tenantId),\n          eq(tenantUsers.userId, targetUserId)\n        ))\n        .limit(1);\n      \n      if (!targetUser) {\n        return { success: false, message: 'Usuário não encontrado no tenant' };\n      }\n      \n      if (targetUser.role === 'owner') {\n        return { success: false, message: 'Não é possível remover o proprietário do tenant' };\n      }\n      \n      // Remove user from tenant\n      await db\n        .delete(tenantUsers)\n        .where(and(\n          eq(tenantUsers.tenantId, tenantId),\n          eq(tenantUsers.userId, targetUserId)\n        ));\n      \n      console.log(`✅ Removed user ${targetUserId} from tenant ${tenantId}`);\n      return { success: true, message: 'Usuário removido com sucesso' };\n      \n    } catch (error) {\n      console.error('❌ Error removing user from tenant:', error);\n      return { success: false, message: 'Falha ao remover usuário' };\n    }\n  }\n  \n  /**\n   * Update user role in tenant\n   */\n  static async updateUserRole(\n    tenantId: string, \n    targetUserId: string, \n    newRole: 'admin' | 'member' | 'viewer',\n    requesterUserId: string\n  ): Promise<{ success: boolean; message: string; tenantUser?: TenantUser }> {\n    try {\n      // Check if requester has permission (only owner can change roles)\n      const requesterAccess = await this.checkUserAccess(tenantId, requesterUserId, ['owner']);\n      if (!requesterAccess) {\n        return { success: false, message: 'Apenas o proprietário pode alterar funções' };\n      }\n      \n      // Can't change owner role\n      const [targetUser] = await db\n        .select()\n        .from(tenantUsers)\n        .where(and(\n          eq(tenantUsers.tenantId, tenantId),\n          eq(tenantUsers.userId, targetUserId)\n        ))\n        .limit(1);\n      \n      if (!targetUser) {\n        return { success: false, message: 'Usuário não encontrado no tenant' };\n      }\n      \n      if (targetUser.role === 'owner') {\n        return { success: false, message: 'Não é possível alterar a função do proprietário' };\n      }\n      \n      // Update user role\n      const [updatedTenantUser] = await db\n        .update(tenantUsers)\n        .set({ \n          role: newRole,\n          updatedAt: sql`now()`\n        })\n        .where(and(\n          eq(tenantUsers.tenantId, tenantId),\n          eq(tenantUsers.userId, targetUserId)\n        ))\n        .returning();\n      \n      console.log(`✅ Updated user ${targetUserId} role to ${newRole} in tenant ${tenantId}`);\n      return { \n        success: true, \n        message: 'Função atualizada com sucesso',\n        tenantUser: updatedTenantUser\n      };\n      \n    } catch (error) {\n      console.error('❌ Error updating user role:', error);\n      return { success: false, message: 'Falha ao atualizar função' };\n    }\n  }\n  \n  /**\n   * Check if user has access to tenant with specific roles\n   */\n  static async checkUserAccess(\n    tenantId: string, \n    userId: string, \n    requiredRoles?: string[]\n  ): Promise<{ tenant: Tenant; role: string } | null> {\n    try {\n      const [result] = await db\n        .select({\n          tenant: tenants,\n          role: tenantUsers.role,\n          status: tenantUsers.status\n        })\n        .from(tenants)\n        .innerJoin(tenantUsers, eq(tenants.id, tenantUsers.tenantId))\n        .where(and(\n          eq(tenants.id, tenantId),\n          eq(tenantUsers.userId, userId),\n          eq(tenantUsers.status, 'active')\n        ))\n        .limit(1);\n      \n      if (!result) {\n        return null;\n      }\n      \n      // Check role requirement\n      if (requiredRoles && !requiredRoles.includes(result.role)) {\n        return null;\n      }\n      \n      return {\n        tenant: result.tenant,\n        role: result.role\n      };\n      \n    } catch (error) {\n      console.error('❌ Error checking user access:', error);\n      return null;\n    }\n  }\n  \n  /**\n   * Get user's current tenant context\n   */\n  static async getUserCurrentTenant(userId: string): Promise<TenantWithUserRole | null> {\n    try {\n      // Get user's preferred tenant or first active tenant\n      const userTenants = await this.getTenantsByUser(userId);\n      \n      if (userTenants.length === 0) {\n        return null;\n      }\n      \n      // Return first tenant (could be enhanced to use user preferences)\n      return userTenants[0];\n      \n    } catch (error) {\n      console.error('❌ Error getting user current tenant:', error);\n      return null;\n    }\n  }\n  \n  /**\n   * Delete tenant (only by owner)\n   */\n  static async deleteTenant(tenantId: string, userId: string): Promise<{ success: boolean; message: string }> {\n    try {\n      // Check if user is the owner\n      const access = await this.checkUserAccess(tenantId, userId, ['owner']);\n      if (!access) {\n        return { success: false, message: 'Apenas o proprietário pode excluir o tenant' };\n      }\n      \n      // Delete tenant (cascade will handle tenant_users)\n      await db\n        .delete(tenants)\n        .where(eq(tenants.id, tenantId));\n      \n      console.log(`✅ Deleted tenant ${tenantId}`);\n      return { success: true, message: 'Tenant excluído com sucesso' };\n      \n    } catch (error) {\n      console.error('❌ Error deleting tenant:', error);\n      return { success: false, message: 'Falha ao excluir tenant' };\n    }\n  }\n}\n\nexport default TenantService;

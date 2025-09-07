@@ -22,7 +22,7 @@ async function createPostgresConnection() {
   try {
     const client = postgres(process.env.DATABASE_URL, {
       max: 1,
-      ssl: 'require',
+      ssl: process.env.DATABASE_URL.includes('sslmode=disable') ? false : 'require',
       connect_timeout: 5, // Timeout mais curto para falhar rapidamente
     });
     

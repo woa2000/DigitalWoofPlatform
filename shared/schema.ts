@@ -1,14 +1,72 @@
 import { sql } from "drizzle-orm";
 import { pgTable, pgSchema, text, varchar, timestamp, jsonb, integer, decimal, boolean, uuid } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // Note: We're not using the auth schema directly to avoid schema reference issues
 // Instead, we'll use a simple userId reference that can be validated at the application level
 
+// ============================================
+// TENANT SYSTEM TABLES
+// ============================================
+
+// Tenants table - organizations/companies
+export const tenants = pgTable("tenants", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Identificação
+  name: text("name").notNull(),
+  slug: text("slug").unique().notNull(), // URL-friendly name
+  domain: text("domain").unique(), // Optional custom domain
+  
+  // Business Info
+  businessType: text("business_type"), // veterinaria, petshop, hotel, etc.
+  subscriptionPlan: text("subscription_plan").default("free"), // free, basic, premium
+  subscriptionStatus: text("subscription_status").default("active"),
+  subscriptionEndDate: timestamp("subscription_end_date"),
+  
+  // Settings & Preferences
+  settings: jsonb("settings").default({}),
+  brandGuidelines: jsonb("brand_guidelines").default({}),
+  billingInfo: jsonb("billing_info").default({}),
+  
+  // Owner & Status
+  ownerId: uuid("owner_id").notNull(), // References the user who created/owns the tenant
+  status: text("status").default("active"),
+  
+  // Metadata
+  createdAt: timestamp("created_at").default(sql`now()`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`now()`).notNull(),
+});
+
+// Tenant Users relationship table
+export const tenantUsers = pgTable("tenant_users", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: uuid("tenant_id").notNull().references(() => tenants.id, { onDelete: "cascade" }),
+  userId: uuid("user_id").notNull(), // References auth.users(id) but no FK due to RLS
+  
+  // Role & Permissions
+  role: text("role").default("member"), // owner, admin, member, viewer
+  permissions: jsonb("permissions").default([]),
+  
+  // Status
+  status: text("status").default("active"), // active, invited, suspended
+  invitedBy: uuid("invited_by"), // References auth.users(id) but no FK due to RLS
+  invitedAt: timestamp("invited_at"),
+  joinedAt: timestamp("joined_at").default(sql`now()`),
+  
+  // Metadata
+  createdAt: timestamp("created_at").default(sql`now()`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`now()`).notNull(),
+}, (table) => ({
+  uniqueTenantUser: sql`UNIQUE(${table.tenantId}, ${table.userId})`
+}));
+
 // User profiles table - application-specific user data
 export const profiles = pgTable("profiles", {
   id: uuid("id").primaryKey().notNull(),
+  tenantId: uuid("tenant_id").references(() => tenants.id), // References the tenant this profile belongs to
   fullName: text("full_name"),
   avatarUrl: text("avatar_url"),
   businessName: text("business_name"),
@@ -65,6 +123,7 @@ export const brandVoices = pgTable("brand_voices", {
 export const brandVoiceJsons = pgTable("brand_voice_jsons", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: uuid("user_id").notNull(),
+  tenantId: uuid("tenant_id").references(() => tenants.id), // References the tenant this brand voice belongs to
   
   // Core Schema Data (JSONB for full search and indexing)
   brandVoiceJson: jsonb("brand_voice_json").notNull(), // Complete Brand Voice JSON Schema v1.0
@@ -105,6 +164,7 @@ export const brandVoiceJsons = pgTable("brand_voice_jsons", {
 export const campaigns = pgTable("campaigns", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: uuid("user_id").notNull(),
+  tenantId: uuid("tenant_id").references(() => tenants.id), // References the tenant this campaign belongs to
   name: text("name").notNull(),
   type: text("type").notNull(), // checkup_preventivo, programa_vip, etc
   status: text("status").notNull(), // ativa, em_teste, pausada, finalizada
@@ -119,6 +179,7 @@ export const campaigns = pgTable("campaigns", {
 export const aiContent = pgTable("ai_content", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: uuid("user_id").notNull(),
+  tenantId: uuid("tenant_id").references(() => tenants.id), // References the tenant this content belongs to
   campaignId: uuid("campaign_id").references(() => campaigns.id),
   type: text("type").notNull(), // post_instagram, email, whatsapp_template
   content: text("content").notNull(),
@@ -161,6 +222,7 @@ export const brandAssets = pgTable("brand_assets", {
 export const brandOnboarding = pgTable("brand_onboarding", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: uuid("user_id").notNull().unique(), // Único por usuário
+  tenantId: uuid("tenant_id").references(() => tenants.id), // References the tenant this onboarding belongs to
   
   // Logo e Visual
   logoUrl: text("logo_url"),
@@ -212,6 +274,7 @@ export const brandOnboarding = pgTable("brand_onboarding", {
 export const businessAnamnesis = pgTable("business_anamnesis", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: uuid("user_id").notNull(),
+  tenantId: uuid("tenant_id").references(() => tenants.id), // References the tenant this anamnesis belongs to
   responses: jsonb("responses").notNull(), // Anamnesis questions and answers
   analysis: jsonb("analysis"), // AI analysis results
   recommendations: jsonb("recommendations"), // Marketing recommendations
@@ -223,6 +286,7 @@ export const businessAnamnesis = pgTable("business_anamnesis", {
 export const anamnesisAnalysis = pgTable("anamnesis_analysis", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: uuid("user_id").notNull(),
+  tenantId: uuid("tenant_id").references(() => tenants.id), // References the tenant this analysis belongs to
   primaryUrl: text("primary_url").notNull(),
   status: text("status").notNull().$type<'queued' | 'running' | 'done' | 'error'>(),
   scoreCompleteness: decimal("score_completeness", { precision: 5, scale: 2 }),
@@ -307,6 +371,7 @@ export const insertComplianceCheckSchema = createInsertSchema(complianceChecks).
 export const contentBriefs = pgTable("content_briefs", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: uuid("user_id").notNull(),
+  tenantId: uuid("tenant_id").references(() => tenants.id), // References the tenant this brief belongs to
   
   // Especificação do conteúdo
   theme: text("theme").notNull(),
@@ -452,11 +517,36 @@ export const insertAnamnesisFindingSchema = createInsertSchema(anamnesisFinding)
   id: true,
 });
 
+// Tenant Schemas
+export const insertTenantSchema = createInsertSchema(tenants).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  name: z.string().min(1, "Nome é obrigatório").max(200, "Nome muito longo"),
+  slug: z.string().min(1, "Slug é obrigatório").max(100, "Slug muito longo").regex(/^[a-z0-9-]+$/, "Slug deve conter apenas letras minúsculas, números e hífens"),
+  businessType: z.enum(['veterinaria', 'petshop', 'hotel', 'creche', 'adestramento', 'outros']).optional(),
+  subscriptionPlan: z.enum(['free', 'basic', 'premium']).default('free'),
+  subscriptionStatus: z.enum(['active', 'cancelled', 'expired', 'trial']).default('active'),
+  status: z.enum(['active', 'suspended', 'archived']).default('active'),
+});
+
+export const insertTenantUserSchema = createInsertSchema(tenantUsers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  joinedAt: true,
+}).extend({
+  role: z.enum(['owner', 'admin', 'member', 'viewer']).default('member'),
+  status: z.enum(['active', 'invited', 'suspended']).default('active'),
+});
+
 // User metadata type for raw_user_meta_data in auth.users
 export type UserMetadata = {
   name?: string;
   business_type?: 'veterinaria' | 'petshop' | 'banho_tosa' | 'hotel_pet';
   business_name?: string;
+  preferred_tenant_id?: string; // ID do tenant preferencial do usuário
 };
 
 // Enums necessários
@@ -515,6 +605,7 @@ export const campaignTemplates = pgTable("campaign_templates", {
 export const userCampaigns = pgTable("user_campaigns", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: uuid("user_id").notNull(),
+  tenantId: uuid("tenant_id").references(() => tenants.id), // References the tenant this campaign belongs to
   templateId: uuid("template_id").references(() => campaignTemplates.id),
   brandVoiceId: uuid("brand_voice_id").references(() => brandVoices.id),
   
@@ -605,6 +696,7 @@ export const assetCollections = pgTable("asset_collections", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   name: varchar("name", { length: 200 }).notNull(),
   description: text("description"),
+  tenantId: uuid("tenant_id").references(() => tenants.id), // References the tenant this collection belongs to
   isPublic: boolean("is_public").default(false).notNull(),
   createdBy: uuid("created_by").notNull(),
   createdAt: timestamp("created_at").default(sql`now()`).notNull(),
@@ -685,6 +777,14 @@ export const insertAssetAnalyticsSchema = createInsertSchema(assetAnalytics).omi
 });
 
 // Note: AuthUser type removed as we're not using auth schema directly
+
+// Tenant System Types
+export type Tenant = typeof tenants.$inferSelect;
+export type InsertTenant = typeof tenants.$inferInsert;
+export type TenantUser = typeof tenantUsers.$inferSelect;
+export type InsertTenantUser = typeof tenantUsers.$inferInsert;
+
+// Existing Types
 export type Profile = typeof profiles.$inferSelect;
 export type InsertProfile = z.infer<typeof insertProfileSchema>;
 export type BrandVoice = typeof brandVoices.$inferSelect;

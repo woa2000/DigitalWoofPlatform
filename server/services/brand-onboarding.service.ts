@@ -10,6 +10,9 @@ const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabase
 
 // Interface para dados de entrada (alinhada com o schema)
 export interface OnboardingData {
+  // Tenant context
+  tenantId?: string;
+  
   // Logo Management
   logoUrl?: string;
   palette?: string[]; // Array de cores em hex
@@ -62,6 +65,7 @@ export class BrandOnboardingService {
       const mockData: BrandOnboarding = {
         id: 'mock-test-user-123',
         userId: 'test-user-123',
+        tenantId: null,
         logoUrl: null,
         palette: ['#1E40AF', '#EF4444', '#10B981'],
         logoMetadata: null,
@@ -188,7 +192,7 @@ export class BrandOnboardingService {
   /**
     * Create new onboarding record
     */
-   static async create(userId: string, data: OnboardingData): Promise<BrandOnboarding> {
+   static async create(userId: string, data: OnboardingData, tenantId?: string): Promise<BrandOnboarding> {
      try {
        const dbAvailable = await this.isDatabaseAvailable();
        
@@ -285,6 +289,7 @@ export class BrandOnboardingService {
        const mockRecord: BrandOnboarding = {
          id: `mock-${Date.now()}`,
          userId,
+         tenantId: data.tenantId || null,
          logoUrl: data.logoUrl || null,
          palette: data.palette || null,
          logoMetadata: data.logoMetadata || null,
@@ -305,7 +310,7 @@ export class BrandOnboardingService {
   /**
    * Update existing onboarding record
    */
-  static async update(userId: string, data: Partial<OnboardingData>): Promise<BrandOnboarding | null> {
+  static async update(userId: string, data: Partial<OnboardingData>, tenantId?: string): Promise<BrandOnboarding | null> {
     try {
       const dbAvailable = await this.isDatabaseAvailable();
       
@@ -403,14 +408,14 @@ export class BrandOnboardingService {
   /**
     * Upsert onboarding data (create or update)
     */
-   static async upsert(userId: string, data: OnboardingData): Promise<BrandOnboarding> {
+   static async upsert(userId: string, data: OnboardingData, tenantId?: string): Promise<BrandOnboarding> {
      try {
        const existing = await this.getByUserId(userId);
 
        if (existing) {
-         return await this.update(userId, data) || existing;
+         return await this.update(userId, data, tenantId) || existing;
        } else {
-         return await this.create(userId, data);
+         return await this.create(userId, data, tenantId);
        }
      } catch (error) {
        console.error('Database error in upsert:', error);
