@@ -105,8 +105,7 @@ export function RobustOnboardingWizard({ userId }: { userId?: string }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -314,7 +313,6 @@ export function RobustOnboardingWizard({ userId }: { userId?: string }) {
             </p>
           )}
         </div>
-      </div>
     </div>
   );
 }

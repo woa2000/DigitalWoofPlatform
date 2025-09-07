@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { BrandOnboardingService } from '../services/brand-onboarding.service';
+import { BrandOnboardingSupabaseService } from '../services/brand-onboarding-supabase.service';
 
 const router = Router();
 
@@ -11,7 +11,7 @@ router.get('/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
     
-    const onboarding = await BrandOnboardingService.getByUserId(userId);
+    const onboarding = await BrandOnboardingSupabaseService.getByUserId(userId);
     
     if (!onboarding) {
       return res.status(404).json({ 
@@ -41,7 +41,7 @@ router.get('/:userId/progress', async (req, res) => {
   try {
     const { userId } = req.params;
     
-    const progress = await BrandOnboardingService.getProgress(userId);
+    const progress = await BrandOnboardingSupabaseService.getProgress(userId);
     
     if (!progress) {
       return res.json({ 
@@ -85,7 +85,7 @@ router.post('/:userId', async (req, res) => {
       });
     }
     
-    const result = await BrandOnboardingService.create(userId, onboardingData);
+    const result = await BrandOnboardingSupabaseService.create(userId, onboardingData);
     
     res.status(201).json({ 
       success: true, 
@@ -109,7 +109,7 @@ router.put('/:userId', async (req, res) => {
     const { userId } = req.params;
     const updateData = req.body;
     
-    const result = await BrandOnboardingService.update(userId, updateData);
+    const result = await BrandOnboardingSupabaseService.update(userId, updateData);
     
     if (!result) {
       return res.status(404).json({ 
@@ -148,7 +148,7 @@ router.put('/:userId/upsert', async (req, res) => {
       });
     }
     
-    const result = await BrandOnboardingService.upsert(userId, onboardingData);
+    const result = await BrandOnboardingSupabaseService.upsert(userId, onboardingData);
     
     res.json({ 
       success: true, 
@@ -179,7 +179,7 @@ router.post('/:userId/step/:step', async (req, res) => {
       });
     }
     
-    const result = await BrandOnboardingService.updateStep(userId, step);
+    const result = await BrandOnboardingSupabaseService.updateStep(userId, step);
     
     if (!result) {
       return res.status(404).json({ 
@@ -209,7 +209,7 @@ router.post('/:userId/complete', async (req, res) => {
   try {
     const { userId } = req.params;
     
-    const result = await BrandOnboardingService.complete(userId);
+    const result = await BrandOnboardingSupabaseService.complete(userId);
     
     if (!result) {
       return res.status(404).json({ 
@@ -239,7 +239,7 @@ router.get('/:userId/brand-voice-json', async (req, res) => {
   try {
     const { userId } = req.params;
     
-    const brandVoiceJSON = await BrandOnboardingService.generateBrandVoiceJSON(userId);
+    const brandVoiceJSON = await BrandOnboardingSupabaseService.generateBrandVoiceJSON(userId);
     
     res.json({ 
       success: true, 
@@ -270,7 +270,7 @@ router.delete('/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
     
-    const success = await BrandOnboardingService.delete(userId);
+    const success = await BrandOnboardingSupabaseService.delete(userId);
     
     if (!success) {
       return res.status(404).json({ 

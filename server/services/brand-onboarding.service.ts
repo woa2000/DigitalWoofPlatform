@@ -1,6 +1,12 @@
 import { db } from '../db';
 import { brandOnboarding, type BrandOnboarding, type InsertBrandOnboarding } from '../../shared/schema';
 import { eq } from 'drizzle-orm';
+import { createClient } from '@supabase/supabase-js';
+
+// Supabase client for development
+const supabaseUrl = process.env.SUPABASE_URL || '';
+const supabaseKey = process.env.SUPABASE_ANON_KEY || '';
+const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
 // Interface para dados de entrada (alinhada com o schema)
 export interface OnboardingData {
@@ -95,9 +101,23 @@ export class BrandOnboardingService {
   private static async isDatabaseAvailable(): Promise<boolean> {
     try {
       console.log('🔍 Testing database connection...');
-      await db.select().from(brandOnboarding).limit(1);
-      console.log('✅ Database is available');
-      return true;
+
+      // In development, use Supabase as it's working and provides persistence
+      if (process.env.NODE_ENV === 'development' && supabase) {
+        console.log('🏠 Development mode: Using Supabase for persistent storage');
+        return true;
+      }
+
+      // In production, try direct database connection
+      const dbInstance = await db;
+      if (dbInstance && typeof (dbInstance as any).select === 'function') {
+        await (dbInstance as any).select().from(brandOnboarding).limit(1);
+        console.log('✅ Direct database connection available');
+        return true;
+      }
+
+      console.warn('⚠️ No database connection available, using in-memory storage');
+      return false;
     } catch (error) {
       console.warn('⚠️ Database not available, using in-memory storage:', error instanceof Error ? error.message : String(error));
       return false;
@@ -116,9 +136,31 @@ export class BrandOnboardingService {
        
        const dbAvailable = await this.isDatabaseAvailable();
        
-       if (dbAvailable) {
+       if (dbAvailable && process.env.NODE_ENV === 'development' && supabase) {
+         console.log('📋 Using Supabase storage for development');
+         try {
+           const { data, error } = await supabase
+             .from('brand_onboarding')
+             .select('*')
+             .eq('user_id', userId)
+             .single();
+
+           if (error && error.code !== 'PGRST116') { // PGRST116 = no rows
+             throw error;
+           }
+
+           const result = data || null;
+           console.log(`📊 Supabase result:`, result ? 'Found' : 'Not found');
+           return result;
+         } catch (error) {
+           console.warn('⚠️ Supabase query failed, falling back to in-memory:', error);
+           const data = BrandOnboardingService.inMemoryStorage.get(userId) || null;
+           return data;
+         }
+       } else if (dbAvailable) {
          console.log('📋 Using database storage');
-         const result = await db
+         const dbInstance = await db;
+         const result = await (dbInstance as any)
            .select()
            .from(brandOnboarding)
            .where(eq(brandOnboarding.userId, userId))
@@ -150,7 +192,56 @@ export class BrandOnboardingService {
      try {
        const dbAvailable = await this.isDatabaseAvailable();
        
-       if (dbAvailable) {
+       if (dbAvailable && process.env.NODE_ENV === 'development' && supabase) {
+         console.log('📝 Using Supabase for development storage');
+         try {
+           const record = {
+             user_id: userId,
+             logoUrl: data.logoUrl || null,
+             palette: data.palette || null,
+             logoMetadata: data.logoMetadata || null,
+             toneConfig: data.toneConfig,
+             languageConfig: data.languageConfig,
+             brandValues: data.brandValues || null,
+             stepCompleted: data.stepCompleted || null,
+             createdAt: new Date().toISOString(),
+             updatedAt: new Date().toISOString(),
+             completedAt: null
+           };
+
+           const { data: result, error } = await supabase
+             .from('brand_onboarding')
+             .insert(record)
+             .select()
+             .single();
+
+           if (error) {
+             throw error;
+           }
+
+           return result as BrandOnboarding;
+         } catch (error) {
+           console.warn('⚠️ Supabase insert failed, falling back to in-memory:', error);
+           const mockRecord: BrandOnboarding = {
+             id: `mock-${Date.now()}`,
+             userId,
+             logoUrl: data.logoUrl || null,
+             palette: data.palette || null,
+             logoMetadata: data.logoMetadata || null,
+             toneConfig: data.toneConfig,
+             languageConfig: data.languageConfig,
+             brandValues: data.brandValues || null,
+             stepCompleted: data.stepCompleted || null,
+             createdAt: new Date(),
+             updatedAt: new Date(),
+             completedAt: null,
+           };
+
+           BrandOnboardingService.inMemoryStorage.set(userId, mockRecord);
+           return mockRecord;
+         }
+       } else if (dbAvailable) {
+         const dbInstance = await db;
          const insertData: InsertBrandOnboarding = {
            userId,
            logoUrl: data.logoUrl || null,
@@ -162,9 +253,9 @@ export class BrandOnboardingService {
            stepCompleted: data.stepCompleted || null,
          };
 
-         const result = await db
+         const result = await (dbInstance as any)
            .insert(brandOnboarding)
-           .values(insertData as any) // Type assertion to bypass the array type issue
+           .values(insertData as any)
            .returning();
 
          return result[0];
@@ -184,7 +275,7 @@ export class BrandOnboardingService {
            updatedAt: new Date(),
            completedAt: null,
          };
-         
+
          BrandOnboardingService.inMemoryStorage.set(userId, mockRecord);
          return mockRecord;
        }
@@ -218,9 +309,51 @@ export class BrandOnboardingService {
     try {
       const dbAvailable = await this.isDatabaseAvailable();
       
-      if (dbAvailable) {
+      if (dbAvailable && process.env.NODE_ENV === 'development' && supabase) {
+        console.log('📝 Using Supabase for development update');
+        try {
+          const updateData: any = {
+            updatedAt: new Date().toISOString()
+          };
+
+          if (data.logoUrl !== undefined) updateData.logoUrl = data.logoUrl;
+          if (data.palette !== undefined) updateData.palette = data.palette;
+          if (data.logoMetadata !== undefined) updateData.logoMetadata = data.logoMetadata;
+          if (data.toneConfig !== undefined) updateData.toneConfig = data.toneConfig;
+          if (data.languageConfig !== undefined) updateData.languageConfig = data.languageConfig;
+          if (data.brandValues !== undefined) updateData.brandValues = data.brandValues;
+          if (data.stepCompleted !== undefined) updateData.stepCompleted = data.stepCompleted;
+
+          const { data: result, error } = await supabase
+            .from('brand_onboarding')
+            .update(updateData)
+            .eq('user_id', userId)
+            .select()
+            .single();
+
+          if (error && error.code !== 'PGRST116') {
+            throw error;
+          }
+
+          return result || null;
+        } catch (error) {
+          console.warn('⚠️ Supabase update failed, falling back to in-memory:', error);
+          const existing = BrandOnboardingService.inMemoryStorage.get(userId);
+          if (!existing) return null;
+
+          const updated = {
+            ...existing,
+            ...data,
+            updatedAt: new Date(),
+          };
+
+          BrandOnboardingService.inMemoryStorage.set(userId, updated);
+          return updated;
+        }
+      } else if (dbAvailable) {
+        const dbInstance = await db;
         const updateData: Partial<InsertBrandOnboarding> = {};
-        
+
         if (data.logoUrl !== undefined) updateData.logoUrl = data.logoUrl;
         if (data.palette !== undefined) updateData.palette = data.palette;
         if (data.logoMetadata !== undefined) updateData.logoMetadata = data.logoMetadata;
@@ -228,25 +361,25 @@ export class BrandOnboardingService {
         if (data.languageConfig !== undefined) updateData.languageConfig = data.languageConfig;
         if (data.brandValues !== undefined) updateData.brandValues = data.brandValues;
         if (data.stepCompleted !== undefined) updateData.stepCompleted = data.stepCompleted;
-        
-        const result = await db
+
+        const result = await (dbInstance as any)
           .update(brandOnboarding)
-          .set(updateData as any) // Type assertion to bypass the array type issue
+          .set(updateData as any)
           .where(eq(brandOnboarding.userId, userId))
           .returning();
-        
+
         return result.length > 0 ? result[0] : null;
       } else {
         // Fallback to in-memory storage
         const existing = BrandOnboardingService.inMemoryStorage.get(userId);
         if (!existing) return null;
-        
+
         const updated = {
           ...existing,
           ...data,
           updatedAt: new Date(),
         };
-        
+
         BrandOnboardingService.inMemoryStorage.set(userId, updated);
         return updated;
       }
@@ -322,12 +455,30 @@ export class BrandOnboardingService {
     try {
       const dbAvailable = await this.isDatabaseAvailable();
       
-      if (dbAvailable) {
-        const result = await db
+      if (dbAvailable && process.env.NODE_ENV === 'development' && supabase) {
+        console.log('🗑️ Using Supabase for development delete');
+        try {
+          const { error } = await supabase
+            .from('brand_onboarding')
+            .delete()
+            .eq('user_id', userId);
+
+          if (error) {
+            throw error;
+          }
+
+          return true;
+        } catch (error) {
+          console.warn('⚠️ Supabase delete failed, falling back to in-memory:', error);
+          return BrandOnboardingService.inMemoryStorage.delete(userId);
+        }
+      } else if (dbAvailable) {
+        const dbInstance = await db;
+        const result = await (dbInstance as any)
           .delete(brandOnboarding)
           .where(eq(brandOnboarding.userId, userId))
           .returning();
-        
+
         return result.length > 0;
       } else {
         // Fallback to in-memory storage

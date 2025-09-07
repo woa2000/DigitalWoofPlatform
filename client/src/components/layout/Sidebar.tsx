@@ -238,15 +238,16 @@ export function Sidebar({ className }: SidebarProps) {
               <p className="text-xs text-gray-400">Digital Woof</p>
             </div>
           )}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={logout}
-            data-testid="button-settings"
-            className="text-gray-300 hover:text-white hover:bg-gray-600"
-          >
-            <Settings className="h-4 w-4" />
-          </Button>
+          <Link href="/config">
+            <Button
+              variant="ghost"
+              size="sm"
+              data-testid="button-settings"
+              className="text-gray-300 hover:text-white hover:bg-gray-600"
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
+          </Link>
         </div>
       </div>
     </div>

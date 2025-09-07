@@ -1,0 +1,491 @@
+import { 
+  User,
+  BrandVoice,
+  InsertBrandVoice,
+  Campaign,
+  InsertCampaign,
+  AIContent,
+  InsertAIContent,
+  ComplianceCheck,
+  InsertComplianceCheck,
+  BrandAsset,
+  InsertBrandAsset,
+  BusinessAnamnesis,
+  InsertBusinessAnamnesis,
+  users,
+  brandVoices,
+  campaigns,
+  aiContent,
+  complianceChecks,
+  brandAssets,
+  businessAnamnesis
+} from "../shared/schema-standalone";
+import { db, getConnectionType } from "./db";
+import { eq, and, desc } from "drizzle-orm";
+import { randomUUID } from "crypto";
+import { IStorage } from "./storage";
+
+// Bridge interface for user management between Supabase Auth and PostgreSQL
+interface LegacyUser {
+  id: string;
+  email: string;
+  name: string;
+  businessType: string;
+  businessName: string;
+  password?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export class DrizzleStorage implements IStorage {
+  
+  constructor() {}
+
+  // Helper method to get the database connection
+  private async getDatabase() {
+    const database = await db;
+    const connectionType = await getConnectionType();
+    
+    if (connectionType !== 'postgres') {
+      throw new Error('DrizzleStorage requires PostgreSQL connection. Current connection is: ' + connectionType);
+    }
+    
+    return database as any; // Cast to bypass type issues for now
+  }
+
+  // ==========================================
+  // USER OPERATIONS (Bridge Implementation)
+  // ==========================================
+  
+  async getUser(id: string): Promise<LegacyUser | undefined> {
+    // Para development, vamos usar dados mock
+    // TODO: Implementar bridge real com Supabase Auth em produção
+    if (id === "demo-user-id") {
+      return {
+        id: "demo-user-id",
+        email: "demo@woofmarketing.com",
+        name: "Dr. Maria Silva",
+        businessType: "veterinaria",
+        businessName: "Clínica Veterinária Pet Care",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+    }
+    return undefined;
+  }
+
+  async getUserByEmail(email: string): Promise<LegacyUser | undefined> {
+    // Para development, vamos usar dados mock
+    // TODO: Implementar bridge real com Supabase Auth em produção
+    if (email === "demo@woofmarketing.com") {
+      return {
+        id: "demo-user-id",
+        email: "demo@woofmarketing.com",
+        name: "Dr. Maria Silva",
+        businessType: "veterinaria",
+        businessName: "Clínica Veterinária Pet Care",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+    }
+    return undefined;
+  }
+
+  async createUser(insertUser: Partial<LegacyUser>): Promise<LegacyUser> {
+    // Para development, vamos retornar dados mock
+    // TODO: Implementar bridge real com Supabase Auth em produção
+    const user: LegacyUser = {
+      id: randomUUID(),
+      email: insertUser.email || '',
+      name: insertUser.name || '',
+      businessType: insertUser.businessType || '',
+      businessName: insertUser.businessName || '',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    return user;
+  }
+
+  // ==========================================
+  // BRAND VOICE OPERATIONS
+  // ==========================================
+
+  async getActiveBrandVoice(userId: string): Promise<BrandVoice | undefined> {
+    const database = await this.getDatabase();
+    const result = await database
+      .select()
+      .from(brandVoices)
+      .where(and(
+        eq(brandVoices.userId, userId),
+        eq(brandVoices.isActive, true)
+      ))
+      .limit(1);
+    
+    return result[0];
+  }
+
+  async getBrandVoiceById(id: string): Promise<BrandVoice | undefined> {
+    const database = await this.getDatabase();
+    const result = await database
+      .select()
+      .from(brandVoices)
+      .where(eq(brandVoices.id, id))
+      .limit(1);
+    
+    return result[0];
+  }
+
+  async createBrandVoice(insertBrandVoice: InsertBrandVoice): Promise<BrandVoice> {
+    const database = await this.getDatabase();
+    const result = await database
+      .insert(brandVoices)
+      .values({
+        ...insertBrandVoice,
+        id: randomUUID(),
+        isActive: insertBrandVoice.isActive ?? true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    
+    return result[0];
+  }
+
+  async updateBrandVoice(id: string, updates: Partial<InsertBrandVoice>): Promise<BrandVoice> {
+    const database = await this.getDatabase();
+    const result = await database
+      .update(brandVoices)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(brandVoices.id, id))
+      .returning();
+    
+    if (result.length === 0) {
+      throw new Error("Brand voice not found");
+    }
+    
+    return result[0];
+  }
+
+  // ==========================================
+  // CAMPAIGN OPERATIONS
+  // ==========================================
+
+  async getCampaignsByUser(userId: string): Promise<Campaign[]> {
+    const database = await this.getDatabase();
+    return await database
+      .select()
+      .from(campaigns)
+      .where(eq(campaigns.userId, userId))
+      .orderBy(desc(campaigns.createdAt));
+  }
+
+  async getCampaignSummary(userId: string): Promise<Campaign[]> {
+    return this.getCampaignsByUser(userId);
+  }
+
+  async getCampaignById(id: string): Promise<Campaign | undefined> {
+    const database = await this.getDatabase();
+    const result = await database
+      .select()
+      .from(campaigns)
+      .where(eq(campaigns.id, id))
+      .limit(1);
+    
+    return result[0];
+  }
+
+  async createCampaign(insertCampaign: InsertCampaign): Promise<Campaign> {
+    const database = await this.getDatabase();
+    const result = await database
+      .insert(campaigns)
+      .values({
+        ...insertCampaign,
+        id: randomUUID(),
+        metrics: insertCampaign.metrics ?? {},
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    
+    return result[0];
+  }
+
+  async updateCampaign(id: string, updates: Partial<InsertCampaign>): Promise<Campaign> {
+    const database = await this.getDatabase();
+    const result = await database
+      .update(campaigns)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(campaigns.id, id))
+      .returning();
+    
+    if (result.length === 0) {
+      throw new Error("Campaign not found");
+    }
+    
+    return result[0];
+  }
+
+  async deleteCampaign(id: string): Promise<void> {
+    const database = await this.getDatabase();
+    await database
+      .delete(campaigns)
+      .where(eq(campaigns.id, id));
+  }
+
+  // ==========================================
+  // AI CONTENT OPERATIONS
+  // ==========================================
+
+  async getAIContentByUser(userId: string): Promise<AIContent[]> {
+    const database = await this.database;
+    return await database
+      .select()
+      .from(aiContent)
+      .where(eq(aiContent.userId, userId))
+      .orderBy(desc(aiContent.createdAt));
+  }
+
+  async createAIContent(insertContent: InsertAIContent): Promise<AIContent> {
+    const database = await this.database;
+    const result = await database
+      .insert(aiContent)
+      .values({
+        ...insertContent,
+        id: randomUUID(),
+        campaignId: insertContent.campaignId ?? null,
+        brandVoiceId: insertContent.brandVoiceId ?? null,
+        complianceScore: insertContent.complianceScore ?? null,
+        humanReviewRequired: insertContent.humanReviewRequired ?? false,
+        isPublished: insertContent.isPublished ?? false,
+        publishedAt: insertContent.publishedAt ?? null,
+        createdAt: new Date(),
+      })
+      .returning();
+    
+    return result[0];
+  }
+
+  async updateAIContent(id: string, updates: Partial<InsertAIContent>): Promise<AIContent> {
+    const database = await this.database;
+    const result = await database
+      .update(aiContent)
+      .set(updates)
+      .where(eq(aiContent.id, id))
+      .returning();
+    
+    if (result.length === 0) {
+      throw new Error("AI content not found");
+    }
+    
+    return result[0];
+  }
+
+  // ==========================================
+  // COMPLIANCE OPERATIONS
+  // ==========================================
+
+  async getComplianceMetrics(userId: string): Promise<any> {
+    const userContent = await this.getAIContentByUser(userId);
+    const totalContent = userContent.length;
+    const compliantContent = userContent.filter(c => c.complianceStatus === "approved").length;
+
+    return {
+      overall: totalContent > 0 ? Math.round((compliantContent / totalContent) * 100 * 10) / 10 : 98.5,
+      categories: {
+        medical: 100,
+        promotional: 96,
+        legal: 100
+      }
+    };
+  }
+
+  async getComplianceViolations(userId: string): Promise<ComplianceCheck[]> {
+    const userContent = await this.getAIContentByUser(userId);
+    const contentIds = userContent.map(c => c.id);
+    
+    if (contentIds.length === 0) {
+      return [];
+    }
+
+    return await this.database
+      .select()
+      .from(complianceChecks)
+      .where(and(
+        eq(complianceChecks.passed, false)
+        // TODO: Add contentId filter when we have the relationship
+      ));
+  }
+
+  async createComplianceCheck(insertCheck: InsertComplianceCheck): Promise<ComplianceCheck> {
+    const database = await this.getDatabase();
+    const result = await database
+      .insert(complianceChecks)
+      .values({
+        ...insertCheck,
+        id: randomUUID(),
+        message: insertCheck.message ?? null,
+        suggestion: insertCheck.suggestion ?? null,
+        createdAt: new Date(),
+      })
+      .returning();
+    
+    return result[0];
+  }
+
+  // ==========================================
+  // DASHBOARD OPERATIONS
+  // ==========================================
+
+  async getDashboardStats(userId: string): Promise<any> {
+    const campaignsList = await this.getCampaignsByUser(userId);
+    const aiContent = await this.getAIContentByUser(userId);
+    const compliance = await this.getComplianceMetrics(userId);
+
+    return {
+      activeCampaigns: campaignsList.filter(c => c.status === "ativa").length,
+      aiContentGenerated: aiContent.length,
+      complianceRate: compliance.overall,
+      engagementRate: 7.2,
+      trends: {
+        campaigns: 15,
+        content: 23,
+        compliance: 2.1,
+        engagement: 2.1
+      }
+    };
+  }
+
+  async getPerformanceData(userId: string): Promise<any> {
+    return {
+      instagram: 8.7,
+      email: 15.2,
+      whatsapp: 23.5
+    };
+  }
+
+  // ==========================================
+  // BRAND ASSETS OPERATIONS
+  // ==========================================
+
+  async getBrandAssetsByUser(userId: string): Promise<BrandAsset[]> {
+    const database = await this.getDatabase();
+    return await database
+      .select()
+      .from(brandAssets)
+      .where(eq(brandAssets.userId, userId))
+      .orderBy(desc(brandAssets.createdAt));
+  }
+
+  async createBrandAsset(insertAsset: InsertBrandAsset): Promise<BrandAsset> {
+    const database = await this.getDatabase();
+    const result = await database
+      .insert(brandAssets)
+      .values({
+        ...insertAsset,
+        id: randomUUID(),
+        metadata: insertAsset.metadata ?? {},
+        createdAt: new Date(),
+      })
+      .returning();
+    
+    return result[0];
+  }
+
+  // ==========================================
+  // BUSINESS ANAMNESIS OPERATIONS
+  // ==========================================
+
+  async getBusinessAnamnesisByUser(userId: string): Promise<BusinessAnamnesis[]> {
+    const database = await this.getDatabase();
+    return await database
+      .select()
+      .from(businessAnamnesis)
+      .where(eq(businessAnamnesis.userId, userId))
+      .orderBy(desc(businessAnamnesis.completedAt));
+  }
+
+  async createBusinessAnamnesis(insertAnamnesis: InsertBusinessAnamnesis): Promise<BusinessAnamnesis> {
+    const database = await this.getDatabase();
+    const result = await database
+      .insert(businessAnamnesis)
+      .values({
+        ...insertAnamnesis,
+        id: randomUUID(),
+        analysis: insertAnamnesis.analysis ?? {},
+        recommendations: insertAnamnesis.recommendations ?? {},
+        score: insertAnamnesis.score ?? null,
+        completedAt: new Date(),
+      })
+      .returning();
+    
+    return result[0];
+  }
+
+  // ==========================================
+  // SAMPLE DATA INITIALIZATION
+  // ==========================================
+
+  async initializeSampleData(): Promise<void> {
+    const sampleUserId = "demo-user-id";
+
+    // Check if sample data already exists
+    const existingBrandVoice = await this.getActiveBrandVoice(sampleUserId);
+    if (existingBrandVoice) {
+      console.log("📊 Sample data already exists, skipping initialization");
+      return;
+    }
+
+    console.log("🔄 Initializing sample data in PostgreSQL...");
+
+    try {
+      // Create sample brand voice
+      const sampleBrandVoice = await this.createBrandVoice({
+        userId: sampleUserId,
+        name: "Pet Care Voice",
+        tone: "profissional-amigavel",
+        persona: {
+          demographics: { age: "25-45", class: "B/C", location: "urbano" },
+          psychographics: { values: ["bem-estar", "confiança"], lifestyle: "ativo" }
+        },
+        values: ["amor pelos animais", "profissionalismo", "transparência"],
+        guidelines: {
+          do: ["usar linguagem empática", "incluir disclaimers"],
+          dont: ["fazer diagnósticos", "prometer curas"]
+        },
+        isActive: true,
+      });
+
+      // Create sample campaigns
+      await this.createCampaign({
+        userId: sampleUserId,
+        name: "Check-up Preventivo",
+        type: "checkup_preventivo",
+        status: "ativa",
+        channels: ["instagram", "email", "whatsapp"],
+        targetAudience: { age: "25-45", interests: ["pets", "saude"] },
+        metrics: { leads: 147, conversions: 18, engagement: 8.7 },
+      });
+
+      await this.createCampaign({
+        userId: sampleUserId,
+        name: "Programa VIP Pet",
+        type: "programa_vip",
+        status: "em_teste",
+        channels: ["instagram", "email"],
+        targetAudience: { age: "30-50", interests: ["premium", "fidelidade"] },
+        metrics: { leads: 89, conversions: 21, engagement: 12.3 },
+      });
+
+      console.log("✅ Sample data initialized successfully");
+    } catch (error) {
+      console.error("❌ Error initializing sample data:", error);
+      throw error;
+    }
+  }
+}

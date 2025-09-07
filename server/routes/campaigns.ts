@@ -12,6 +12,30 @@ const requireAuth = (req: any, res: any, next: any) => {
   next();
 };
 
+// Test route for campaigns without authentication
+router.get("/test/:userId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    console.log(`🔍 Testing campaigns for user: ${userId}`);
+    
+    const campaigns = await storage.getCampaignsByUser(userId);
+    
+    res.json({
+      message: "DrizzleStorage campaigns test successful",
+      userId,
+      campaigns,
+      count: campaigns.length,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error("Campaigns test error:", error);
+    res.status(500).json({ 
+      message: "Failed to test campaigns", 
+      error: error instanceof Error ? error.message : String(error)
+    });
+  }
+});
+
 // Get campaign summary
 router.get("/summary", requireAuth, async (req: any, res) => {
   try {
@@ -49,7 +73,7 @@ router.post("/", requireAuth, async (req: any, res) => {
     res.json(campaign);
   } catch (error) {
     console.error("Create campaign error:", error);
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ message: error instanceof Error ? error.message : "Unknown error" });
   }
 });
 
@@ -88,7 +112,7 @@ router.put("/:id", requireAuth, async (req: any, res) => {
     res.json(updatedCampaign);
   } catch (error) {
     console.error("Update campaign error:", error);
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ message: error instanceof Error ? error.message : "Unknown error" });
   }
 });
 

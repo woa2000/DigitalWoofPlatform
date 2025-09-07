@@ -1,0 +1,39 @@
+
+> rest-express@1.0.0 dev
+> cross-env NODE_ENV=development tsx server/index.ts
+
+[dotenv@17.2.2] injecting env (9) from .env -- tip: 📡 version env with Radar: https://dotenvx.com/radar
+🔄 Configurando conexão com banco de dados...
+DATABASE_URL: Configurado
+SUPABASE_URL: https://fzknihkqgjkcaoeecxfq.supabase.co
+NODE_ENV: development
+[dotenv@17.2.2] injecting env (0) from .env -- tip: 📡 version env with Radar: https://dotenvx.com/radar
+[dotenv@17.2.2] injecting env (0) from .env -- tip: ⚙️  override existing env vars with { override: true }
+[ContentGenerationService] Service initialized with calendar integration
+[dotenv@17.2.2] injecting env (0) from .env -- tip: 📡 observe env with Radar: https://dotenvx.com/radar
+[dotenv@17.2.2] injecting env (0) from .env -- tip: ⚙️  override existing env vars with { override: true }
+CWD: /Users/wilsonandrade/Documents/Projetos/DW - Digital Woof (Plataforma)/DigitalWoofPlatform
+DATABASE_URL after dotenv: postgres://rasystem:M@asterKey_0000@easypanel.rasystem.com.br:5440/woof?sslmode=disable
+9:07:44 PM [express] serving on port 5000
+❌ Conexão PostgreSQL direta falhou: Client network socket disconnected before secure TLS connection was established
+🔄 Tentando conexão alternativa via Supabase Client...
+🔄 Usando conexão via Supabase Client
+✅ Conexão Supabase Client estabelecida com sucesso
+[2025-09-07T00:07:57.850Z] INFO: Incoming request {
+  method: 'GET',
+  url: '/api/dashboard/test/demo-user-id',
+  userAgent: 'curl/8.7.1',
+  ip: '127.0.0.1',
+  contentLength: undefined
+}
+🔍 Testing DrizzleStorage for user: demo-user-id
+🔗 DrizzleStorage usando conexão: supabase
+🔗 DrizzleStorage usando conexão: supabase
+🔗 DrizzleStorage usando conexão: supabase
+9:07:57 PM [express] GET /api/dashboard/test/demo-user-id 200 in 3ms :: {"message":"DrizzleStorage t…
+[2025-09-07T00:07:57.852Z] INFO: Request completed {
+  statusCode: 200,
+  method: 'GET',
+  url: '/test/demo-user-id',
+  contentLength: '276'
+}

@@ -4,6 +4,29 @@ import { authenticateToken, AuthenticatedRequest } from "../middleware/auth";
 
 const router = Router();
 
+// Test route to verify DrizzleStorage without authentication
+router.get("/test/:userId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    console.log(`🔍 Testing DrizzleStorage for user: ${userId}`);
+    
+    const stats = await storage.getDashboardStats(userId);
+    
+    res.json({
+      message: "DrizzleStorage test successful",
+      userId,
+      stats,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error("Dashboard test error:", error);
+    res.status(500).json({ 
+      message: "Failed to test dashboard", 
+      error: error instanceof Error ? error.message : String(error)
+    });
+  }
+});
+
 // Get dashboard stats
 router.get("/stats", authenticateToken, async (req: AuthenticatedRequest, res) => {
   try {

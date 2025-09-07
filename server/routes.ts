@@ -1,5 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import express from "express";
+import path from "path";
 import { storage } from "./storage";
 import { loggingMiddleware } from "./utils/logger";
 import { HybridCacheProvider, cacheMiddleware, CacheKeys } from './cache/CacheProvider';
@@ -19,6 +21,9 @@ import templatesRoutes from "./routes/templates";
 import templateSearchRoutes from "./routes/template-search";
 import templateComparisonRoutes from "./routes/template-comparison";
 import assetsRoutes from "./routes/assets";
+import configRoutes from "./routes/config";
+import profilesRoutes from "./routes/profiles";
+import uploadRoutes from "./routes/upload";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize services
@@ -36,6 +41,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use(loggingMiddleware);
   app.use(queryAnalysisMiddleware(queryOptimizer));
 
+  // Serve uploaded files
+  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
   // API Routes (auth is now handled by Supabase)
   app.use("/api/dashboard", dashboardRoutes);
   app.use("/api/campaigns", campaignsRoutes);
@@ -48,7 +56,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/performance", performanceRoutes);
   app.use("/api/analytics", analyticsRoutes);
   app.use("/api/assets", assetsRoutes);
-  
+  app.use("/api/config", configRoutes);
+  app.use("/api/profiles", profilesRoutes);
+  app.use("/api/upload", uploadRoutes);
+
   // Apply caching to template routes
   app.use(
     "/api/templates", 

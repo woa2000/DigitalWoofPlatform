@@ -74,25 +74,5 @@ async function initializeConnection() {
 }
 
 // Exportar a conexão inicializada
-const connectionPromise = initializeConnection();
-
-// Para compatibilidade com o código existente, exportamos apenas a instância do banco
-export const db = connectionPromise.then(conn => {
-  if (conn.type === 'postgres') {
-    return conn.db; // Drizzle instance
-  } else {
-    // Para Supabase, retornamos o client diretamente
-    return conn.db; // Supabase client
-  }
-});
-
-// Exportar também o tipo de conexão para uso futuro
-export const getConnectionType = async () => {
-  const conn = await connectionPromise;
-  return conn.type;
-};
-
-// Função auxiliar para obter a instância do banco de forma síncrona (para testes)
-export const getDbInstance = async () => {
-  return await db;
-};
+export const connectionPromise = initializeConnection();
+export const db = connectionPromise.then(conn => conn.db);

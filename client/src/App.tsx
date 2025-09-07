@@ -14,6 +14,7 @@ import EditorialCalendar from "@/pages/EditorialCalendar";
 import AnamneseDigital from "@/pages/AnamneseDigital";
 import Templates from "@/pages/Templates";
 import VisualAssetsLibrary from "@/pages/VisualAssetsLibrary";
+import Config from "@/pages/Config";
 import SidebarTest from "@/pages/SidebarTest";
 import NotFound from "@/pages/not-found";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
@@ -113,6 +114,11 @@ function Router() {
           >
             <PerformanceDashboard />
           </DashboardLayout>
+        </ProtectedRoute>
+      </Route>
+      <Route path="/config">
+        <ProtectedRoute>
+          <Config />
         </ProtectedRoute>
       </Route>
       <Route path="/sidebar-test">

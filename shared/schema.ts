@@ -3,23 +3,54 @@ import { pgTable, pgSchema, text, varchar, timestamp, jsonb, integer, decimal, b
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Reference to Supabase auth schema
-export const authSchema = pgSchema("auth");
+// Note: We're not using the auth schema directly to avoid schema reference issues
+// Instead, we'll use a simple userId reference that can be validated at the application level
 
-// Reference to Supabase auth.users table
-// This table is managed by Supabase Auth and contains user authentication data
-export const authUsers = authSchema.table("users", {
-  id: uuid("id").primaryKey(),
-  email: text("email"),
-  rawUserMetaData: jsonb("raw_user_meta_data"),
-  createdAt: timestamp("created_at"),
-  updatedAt: timestamp("updated_at"),
+// User profiles table - application-specific user data
+export const profiles = pgTable("profiles", {
+  id: uuid("id").primaryKey().notNull(),
+  fullName: text("full_name"),
+  avatarUrl: text("avatar_url"),
+  businessName: text("business_name"),
+  businessType: text("business_type"), // veterinaria, petshop, hotel, etc.
+  phone: text("phone"),
+  website: text("website"),
+  address: text("address"),
+  city: text("city"),
+  state: text("state"),
+  zipCode: text("zip_code"),
+  country: text("country").default("BR"),
+  
+  // Subscription and plan info
+  planType: text("plan_type").default("free"), // free, basic, premium
+  subscriptionStatus: text("subscription_status").default("active"), // active, cancelled, expired
+  subscriptionEndDate: timestamp("subscription_end_date"),
+  
+  // Onboarding status
+  onboardingCompleted: boolean("onboarding_completed").default(false),
+  onboardingStep: text("onboarding_step").default("welcome"), // welcome, brand-setup, preferences, complete
+  
+  // User preferences
+  timezone: text("timezone").default("America/Sao_Paulo"),
+  language: text("language").default("pt-BR"),
+  notifications: jsonb("notifications").default({
+    email: true,
+    browser: true,
+    marketing: false
+  }),
+  
+  // Metadata
+  metadata: jsonb("metadata").default({}),
+  
+  // Timestamps
+  createdAt: timestamp("created_at").default(sql`now()`).notNull(),
+  updatedAt: timestamp("updated_at").default(sql`now()`).notNull(),
 });
 
 // Brand Voice profiles (legacy - deprecated in favor of brandVoiceJsons)
 export const brandVoices = pgTable("brand_voices", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id").references(() => authUsers.id).notNull(),
+  userId: uuid("user_id").notNull(),
   name: text("name").notNull(),
   tone: text("tone").notNull(), // profissional-amigavel, empatico, tecnico
   persona: jsonb("persona").notNull(), // Target audience characteristics
@@ -33,7 +64,7 @@ export const brandVoices = pgTable("brand_voices", {
 // Brand Voice JSON Schema v1.0 - Complete brand voice profiles
 export const brandVoiceJsons = pgTable("brand_voice_jsons", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id").references(() => authUsers.id).notNull(),
+  userId: uuid("user_id").notNull(),
   
   // Core Schema Data (JSONB for full search and indexing)
   brandVoiceJson: jsonb("brand_voice_json").notNull(), // Complete Brand Voice JSON Schema v1.0
@@ -73,7 +104,7 @@ export const brandVoiceJsons = pgTable("brand_voice_jsons", {
 // Campaigns
 export const campaigns = pgTable("campaigns", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id").references(() => authUsers.id).notNull(),
+  userId: uuid("user_id").notNull(),
   name: text("name").notNull(),
   type: text("type").notNull(), // checkup_preventivo, programa_vip, etc
   status: text("status").notNull(), // ativa, em_teste, pausada, finalizada
@@ -87,7 +118,7 @@ export const campaigns = pgTable("campaigns", {
 // AI Generated Content
 export const aiContent = pgTable("ai_content", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id").references(() => authUsers.id).notNull(),
+  userId: uuid("user_id").notNull(),
   campaignId: uuid("campaign_id").references(() => campaigns.id),
   type: text("type").notNull(), // post_instagram, email, whatsapp_template
   content: text("content").notNull(),
@@ -117,7 +148,7 @@ export const complianceChecks = pgTable("compliance_checks", {
 // Brand assets
 export const brandAssets = pgTable("brand_assets", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id").references(() => authUsers.id).notNull(),
+  userId: uuid("user_id").notNull(),
   type: text("type").notNull(), // logo, color_palette, typography
   name: text("name").notNull(),
   fileName: text("file_name").notNull(),
@@ -129,7 +160,7 @@ export const brandAssets = pgTable("brand_assets", {
 // Brand onboarding - Wizard de configuração da marca
 export const brandOnboarding = pgTable("brand_onboarding", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id").references(() => authUsers.id).notNull().unique(), // Único por usuário
+  userId: uuid("user_id").notNull().unique(), // Único por usuário
   
   // Logo e Visual
   logoUrl: text("logo_url"),
@@ -180,7 +211,7 @@ export const brandOnboarding = pgTable("brand_onboarding", {
 // Business anamnesis
 export const businessAnamnesis = pgTable("business_anamnesis", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id").references(() => authUsers.id).notNull(),
+  userId: uuid("user_id").notNull(),
   responses: jsonb("responses").notNull(), // Anamnesis questions and answers
   analysis: jsonb("analysis"), // AI analysis results
   recommendations: jsonb("recommendations"), // Marketing recommendations
@@ -191,7 +222,7 @@ export const businessAnamnesis = pgTable("business_anamnesis", {
 // Anamnesis Analysis - Digital presence analysis
 export const anamnesisAnalysis = pgTable("anamnesis_analysis", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id").references(() => authUsers.id).notNull(),
+  userId: uuid("user_id").notNull(),
   primaryUrl: text("primary_url").notNull(),
   status: text("status").notNull().$type<'queued' | 'running' | 'done' | 'error'>(),
   scoreCompleteness: decimal("score_completeness", { precision: 5, scale: 2 }),
@@ -222,6 +253,20 @@ export const anamnesisFinding = pgTable("anamnesis_finding", {
 });
 
 // Create insert schemas
+export const insertProfileSchema = createInsertSchema(profiles).omit({
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  phone: z.string().optional(),
+  website: z.string().url().optional().or(z.literal('')),
+  businessType: z.enum(['veterinaria', 'petshop', 'hotel', 'creche', 'adestramento', 'outros']).optional(),
+  planType: z.enum(['free', 'basic', 'premium']).default('free'),
+  subscriptionStatus: z.enum(['active', 'cancelled', 'expired']).default('active'),
+  onboardingStep: z.enum(['welcome', 'brand-setup', 'preferences', 'complete']).default('welcome'),
+  timezone: z.string().default('America/Sao_Paulo'),
+  language: z.enum(['pt-BR', 'en-US', 'es-ES']).default('pt-BR'),
+});
+
 export const insertBrandVoiceJsonSchema = createInsertSchema(brandVoiceJsons).omit({
   id: true,
   createdAt: true,
@@ -261,7 +306,7 @@ export const insertComplianceCheckSchema = createInsertSchema(complianceChecks).
 // Content Briefs for Content Generation
 export const contentBriefs = pgTable("content_briefs", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id").references(() => authUsers.id).notNull(),
+  userId: uuid("user_id").notNull(),
   
   // Especificação do conteúdo
   theme: text("theme").notNull(),
@@ -299,7 +344,7 @@ export const generatedContent = pgTable("generated_content", {
   // Status e aprovação
   status: text("status").default("generated").notNull(), // generated, approved, rejected, regenerated, published
   approvedVariationId: text("approved_variation_id"),
-  approvedBy: uuid("approved_by").references(() => authUsers.id),
+  approvedBy: uuid("approved_by"),
   approvedAt: timestamp("approved_at"),
   
   // Métricas de geração
@@ -325,7 +370,7 @@ export const contentFeedback = pgTable("content_feedback", {
   regenerationNotes: text("regeneration_notes"),
   
   // Metadata
-  userId: uuid("user_id").references(() => authUsers.id).notNull(),
+  userId: uuid("user_id").notNull(),
   createdAt: timestamp("created_at").default(sql`now()`).notNull(),
 });
 
@@ -458,7 +503,7 @@ export const campaignTemplates = pgTable("campaign_templates", {
   seasonality: jsonb("seasonality"), // {months: [1,2,3], peak_performance: 'high'}
   
   // Metadata
-  createdBy: uuid("created_by").references(() => authUsers.id),
+  createdBy: uuid("created_by"),
   isPublic: boolean("is_public").default(true).notNull(),
   isPremium: boolean("is_premium").default(false).notNull(),
   
@@ -469,7 +514,7 @@ export const campaignTemplates = pgTable("campaign_templates", {
 // Campanhas personalizadas dos usuários
 export const userCampaigns = pgTable("user_campaigns", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id").notNull().references(() => authUsers.id),
+  userId: uuid("user_id").notNull(),
   templateId: uuid("template_id").references(() => campaignTemplates.id),
   brandVoiceId: uuid("brand_voice_id").references(() => brandVoices.id),
   
@@ -550,7 +595,7 @@ export const assets = pgTable("assets", {
   metadata: jsonb("metadata"), // alt, caption, attribution, license
 
   // Controle de versão e timestamps
-  createdBy: uuid("created_by").references(() => authUsers.id),
+  createdBy: uuid("created_by"),
   createdAt: timestamp("created_at").default(sql`now()`).notNull(),
   updatedAt: timestamp("updated_at").default(sql`now()`).notNull(),
 });
@@ -561,7 +606,7 @@ export const assetCollections = pgTable("asset_collections", {
   name: varchar("name", { length: 200 }).notNull(),
   description: text("description"),
   isPublic: boolean("is_public").default(false).notNull(),
-  createdBy: uuid("created_by").references(() => authUsers.id).notNull(),
+  createdBy: uuid("created_by").notNull(),
   createdAt: timestamp("created_at").default(sql`now()`).notNull(),
   updatedAt: timestamp("updated_at").default(sql`now()`).notNull(),
 });
@@ -577,7 +622,7 @@ export const assetCollectionItems = pgTable("asset_collection_items", {
 // Asset Favorites
 export const assetFavorites = pgTable("asset_favorites", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id").references(() => authUsers.id).notNull(),
+  userId: uuid("user_id").notNull(),
   assetId: uuid("asset_id").references(() => assets.id).notNull(),
   addedAt: timestamp("added_at").default(sql`now()`).notNull(),
 }, (table) => ({
@@ -588,7 +633,7 @@ export const assetFavorites = pgTable("asset_favorites", {
 export const assetAnalytics = pgTable("asset_analytics", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   assetId: uuid("asset_id").references(() => assets.id).notNull(),
-  userId: uuid("user_id").references(() => authUsers.id),
+  userId: uuid("user_id"),
   action: text("action").notNull(), // view, download, favorite, unfavorite
   metadata: jsonb("metadata"), // additional context
   createdAt: timestamp("created_at").default(sql`now()`).notNull(),
@@ -639,8 +684,9 @@ export const insertAssetAnalyticsSchema = createInsertSchema(assetAnalytics).omi
   createdAt: true,
 });
 
-// Infer types
-export type AuthUser = typeof authUsers.$inferSelect;
+// Note: AuthUser type removed as we're not using auth schema directly
+export type Profile = typeof profiles.$inferSelect;
+export type InsertProfile = z.infer<typeof insertProfileSchema>;
 export type BrandVoice = typeof brandVoices.$inferSelect;
 export type InsertBrandVoice = z.infer<typeof insertBrandVoiceSchema>;
 export type BrandVoiceJson = typeof brandVoiceJsons.$inferSelect;

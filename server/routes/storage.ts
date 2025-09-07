@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import multer from 'multer';
 import { LogoStorageService } from '../services/logo-storage.service.js';
-import { BrandOnboardingService } from '../services/brand-onboarding.service.js';
+import { BrandOnboardingSupabaseService } from '../services/brand-onboarding-supabase.service.js';
 
 const router = Router();
 
@@ -62,7 +62,7 @@ router.post('/logo/:userId', upload.single('logo'), async (req: MulterRequest, r
     
     // Update onboarding data with logo info
     try {
-      await BrandOnboardingService.update(userId, {
+      await BrandOnboardingSupabaseService.update(userId, {
         logoUrl: uploadResult.logoUrl,
         logoMetadata: uploadResult.metadata,
         palette: uploadResult.palette,
@@ -100,7 +100,7 @@ router.delete('/logo/:userId', async (req: Request, res: Response) => {
     const { userId } = req.params;
     
     // Get current onboarding data to find logo URL
-    const onboarding = await BrandOnboardingService.getByUserId(userId);
+    const onboarding = await BrandOnboardingSupabaseService.getByUserId(userId);
     
     if (!onboarding || !onboarding.logoUrl) {
       return res.status(404).json({
@@ -120,7 +120,7 @@ router.delete('/logo/:userId', async (req: Request, res: Response) => {
     }
     
     // Update onboarding data to remove logo info
-    await BrandOnboardingService.update(userId, {
+    await BrandOnboardingSupabaseService.update(userId, {
       logoUrl: undefined,
       logoMetadata: undefined,
       palette: undefined
@@ -148,7 +148,7 @@ router.get('/logo/:userId/metadata', async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
     
-    const onboarding = await BrandOnboardingService.getByUserId(userId);
+    const onboarding = await BrandOnboardingSupabaseService.getByUserId(userId);
     
     if (!onboarding || !onboarding.logoUrl) {
       return res.status(404).json({
@@ -185,7 +185,7 @@ router.get('/logo/:userId/palette', async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
     
-    const onboarding = await BrandOnboardingService.getByUserId(userId);
+    const onboarding = await BrandOnboardingSupabaseService.getByUserId(userId);
     
     if (!onboarding || !onboarding.logoUrl) {
       return res.status(404).json({
@@ -216,7 +216,7 @@ router.get('/logo/:userId/palette', async (req: Request, res: Response) => {
     }
     
     // Update onboarding with new palette
-    await BrandOnboardingService.update(userId, {
+    await BrandOnboardingSupabaseService.update(userId, {
       palette,
       stepCompleted: 'palette'
     });
