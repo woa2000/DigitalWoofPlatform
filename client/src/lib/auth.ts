@@ -10,18 +10,39 @@ interface AuthState {
 
 export function useAuth() {
   const [authState, setAuthState] = useState<AuthState>({
-    user: { email: 'test@example.com' } as User,
-    isLoading: false,
-    isAuthenticated: true,
+    user: null,
+    isLoading: true,
+    isAuthenticated: false,
   });
 
   useEffect(() => {
-    // Mock authentication - always authenticated for testing
-    setAuthState({
-      user: { email: 'test@example.com' } as User,
-      isLoading: false,
-      isAuthenticated: true,
-    });
+    // Check initial auth state
+    checkAuthStatus();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('🔄 Auth state changed:', event, session?.user?.email);
+        
+        if (session?.user) {
+          setAuthState({
+            user: session.user,
+            isLoading: false,
+            isAuthenticated: true,
+          });
+        } else {
+          setAuthState({
+            user: null,
+            isLoading: false,
+            isAuthenticated: false,
+          });
+        }
+      }
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const checkAuthStatus = async () => {
@@ -85,13 +106,25 @@ export function useAuth() {
 
   const logout = async () => {
     try {
+      console.log('🔄 Fazendo logout...');
+      setAuthState(prev => ({ ...prev, isLoading: true }));
+      
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error("Logout error:", error);
+        throw error;
       }
-      // State will be updated by onAuthStateChange
+      
+      console.log('✅ Logout realizado com sucesso');
     } catch (error) {
       console.error("Logout error:", error);
+      // Mesmo com erro, atualizar estado para não autenticado
+      setAuthState({
+        user: null,
+        isLoading: false,
+        isAuthenticated: false,
+      });
+      throw error;
     }
   };
 

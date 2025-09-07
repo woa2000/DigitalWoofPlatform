@@ -6,6 +6,7 @@ import { storage } from "./storage";
 import { loggingMiddleware } from "./utils/logger";
 import { HybridCacheProvider, cacheMiddleware, CacheKeys } from './cache/CacheProvider';
 import { QueryOptimizer, queryAnalysisMiddleware } from './services/QueryOptimizer';
+import { authenticateToken } from "./middleware/auth";
 
 import dashboardRoutes from "./routes/dashboard";
 import campaignsRoutes from "./routes/campaigns";
@@ -24,6 +25,8 @@ import assetsRoutes from "./routes/assets";
 import configRoutes from "./routes/config";
 import profilesRoutes from "./routes/profiles";
 import uploadRoutes from "./routes/upload";
+import tenantsRoutes from "./routes/tenants";
+import usersRoutes from "./routes/users";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize services
@@ -50,8 +53,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/brand-voice", brandVoiceRoutes);
   app.use("/api/compliance", complianceRoutes);
   app.use("/api/anamnesis", anamnesisRoutes);
-  app.use("/api/onboarding", onboardingRoutes);
-  app.use("/api/storage", storageRoutes);
+  app.use("/api/onboarding", authenticateToken, onboardingRoutes);
+  app.use("/api/storage", authenticateToken, storageRoutes);
   app.use("/api/content", contentRoutes);
   app.use("/api/performance", performanceRoutes);
   app.use("/api/analytics", analyticsRoutes);
@@ -59,6 +62,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/config", configRoutes);
   app.use("/api/profiles", profilesRoutes);
   app.use("/api/upload", uploadRoutes);
+  app.use("/api/tenants", authenticateToken, tenantsRoutes);
+  app.use("/api/users", usersRoutes);
 
   // Apply caching to template routes
   app.use(

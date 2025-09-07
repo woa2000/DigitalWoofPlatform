@@ -4,12 +4,13 @@ import { RobustOnboardingWizard } from '@/components/onboarding/RobustOnboarding
 
 export default function Onboarding() {
   // TODO: Get userId from authentication context
+  // Para agora, usando um ID de teste - na implementação real deve vir do contexto de auth
   const userId = 'test-user-123';
 
   return (
     <DashboardLayout
       title="Onboarding de Marca"
-      subtitle="Configure a identidade digital da sua marca"
+      subtitle="Configure a identidade digital da sua marca com salvamento automático"
     >
       <RobustOnboardingWizard userId={userId} />
     </DashboardLayout>

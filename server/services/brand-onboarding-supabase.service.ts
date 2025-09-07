@@ -83,12 +83,13 @@ export class BrandOnboardingSupabaseService {
   /**
    * Create new onboarding record
    */
-  static async create(userId: string, data: OnboardingData): Promise<BrandOnboardingRecord> {
+  static async create(userId: string, data: OnboardingData, tenantId?: string): Promise<BrandOnboardingRecord> {
     try {
-      console.log(`📝 Creating onboarding record for user: ${userId}`);
+      console.log(`📝 Creating onboarding record for user: ${userId}${tenantId ? ` in tenant: ${tenantId}` : ''}`);
 
       const record = {
         user_id: userId,
+        tenantId: tenantId || null, // 🆕 Adicionar tenantId
         logoUrl: data.logoUrl || null,
         palette: data.palette || null,
         logoMetadata: data.logoMetadata || null,
@@ -123,9 +124,9 @@ export class BrandOnboardingSupabaseService {
   /**
    * Update existing onboarding record
    */
-  static async update(userId: string, data: Partial<OnboardingData>): Promise<BrandOnboardingRecord | null> {
+  static async update(userId: string, data: Partial<OnboardingData>, tenantId?: string): Promise<BrandOnboardingRecord | null> {
     try {
-      console.log(`📝 Updating onboarding record for user: ${userId}`);
+      console.log(`📝 Updating onboarding record for user: ${userId}${tenantId ? ` in tenant: ${tenantId}` : ''}`);
 
       const updateData: any = {
         updatedAt: new Date().toISOString()
@@ -138,6 +139,9 @@ export class BrandOnboardingSupabaseService {
       if (data.languageConfig !== undefined) updateData.languageConfig = data.languageConfig;
       if (data.brandValues !== undefined) updateData.brandValues = data.brandValues;
       if (data.stepCompleted !== undefined) updateData.stepCompleted = data.stepCompleted;
+      
+      // 🆕 Adicionar tenantId se fornecido
+      if (tenantId !== undefined) updateData.tenantId = tenantId;
 
       const { data: result, error } = await supabase
         .from('brand_onboarding')

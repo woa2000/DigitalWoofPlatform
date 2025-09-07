@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
+import { UserManagement } from '@/components/users/UserManagement';
 import { 
   Building2, 
   Settings, 
@@ -240,10 +241,9 @@ export function TenantSettings() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Configurações da Organização</h1>
           <p className="text-muted-foreground">
             Gerencie as configurações da sua organização
           </p>
@@ -261,7 +261,7 @@ export function TenantSettings() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="general" className="flex items-center space-x-2">
             <Building2 className="h-4 w-4" />
             <span>Geral</span>
@@ -273,6 +273,10 @@ export function TenantSettings() {
           <TabsTrigger value="team" className="flex items-center space-x-2">
             <Users className="h-4 w-4" />
             <span>Equipe</span>
+          </TabsTrigger>
+          <TabsTrigger value="users" className="flex items-center space-x-2">
+            <UserPlus className="h-4 w-4" />
+            <span>Usuários</span>
           </TabsTrigger>
           <TabsTrigger value="subscription" className="flex items-center space-x-2">
             <CreditCard className="h-4 w-4" />
@@ -368,6 +372,10 @@ export function TenantSettings() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="users" className="space-y-6">
+          <UserManagement tenantId={tenant.id} />
         </TabsContent>
 
         <TabsContent value="subscription" className="space-y-6">

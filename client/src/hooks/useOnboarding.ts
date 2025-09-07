@@ -211,6 +211,11 @@ export function useOnboarding(userId?: string): UseOnboardingReturn {
   const validateAndNextStep = async (): Promise<boolean> => {
     const isValid = validateCurrentStep();
     if (isValid) {
+      // 🆕 Salvar etapa atual antes de avançar (exceto etapa 0 que já salva no upload)
+      if (state.currentStep > 0) {
+        await saveCurrentStep();
+      }
+      
       await nextStep();
       return true;
     }
@@ -255,7 +260,65 @@ export function useOnboarding(userId?: string): UseOnboardingReturn {
     dispatch({ type: 'UPDATE_BRAND_VALUES', payload: values });
   };
 
-  // Save progress to localStorage only (no backend save until completion)
+  // 🆕 NOVO: Salvamento automático por etapa
+  const saveCurrentStep = useCallback(async () => {
+    if (!apiClient || state.currentStep === 0) {
+      // Etapa 0 (logo) já salva automaticamente no upload
+      return;
+    }
+    
+    dispatch({ type: 'SET_LOADING', payload: true });
+    
+    try {
+      const stepData = getCurrentStepData();
+      if (Object.keys(stepData).length === 0) {
+        // Não há dados para salvar
+        return;
+      }
+      
+      console.log('💾 Auto-saving step data:', state.currentStep, stepData);
+      const result = await apiClient.saveStepData(stepData, state.currentStep);
+      
+      if (!result.success) {
+        console.warn('Failed to save step data:', result.error);
+      } else {
+        console.log('✅ Step data saved successfully');
+      }
+    } catch (error) {
+      console.error('Error saving step data:', error);
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  }, [apiClient, state.currentStep, state]);
+
+  // Função auxiliar para obter dados da etapa atual
+  const getCurrentStepData = () => {
+    switch (state.currentStep) {
+      case 1: // Tone step
+        return { toneConfig: state.toneConfig };
+      case 2: // Language step
+        return { languageConfig: state.languageConfig };
+      case 3: // Values step
+        return { brandValues: state.brandValues };
+      default:
+        return {};
+    }
+  };
+
+  // Auto-save com debounce (apenas para etapas 1-3, não para etapa 0 que é upload)
+  useEffect(() => {
+    if (state.currentStep === 0) return; // Skip logo step - already saves on upload
+    
+    const timeoutId = setTimeout(saveCurrentStep, 2000); // Debounce de 2s
+    return () => clearTimeout(timeoutId);
+  }, [
+    state.toneConfig, 
+    state.languageConfig, 
+    state.brandValues, 
+    saveCurrentStep
+  ]);
+
+  // Save progress to localStorage only (mantém backup local)
   const saveProgressLocally = async () => {
     try {
       localStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify(state));
@@ -296,7 +359,7 @@ export function useOnboarding(userId?: string): UseOnboardingReturn {
 
       // Single save to database (no incremental saves)
       if (apiClient) {
-        const saveResult = await apiClient.saveOnboardingData(finalBrandVoiceData);
+        const saveResult = await apiClient.saveData(state);
         if (!saveResult.success) {
           throw new Error(saveResult.error || 'Falha ao salvar dados no servidor');
         }

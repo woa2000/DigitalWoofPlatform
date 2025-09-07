@@ -12,13 +12,13 @@ export * from './schemas/tenant-system';
 export * from './schemas/brand-system';
 
 // Sistema de Campanhas (Templates, Performance)
-export * from './schemas/campaign-system';
+// export * from './schemas/campaign-system';
 
 // Sistema de IA e Conteúdo (Prompts, Geração, Feedback)
-export * from './schemas/ai-content';
+// export * from './schemas/ai-content';
 
 // Sistema de Assets (Biblioteca Visual, Coleções)
-export * from './schemas/assets';
+// export * from './schemas/assets';
 
 // Sistema de Anamnese (Análise, Insights, Business)
 export * from './schemas/anamnesis';
@@ -28,22 +28,22 @@ export * from './schemas/anamnesis';
 // ==========================================
 
 // Tipos do Sistema de Tenants
-export * from './types/tenant-system';
+// export * from './types/tenant-system';
 
 // Tipos do Sistema de Marca
-export * from './types/brand-system';
+// export * from './types/brand-system';
 
 // Tipos do Sistema de Campanhas
-export * from './types/campaign-system';
+// export * from './types/campaign-system';
 
 // Tipos do Sistema de IA e Conteúdo
-export * from './types/ai-content';
+// export * from './types/ai-content';
 
 // Tipos do Sistema de Assets
-export * from './types/assets';
+// export * from './types/assets';
 
 // Tipos do Sistema de Anamnese
-export * from './types/anamnesis';
+// export * from './types/anamnesis';
 
 // ==========================================
 // 🌟 UTILITIES & HELPERS

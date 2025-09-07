@@ -2,6 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import multer from 'multer';
 import { LogoStorageService } from '../services/logo-storage.service.js';
 import { BrandOnboardingSupabaseService } from '../services/brand-onboarding-supabase.service.js';
+import { TenantService } from '../services/tenant-basic.service.js';
 
 const router = Router();
 
@@ -42,6 +43,19 @@ router.post('/logo/:userId', upload.single('logo'), async (req: MulterRequest, r
       });
     }
     
+    // 🆕 OBTER TENANT CONTEXT
+    console.log('🔍 Getting tenant context for user:', userId);
+    const currentTenant = await TenantService.getUserCurrentTenant(userId);
+    
+    if (!currentTenant?.id) {
+      return res.status(400).json({
+        success: false,
+        error: 'Tenant context not found for user'
+      });
+    }
+    
+    console.log('✅ Tenant context found:', currentTenant.id);
+    
     // Bucket creation is now handled in the uploadLogo method
     console.log('🔄 Processing logo upload for user:', userId);
     
@@ -60,14 +74,16 @@ router.post('/logo/:userId', upload.single('logo'), async (req: MulterRequest, r
       });
     }
     
-    // Update onboarding data with logo info
+    // 🆕 INCLUIR TENANT_ID NO UPDATE
     try {
       await BrandOnboardingSupabaseService.update(userId, {
         logoUrl: uploadResult.logoUrl,
         logoMetadata: uploadResult.metadata,
         palette: uploadResult.palette,
         stepCompleted: 'logo'
-      });
+      }, currentTenant.id); // ← Novo parâmetro tenantId
+      
+      console.log('✅ Onboarding updated with tenant context');
     } catch (updateError) {
       console.error('Error updating onboarding with logo data:', updateError);
       // Continue - logo was uploaded successfully even if DB update failed

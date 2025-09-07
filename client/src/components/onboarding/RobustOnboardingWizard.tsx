@@ -5,6 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, ArrowRight, Check, Upload, Palette, Volume2, MessageSquare, Eye } from 'lucide-react';
 import { useOnboarding } from '@/hooks/useOnboarding';
+import { useTenantContext } from '@/hooks/useTenantContext';
 import { cn } from '@/lib/utils';
 
 // Step imports (placeholders for now)
@@ -58,6 +59,9 @@ export function RobustOnboardingWizard({ userId }: { userId?: string }) {
   const [isCompleting, setIsCompleting] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   
+  // 🆕 Adicionar contexto de tenant
+  const { currentTenant, loading: tenantLoading, error: tenantError } = useTenantContext();
+  
   const {
     currentStep,
     state,
@@ -76,6 +80,38 @@ export function RobustOnboardingWizard({ userId }: { userId?: string }) {
     updateLanguageConfig,
     updateBrandValues
   } = useOnboarding(userId);
+
+  // 🆕 Não renderizar até ter contexto de tenant
+  if (tenantLoading) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Carregando contexto...</h2>
+          <p className="text-gray-600">Preparando ambiente para configuração da marca</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (tenantError || !currentTenant?.id) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center py-12">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-red-600 text-2xl">⚠️</span>
+          </div>
+          <h2 className="text-xl font-semibold text-red-900 mb-2">Erro de Contexto</h2>
+          <p className="text-red-700 mb-4">
+            {tenantError || 'Não foi possível encontrar o contexto da empresa'}
+          </p>
+          <Button onClick={() => window.location.reload()} variant="outline">
+            Tentar Novamente
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const CurrentStepComponent = STEPS[currentStep]?.component;
   const progressPercentage = ((currentStep + 1) / STEPS.length) * 100;
@@ -115,6 +151,18 @@ export function RobustOnboardingWizard({ userId }: { userId?: string }) {
             Vamos criar a identidade digital da sua marca pet em alguns passos simples. 
             Este processo levará cerca de 10-15 minutos.
           </p>
+          {/* 🆕 Mostrar contexto do tenant */}
+          {currentTenant && (
+            <div className="mt-4 inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-50 text-blue-700 border border-blue-200">
+              <span className="font-medium">{currentTenant.name}</span>
+              {currentTenant.businessType && (
+                <>
+                  <span className="mx-2">•</span>
+                  <span className="capitalize">{currentTenant.businessType}</span>
+                </>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Progress Bar */}
@@ -242,6 +290,14 @@ export function RobustOnboardingWizard({ userId }: { userId?: string }) {
                   </div>
                 )}
                 
+                {/* 🆕 Indicador de contexto */}
+                {!isLoading && currentTenant?.id && (
+                  <div className="flex items-center space-x-2 text-sm text-green-600">
+                    <Check className="w-4 h-4" />
+                    <span>Dados seguros</span>
+                  </div>
+                )}
+                
                 {/* Step indicator */}
                 <span className="text-sm text-gray-500">
                   {currentStep + 1} de {STEPS.length}
@@ -308,9 +364,14 @@ export function RobustOnboardingWizard({ userId }: { userId?: string }) {
               </p>
             </div>
           ) : (
-            <p className="text-sm text-gray-500">
-              Complete cada etapa para prosseguir. Seus dados serão salvos apenas ao finalizar.
-            </p>
+            <div className="space-y-2">
+              <p className="text-sm text-gray-700 font-medium">
+                💾 Salvamento Automático Ativo
+              </p>
+              <p className="text-sm text-gray-500">
+                Seus dados são salvos automaticamente a cada mudança. Pode navegar tranquilamente entre as etapas.
+              </p>
+            </div>
           )}
         </div>
     </div>

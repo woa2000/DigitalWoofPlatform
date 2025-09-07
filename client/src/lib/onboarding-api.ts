@@ -1,4 +1,5 @@
 import { OnboardingState, LogoProcessingResult, ToneConfiguration, LanguageConfiguration, BrandValues } from '@shared/types/onboarding';
+import { apiRequest } from './queryClient';
 
 const API_BASE = '/api';
 
@@ -16,20 +17,16 @@ export class OnboardingApiClient {
   }
 
   // Get existing onboarding data
-  async getOnboardingData(): Promise<OnboardingApiResponse<OnboardingState>> {
+  async getData(): Promise<OnboardingApiResponse<OnboardingState>> {
     try {
-      const response = await fetch(`${API_BASE}/onboarding/${this.userId}`);
+      const response = await apiRequest('GET', `/api/onboarding/${this.userId}`);
       const data = await response.json();
 
-      if (!response.ok) {
-        console.warn('Backend error, falling back to localStorage:', data.error);
-        return { success: false, error: data.error || 'Failed to fetch onboarding data' };
-      }
-
-      return { success: true, data: this.transformFromBackend(data.data) };
+      const transformedData = this.transformFromBackend(data.data);
+      return { success: true, data: transformedData };
     } catch (error) {
-      console.warn('Network error, falling back to localStorage:', error);
-      return { success: false, error: 'Network error' };
+      console.error('Error fetching onboarding data:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Network error' };
     }
   }
 
@@ -51,27 +48,16 @@ export class OnboardingApiClient {
   }
 
   // Save onboarding data (create or update)
-  async saveOnboardingData(onboardingData: Partial<OnboardingState>): Promise<OnboardingApiResponse> {
+  async saveData(state: OnboardingState): Promise<OnboardingApiResponse> {
     try {
-      const transformedData = this.transformToBackend(onboardingData);
-      const response = await fetch(`${API_BASE}/onboarding/${this.userId}/upsert`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(transformedData),
-      });
-
+      const transformedData = this.transformToBackend(state);
+      const response = await apiRequest('PUT', `/api/onboarding/${this.userId}/upsert`, transformedData);
       const data = await response.json();
-
-      if (!response.ok) {
-        return { success: false, error: data.error || 'Failed to save onboarding data' };
-      }
 
       return { success: true, data: data.data };
     } catch (error) {
       console.error('Error saving onboarding data:', error);
-      return { success: false, error: 'Network error' };
+      return { success: false, error: error instanceof Error ? error.message : 'Network error' };
     }
   }
 
@@ -98,20 +84,13 @@ export class OnboardingApiClient {
   // Complete onboarding
   async completeOnboarding(): Promise<OnboardingApiResponse> {
     try {
-      const response = await fetch(`${API_BASE}/onboarding/${this.userId}/complete`, {
-        method: 'POST',
-      });
-
+      const response = await apiRequest('POST', `/api/onboarding/${this.userId}/complete`);
       const data = await response.json();
-
-      if (!response.ok) {
-        return { success: false, error: data.error || 'Failed to complete onboarding' };
-      }
 
       return { success: true, data: data.data };
     } catch (error) {
       console.error('Error completing onboarding:', error);
-      return { success: false, error: 'Network error' };
+      return { success: false, error: error instanceof Error ? error.message : 'Network error' };
     }
   }
 
@@ -153,6 +132,27 @@ export class OnboardingApiClient {
     } catch (error) {
       console.error('Error uploading logo:', error);
       return { success: false, error: 'Network error' };
+    }
+  }
+
+  // 🆕 NOVO: Save step data incrementally  
+  async saveStepData(stepData: Partial<OnboardingState>, stepIndex: number): Promise<OnboardingApiResponse> {
+    try {
+      const transformedData = this.transformToBackend(stepData);
+      
+      // Add step completion marker
+      const stepNames = ['logo', 'tone', 'language', 'values', 'preview'] as const;
+      if (stepIndex >= 0 && stepIndex < stepNames.length) {
+        transformedData.stepCompleted = stepNames[stepIndex];
+      }
+      
+      const response = await apiRequest('PUT', `/api/onboarding/${this.userId}/step`, transformedData);
+      const data = await response.json();
+      
+      return { success: true, data: data.data };
+    } catch (error) {
+      console.error('Error saving step data:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Network error' };
     }
   }
 

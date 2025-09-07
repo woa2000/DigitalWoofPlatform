@@ -17,6 +17,7 @@ import VisualAssetsLibrary from "@/pages/VisualAssetsLibrary";
 import Config from "@/pages/Config";
 import SidebarTest from "@/pages/SidebarTest";
 import NotFound from "@/pages/not-found";
+import { TenantSettings } from "@/pages/settings/TenantSettings";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -119,6 +120,16 @@ function Router() {
       <Route path="/config">
         <ProtectedRoute>
           <Config />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/settings">
+        <ProtectedRoute>
+          <DashboardLayout
+            title="Configurações da Organização"
+            subtitle="Gerencie as configurações da sua organização"
+          >
+            <TenantSettings />
+          </DashboardLayout>
         </ProtectedRoute>
       </Route>
       <Route path="/sidebar-test">
